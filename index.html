@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📦 Mon Tiroir à Applications</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>📦 Mon Tiroir à Apps</h1>
+        <p id="fun-quote">L'endroit parfait pour ranger mes créations et mes idées folles !</p>
+      </div>
+      <!-- Bouton de basculeur de thème -->
+      <button id="themeToggle" class="theme-btn" aria-label="Changer de thème" title="Changer le thème">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </header>
+
+    <!-- Zone de recherche rapide -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Chercher une app, un jeu ou un projet...">
+    </div>
+
+    <!-- Le tiroir qui contient les cartes -->
+    <main class="drawer" id="appsDrawer">
+      <!-- Les cartes d'apps seront générées ici dynamiquement par JavaScript -->
+    </main>
+
+    <!-- Boîte à suggestions drôles -->
+    <section class="suggestions-box">
+      <h2>💡 Suggestion du jour (ou idée folle)</h2>
+      <button id="suggestBtn">Obtenir une idée inutile</button>
+      <p id="suggestionText">Clique sur le bouton si tu oses !</p>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

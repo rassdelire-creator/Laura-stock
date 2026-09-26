@@ -1,0 +1,264 @@
+/* ==========================================================================
+
+VARIABLES & THÈMES
+========================================================================== */
+:root {
+--bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+--bg-color: #0f172a;
+--card-bg: rgba(30, 41, 59, 0.65);
+--card-hover-bg: rgba(45, 55, 72, 0.85);
+--text-color: #f8fafc;
+--text-secondary: #94a3b8;
+--border-color: rgba(255, 255, 255, 0.12);
+--border-hover: rgba(168, 85, 247, 0.6);
+--accent-color: #38bdf8;
+--accent-purple: #c084fc;
+--shadow-color: rgba(0, 0, 0, 0.4);
+--glow-color: rgba(168, 85, 247, 0.25);
+--box-bg: rgba(15, 23, 42, 0.7);
+}
+[data-theme="light"] {
+--bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+--bg-color: #f8fafc;
+--card-bg: rgba(255, 255, 255, 0.8);
+--card-hover-bg: rgba(255, 255, 255, 0.95);
+--text-color: #0f172a;
+--text-secondary: #475569;
+--border-color: rgba(0, 0, 0, 0.08);
+--border-hover: rgba(147, 51, 234, 0.5);
+--accent-color: #0284c7;
+--accent-purple: #7e22ce;
+--shadow-color: rgba(0, 0, 0, 0.08);
+--glow-color: rgba(147, 51, 234, 0.15);
+--box-bg: rgba(255, 255, 255, 0.6);
+}
+
+/* ==========================================================================
+2. REINITIALISATION & BASE
+========================================================================== */
+
+{
+box-sizing: border-box;
+}
+body {
+font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+background: var(--bg-gradient);
+background-attachment: fixed;
+color: var(--text-color);
+margin: 0;
+padding: 30px 20px;
+min-height: 100vh;
+transition: background 0.4s ease, color 0.4s ease;
+}
+
+.container {
+max-width: 960px;
+margin: 0 auto;
+}
+
+/* ==========================================================================
+3. HEADER & BOUTON THÈME
+========================================================================== */
+header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 30px;
+padding-bottom: 10px;
+}
+
+.header-content h1 {
+margin: 0 0 8px 0;
+font-size: 2.2rem;
+background: linear-gradient(135deg, var(--accent-color), var(--accent-purple));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+#fun-quote {
+margin: 0;
+font-style: italic;
+color: var(--text-secondary);
+font-size: 1rem;
+}
+
+.theme-btn {
+background: var(--card-bg);
+border: 1px solid var(--border-color);
+color: var(--text-color);
+font-size: 22px;
+width: 50px;
+height: 50px;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+box-shadow: 0 4px 12px var(--shadow-color);
+transition: transform 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.theme-btn:hover {
+transform: scale(1.1) rotate(12deg);
+border-color: var(--accent-purple);
+}
+
+/* ==========================================================================
+4. BARRE DE RECHERCHE
+========================================================================== */
+.search-bar {
+text-align: center;
+margin-bottom: 35px;
+}
+
+.search-bar input {
+width: 80%;
+max-width: 550px;
+padding: 14px 22px;
+border-radius: 30px;
+border: 2px solid var(--border-color);
+background: var(--card-bg);
+color: var(--text-color);
+font-size: 1rem;
+outline: none;
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+box-shadow: 0 8px 20px var(--shadow-color);
+transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+width: 90%;
+border-color: var(--accent-color);
+box-shadow: 0 0 25px var(--glow-color);
+}
+
+/* ==========================================================================
+5. GRILLE DES APPLICATIONS & CARTES GLASSMORPHISM
+========================================================================== */
+.drawer {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+gap: 22px;
+margin-bottom: 45px;
+}
+
+@Keyframes fadeInUp {
+from {
+opacity: 0;
+transform: translateY(20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.app-card {
+background: var(--card-bg);
+backdrop-filter: blur(16px);
+-webkit-backdrop-filter: blur(16px);
+border: 1px solid var(--border-color);
+border-radius: 18px;
+padding: 24px 20px;
+text-align: center;
+cursor: pointer;
+box-shadow: 0 10px 25px var(--shadow-color);
+animation: fadeInUp 0.4s ease forwards;
+transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.app-card:hover {
+transform: translateY(-8px) scale(1.02);
+background: var(--card-hover-bg);
+border-color: var(--border-hover);
+box-shadow: 0 15px 30px var(--shadow-color), 0 0 20px var(--glow-color);
+}
+
+.app-card .icon {
+font-size: 48px;
+margin-bottom: 12px;
+display: inline-block;
+transition: transform 0.3s ease;
+}
+
+.app-card:hover .icon {
+transform: scale(1.2) rotate(6deg);
+}
+
+.app-card h3 {
+margin: 0 0 8px 0;
+font-size: 1.2rem;
+color: var(--accent-color);
+}
+
+.app-card p {
+margin: 0;
+font-size: 0.9rem;
+color: var(--text-secondary);
+line-height: 1.4;
+}
+
+/* ==========================================================================
+6. BOÎTE À SUGGESTIONS & BOUTON ANIMÉ
+========================================================================== */
+.suggestions-box {
+background: var(--box-bg);
+backdrop-filter: blur(16px);
+-webkit-backdrop-filter: blur(16px);
+padding: 30px 20px;
+border-radius: 20px;
+border: 2px dashed var(--accent-purple);
+text-align: center;
+box-shadow: 0 10px 25px var(--shadow-color);
+}
+
+.suggestions-box h2 {
+margin-top: 0;
+font-size: 1.3rem;
+color: var(--accent-purple);
+}
+
+@Keyframes pulseGlow {
+0% {
+box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.6);
+}
+70% {
+box-shadow: 0 0 0 16px rgba(244, 63, 94, 0);
+}
+100% {
+box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+}
+}
+
+.suggestions-box button {
+background: linear-gradient(135deg, #f43f5e, #e11d48);
+color: #ffffff;
+border: none;
+padding: 12px 26px;
+font-size: 0.95rem;
+font-weight: 700;
+border-radius: 50px;
+cursor: pointer;
+margin-top: 10px;
+animation: pulseGlow 2s infinite;
+transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.suggestions-box button:hover {
+transform: scale(1.05);
+}
+
+.suggestions-box button:active {
+transform: scale(0.95);
+}
+
+#suggestionText {
+margin-top: 18px;
+font-size: 1.05rem;
+font-weight: 500;
+color: var(--text-color);
+min-height: 1.5em;
+}

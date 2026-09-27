@@ -2,205 +2,496 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>LaugraStok 🚀</title>
-  
-  <meta name="apple-mobile-web-app-title" content="LaugraStok">
-  <meta name="application-name" content="LaugraStok">
-  <meta name="theme-color" content="#0d0d11">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application - Coffre-fort & Tetris</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --danger: #ef4444;
+      --text: #f8fafc;
+    }
 
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .nav-btn {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 2px solid #334155;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .nav-btn.active, .nav-btn:hover {
+      border-color: var(--accent);
+      background: #334155;
+    }
+
+    .section {
+      display: none;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .section.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- STYLES COFFRE-FORT --- */
+    .vault-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 25px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .pin-display {
+      background: #0f172a;
+      font-size: 2rem;
+      letter-spacing: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      min-height: 65px;
+      border: 1px solid #334155;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .key-btn {
+      background: #334155;
+      color: var(--text);
+      border: none;
+      padding: 18px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .key-btn:active {
+      background: var(--accent);
+    }
+
+    .key-btn.clear { background: #475569; }
+    .key-btn.enter { background: #16a34a; }
+
+    .error-msg {
+      color: var(--danger);
+      margin-top: 10px;
+      font-size: 0.9rem;
+      min-height: 20px;
+    }
+
+    /* Page Secrète */
+    .secret-page {
+      background: #022c22;
+      border: 2px solid #059669;
+      border-radius: 12px;
+      padding: 25px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .secret-content {
+      margin: 20px 0;
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    /* --- STYLES TETRIS --- */
+    .tetris-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    canvas {
+      border: 3px solid var(--accent);
+      background-color: #000;
+      border-radius: 4px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .score-board {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .controls-hint {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
 
-  <!-- ARRIÈRE-PLAN BULLES DE LIQUIDE / APPLE GLASS -->
-  <div class="glass-bg">
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
-    <div class="bubble bubble-3"></div>
-  </div>
+  <nav>
+    <button class="nav-btn active" onclick="switchTab('vault')">🔒 Coffre-fort</button>
+    <button class="nav-btn" onclick="switchTab('tetris')">🎮 Tetris</button>
+  </nav>
 
-  <!-- Écran d'accueil -->
-  <div id="splashScreen" class="splash-screen">
-    <div class="splash-logo-box">
-      <span class="splash-icon">🫶</span>
-    </div>
-    <h1 class="splash-title">LAUGRASTOK</h1>
-  </div>
-
-  <!-- Formulaire Profil -->
-  <div id="profileModal" class="modal-overlay hidden">
-    <div class="modal-card glass-card">
-      <h2>Bienvenue ! 🚀</h2>
-      <p>Configure ton profil pour commencer :</p>
+  <!-- SECTION COFFRE FORT -->
+  <div id="vault-section" class="section active">
+    <!-- ÉCRAN DE VERROUILLAGE -->
+    <div id="vault-lock" class="vault-card">
+      <h2>Coffre-fort Sécurisé</h2>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Entrez le code secret pour accéder à votre page</p>
       
-      <div class="form-group">
-        <label>Ton prénom ou pseudo *</label>
-        <input type="text" id="userNameInput" placeholder="Ex: Rass">
-      </div>
-
-      <div class="form-group">
-        <label>Ton âge *</label>
-        <input type="number" id="userAgeInput" placeholder="Ex: 17">
-      </div>
-
-      <button id="saveProfileBtn" class="primary-btn">Valider et Entrer</button>
-    </div>
-  </div>
-
-  <!-- COFFRE-FORT / IDÉES SECRÈTES -->
-  <div id="secretModal" class="modal-overlay hidden">
-    <div class="modal-card modal-large glass-card">
-      <div class="modal-header">
-        <h2>🔒 Idées Secrètes</h2>
-        <button id="closeSecretBtn" class="close-btn">✕</button>
-      </div>
-
-      <div id="pinArea">
-        <p id="pinInstruction">Entre ton mot de passe à 6 chiffres :</p>
-        <div class="pin-inputs">
-          <input type="password" maxlength="6" id="pinInput" placeholder="••••••" inputmode="numeric">
-        </div>
-        <button id="unlockSecretBtn" class="primary-btn mt-12">Déverrouiller</button>
-      </div>
-
-      <div id="secretContent" class="hidden">
-        <p class="secret-desc">Ces idées ne sont visibles qu'avec ton code PIN.</p>
-        <div class="gpt-card add-idea-section compact">
-          <input type="text" id="secretTitle" placeholder="Titre secret...">
-          <textarea id="secretText" placeholder="Écris ton idée secrète..." rows="2"></textarea>
-          <button id="addSecretBtn" class="primary-btn mt-12">🔒 Sauvegarder dans le coffre</button>
-        </div>
-        <div id="secretIdeasList" class="ideas-grid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL ARCADE -->
-  <div id="gamesModal" class="modal-overlay hidden">
-    <div class="modal-card modal-large glass-card">
-      <div class="modal-header">
-        <h2>🎮 Zone Arcade</h2>
-        <button id="closeGamesBtn" class="close-btn">✕</button>
-      </div>
-
-      <div class="games-tabs">
-        <button class="game-tab-btn active" data-game="tetris">🧱 Tetris Pro</button>
-        <button class="game-tab-btn" data-game="snake">🐍 Snake Pro</button>
-      </div>
-
-      <div class="game-score-bar">
-        <span>Score : <strong id="gameScore">0</strong></span>
-        <span>Meilleur : <strong id="gameHighScore">0</strong></span>
-      </div>
-
-      <div class="game-display-area">
-        <canvas id="gameCanvas" width="240" height="320"></canvas>
-      </div>
-
-      <div class="game-controls">
-        <button id="startGameBtn" class="primary-btn">▶️ Lancer / Recommencer</button>
-        
-        <div id="mobileDpad" class="d-pad">
-          <button id="btnUp" class="dpad-btn">▲</button>
-          <div class="d-pad-row">
-            <button id="btnLeft" class="dpad-btn">◄</button>
-            <button id="btnRotate" class="dpad-btn btn-action" title="Tourner">🔄</button>
-            <button id="btnRight" class="dpad-btn">►</button>
-          </div>
-          <button id="btnDown" class="dpad-btn">▼</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- APP CONTAINER PRINCIPAL -->
-  <div class="app-container">
-    <header>
-      <div>
-        <h1>LAUGRASTOK <span class="version-tag">v1.2</span></h1>
-        <p id="userGreeting" class="user-greeting"></p>
-      </div>
+      <div id="pin-display" class="pin-display">••••</div>
       
-      <div class="header-actions">
-        <button id="secretToggle" class="icon-btn glass-btn" title="Idées Secrètes">🔒</button>
-        <button id="gamesToggle" class="icon-btn glass-btn" title="Mini-jeux">🎮</button>
-        <button id="themeToggle" class="icon-btn glass-btn" title="Thème">🌙</button>
+      <div class="keypad">
+        <button class="key-btn" onclick="pressPin('1')">1</button>
+        <button class="key-btn" onclick="pressPin('2')">2</button>
+        <button class="key-btn" onclick="pressPin('3')">3</button>
+        <button class="key-btn" onclick="pressPin('4')">4</button>
+        <button class="key-btn" onclick="pressPin('5')">5</button>
+        <button class="key-btn" onclick="pressPin('6')">6</button>
+        <button class="key-btn" onclick="pressPin('7')">7</button>
+        <button class="key-btn" onclick="pressPin('8')">8</button>
+        <button class="key-btn" onclick="pressPin('9')">9</button>
+        <button class="key-btn clear" onclick="clearPin()">C</button>
+        <button class="key-btn" onclick="pressPin('0')">0</button>
+        <button class="key-btn enter" onclick="unlockVault()">🔓</button>
       </div>
-    </header>
+      <div id="vault-error" class="error-msg"></div>
+    </div>
 
-    <!-- DASHBOARD ET STATS POUR MEUBLER L'INTERFACE -->
-    <section class="glass-card dashboard-widget">
-      <div class="dash-item">
-        <span class="dash-num" id="totalIdeasCount">0</span>
-        <span class="dash-label">Idées créées</span>
-      </div>
-      <div class="dash-divider"></div>
-      <div class="dash-item">
-        <span class="dash-num" id="favIdeasCount">0</span>
-        <span class="dash-label">Favoris</span>
-      </div>
-      <div class="dash-divider"></div>
-      <div class="dash-item">
-        <button id="randomPromptBtn" class="dash-action-btn">💡 Inspiration</button>
-      </div>
-    </section>
-
-    <!-- CRÉATION D'IDÉE EN VERRE TREMPÉ -->
-    <section class="glass-card add-idea-section">
-      <div class="input-group">
-        <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
-        <select id="ideaCategory">
-          <option value="app">💻 Dev</option>
-          <option value="story">✍️ Histoire</option>
-          <option value="video">🎥 Vidéo</option>
-          <option value="other">💡 Autre</option>
-        </select>
+    <!-- PAGE SECRÈTE (Masquée par défaut) -->
+    <div id="vault-secret" class="secret-page hidden">
+      <h2>🔐 Espace Secret Déverrouillé</h2>
+      <p style="color: #6ee7b7;">Bienvenue dans votre espace privé.</p>
+      
+      <div class="secret-content">
+        <h3>Vos Notes Confidentielles :</h3>
+        <p style="margin-top: 10px;">• Projet secret en cours...</p>
+        <p>• Identifiants de secours enregistrés.</p>
       </div>
 
-      <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
-
-      <!-- BARRE MÉDIA PROPRE -->
-      <div class="media-bar">
-        <div class="media-actions-row">
-          <button id="recordVoiceBtn" class="media-square-btn" title="Enregistrer un vocal">
-            🎙️ <span id="recordTimer" class="record-timer hidden">00:00</span>
-          </button>
-
-          <label for="cameraInput" class="media-square-btn" title="Ajouter une Photo ou Vidéo">
-            📷 / 🎥
-            <input type="file" id="cameraInput" accept="image/*,video/*" capture="environment" hidden>
-          </label>
-        </div>
-
-        <div id="mediaStatus" class="media-status-tag">Aucun média ajouté</div>
-      </div>
-
-      <button id="addBtn" class="primary-btn mt-12">+ Sauvegarder l'idée</button>
-    </section>
-
-    <!-- FILTRES ET RECHERCHE -->
-    <section class="filter-section">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Rechercher dans mes idées...">
-      </div>
-      <div class="tags">
-        <button class="tag-btn active" data-filter="all">Toutes</button>
-        <button class="tag-btn" data-filter="fav">⭐ Favoris</button>
-        <button class="tag-btn" data-filter="app">Dev</button>
-        <button class="tag-btn" data-filter="story">Histoires</button>
-        <button class="tag-btn" data-filter="video">Vidéos</button>
-      </div>
-    </section>
-
-    <!-- LISTE DES IDÉES -->
-    <main id="ideasList" class="ideas-grid"></main>
+      <button class="nav-btn" style="background: var(--danger); border: none;" onclick="lockVault()">🔒 Verrouiller le coffre</button>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- SECTION TETRIS -->
+  <div id="tetris-section" class="section">
+    <div class="tetris-container">
+      <div class="score-board">Score : <span id="score">0</span></div>
+      <canvas id="tetris" width="240" height="400"></canvas>
+      <button class="nav-btn" onclick="resetGame()">Recommencer</button>
+      <div class="controls-hint">
+        Flèches : ⬅️ ➡️ Déplacer | ⬆️ Tourner | ⬇️ Accélérer
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* --- GESTION DES ONGLETS --- */
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+
+      if(tab === 'vault') {
+        document.querySelectorAll('.nav-btn')[0].classList.add('active');
+        document.getElementById('vault-section').classList.add('active');
+      } else {
+        document.querySelectorAll('.nav-btn')[1].classList.add('active');
+        document.getElementById('tetris-section').classList.add('active');
+      }
+    }
+
+    /* --- LOGIQUE DU COFFRE-FORT --- */
+    const CORRECT_PIN = "1234"; // Code d'accès par défaut
+    let currentInput = "";
+
+    function pressPin(num) {
+      if (currentInput.length < 4) {
+        currentInput += num;
+        updatePinDisplay();
+      }
+    }
+
+    function clearPin() {
+      currentInput = "";
+      updatePinDisplay();
+      document.getElementById('vault-error').textContent = "";
+    }
+
+    function updatePinDisplay() {
+      const display = document.getElementById('pin-display');
+      display.textContent = "•".repeat(currentInput.length) || "••••";
+    }
+
+    function unlockVault() {
+      if (currentInput === CORRECT_PIN) {
+        document.getElementById('vault-lock').classList.add('hidden');
+        document.getElementById('vault-secret').classList.remove('hidden');
+        clearPin();
+      } else {
+        document.getElementById('vault-error').textContent = "Code incorrect ! Recommencez.";
+        currentInput = "";
+        updatePinDisplay();
+      }
+    }
+
+    function lockVault() {
+      document.getElementById('vault-secret').classList.add('hidden');
+      document.getElementById('vault-lock').classList.remove('hidden');
+    }
+
+    /* --- LOGIQUE TETRIS CORRIGÉE --- */
+    const canvas = document.getElementById('tetris');
+    const context = canvas.getContext('2d');
+    context.scale(20, 20);
+
+    // Matrice du plateau (12 colonnes x 20 lignes)
+    const arena = createMatrix(12, 20);
+
+    const colors = [
+      null,
+      '#ef4444', // I
+      '#3b82f6', // L
+      '#f59e0b', // J
+      '#10b981', // O
+      '#ec4899', // Z
+      '#8b5cf6', // S
+      '#06b6d4'  // T
+    ];
+
+    const player = {
+      pos: {x: 0, y: 0},
+      matrix: null,
+      score: 0
+    };
+
+    function createMatrix(w, h) {
+      const matrix = [];
+      while (h--) {
+        matrix.push(new Array(w).fill(0));
+      }
+      return matrix;
+    }
+
+    function createPiece(type) {
+      if (type === 'I') {
+        return [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
+      } else if (type === 'L') {
+        return [[0, 2, 0], [0, 2, 0], [0, 2, 2]];
+      } else if (type === 'J') {
+        return [[0, 3, 0], [0, 3, 0], [3, 3, 0]];
+      } else if (type === 'O') {
+        return [[4, 4], [4, 4]];
+      } else if (type === 'Z') {
+        return [[5, 5, 0], [0, 5, 5], [0, 0, 0]];
+      } else if (type === 'S') {
+        return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
+      } else if (type === 'T') {
+        return [[0, 7, 0], [7, 7, 7], [0, 0, 0]];
+      }
+    }
+
+    // Fusion de la pièce bloquée dans la grille permanente
+    function merge(arena, player) {
+      player.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            arena[y + player.pos.y][x + player.pos.x] = value;
+          }
+        });
+      });
+    }
+
+    // Gestion des collisions avec les bords et le sol
+    function collide(arena, player) {
+      const m = player.matrix;
+      const o = player.pos;
+      for (let y = 0; y < m.length; ++y) {
+        for (let x = 0; x < m[y].length; ++x) {
+          if (m[y][x] !== 0 &&
+             (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // Nettoyage SEULEMENT des lignes 100% remplies
+    function arenaSweep() {
+      let rowCount = 1;
+      outer: for (let y = arena.length - 1; y >= 0; --y) {
+        for (let x = 0; x < arena[y].length; ++x) {
+          if (arena[y][x] === 0) {
+            continue outer;
+          }
+        }
+        const row = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(row);
+        ++y;
+
+        player.score += rowCount * 10;
+        rowCount *= 2;
+      }
+      updateScore();
+    }
+
+    function playerDrop() {
+      player.pos.y++;
+      if (collide(arena, player)) {
+        player.pos.y--;
+        merge(arena, player); // On fixe la pièce au sol
+        playerReset();        // Nouvelle pièce
+        arenaSweep();         // Verification des lignes
+      }
+      dropCounter = 0;
+    }
+
+    function playerMove(dir) {
+      player.pos.x += dir;
+      if (collide(arena, player)) {
+        player.pos.x -= dir;
+      }
+    }
+
+    function playerRotate() {
+      const pos = player.pos.x;
+      let offset = 1;
+      rotate(player.matrix);
+      while (collide(arena, player)) {
+        player.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if (offset > player.matrix[0].length) {
+          rotate(player.matrix, -1);
+          player.pos.x = pos;
+          return;
+        }
+      }
+    }
+
+    function rotate(matrix) {
+      for (let y = 0; y < matrix.length; ++y) {
+        for (let x = 0; x < y; ++x) {
+          [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+        }
+      }
+      matrix.forEach(row => row.reverse());
+    }
+
+    function playerReset() {
+      const pieces = 'ILJOTSZ';
+      player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
+      player.pos.y = 0;
+      player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+      
+      // Fin de partie
+      if (collide(arena, player)) {
+        arena.forEach(row => row.fill(0));
+        player.score = 0;
+        updateScore();
+      }
+    }
+
+    function draw() {
+      context.fillStyle = '#000';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawMatrix(arena, {x: 0, y: 0});
+      drawMatrix(player.matrix, player.pos);
+    }
+
+    function drawMatrix(matrix, offset) {
+      matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            context.fillStyle = colors[value];
+            context.fillRect(x + offset.x, y + offset.y, 1, 1);
+          }
+        });
+      });
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = player.score;
+    }
+
+    function resetGame() {
+      arena.forEach(row => row.fill(0));
+      player.score = 0;
+      updateScore();
+      playerReset();
+    }
+
+    let dropCounter = 0;
+    let dropInterval = 1000;
+    let lastTime = 0;
+
+    function update(time = 0) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+
+      dropCounter += deltaTime;
+      if (dropCounter > dropInterval) {
+        playerDrop();
+      }
+
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    // Écouteurs de clavier
+    document.addEventListener('keydown', event => {
+      if (!document.getElementById('tetris-section').classList.contains('active')) return;
+
+      if (event.key === 'ArrowLeft') playerMove(-1);
+      else if (event.key === 'ArrowRight') playerMove(1);
+      else if (event.key === 'ArrowDown') playerDrop();
+      else if (event.key === 'ArrowUp') playerRotate();
+    });
+
+    // Démarrage du moteur
+    playerReset();
+    update();
+  </script>
 </body>
 </html>

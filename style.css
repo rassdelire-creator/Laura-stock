@@ -83,7 +83,7 @@ h1 span {
   font-size: 1.1rem;
 }
 
-/* FORMULAIRE PROFIL CORRIGÉ POUR MOBILE */
+/* FORMULAIRE PROFIL CENTRÉ */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -222,7 +222,7 @@ h1 span {
   margin-top: 8px;
 }
 
-/* SECTION CHAT & IDÉES */
+/* SECTION ADD & LISTE IDÉES */
 .add-idea-section {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -363,16 +363,7 @@ textarea {
   cursor: pointer;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 30px;
-  color: var(--text-muted);
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  background: var(--panel);
-}
-
-/* SPLASH SCREEN */
+/* SPLASH SCREEN ACCUEIL */
 .splash-screen {
   position: fixed;
   top: 0;
@@ -414,9 +405,9 @@ textarea {
 }
 
 .splash-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 @keyframes pulseGlow {

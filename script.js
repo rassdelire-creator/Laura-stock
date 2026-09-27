@@ -44,7 +44,7 @@ addBtn.addEventListener('click', () => {
     date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
   };
 
-  ideas.unshift(newIdea); // Ajoute au début de la liste
+  ideas.unshift(newIdea);
   saveAndRender();
 
   // Réinitialiser les champs
@@ -124,6 +124,16 @@ tagBtns.forEach(btn => {
     currentFilter = btn.dataset.filter;
     renderIdeas();
   });
+});
+
+// --- MASQUER L'ÉCRAN D'ACCUEIL APRÈS CHARGEMENT ---
+window.addEventListener('load', () => {
+  const splash = document.getElementById('splashScreen');
+  setTimeout(() => {
+    if (splash) {
+      splash.classList.add('hidden');
+    }
+  }, 1500); // S'affiche pendant 1,5 seconde
 });
 
 // Initialisation

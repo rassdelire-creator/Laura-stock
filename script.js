@@ -1,258 +1,633 @@
-/* --- GESTION DES ONGLETS (Tetris activé par défaut) --- */
-function switchTab(tab) {
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+document.addEventListener('DOMContentLoaded', () => {
 
-  if(tab === 'vault') {
-    document.getElementById('tab-vault').classList.add('active');
-    document.getElementById('vault-section').classList.add('active');
-  } else {
-    document.getElementById('tab-tetris').classList.add('active');
-    document.getElementById('tetris-section').classList.add('active');
+  // 1. SPLASH SCREEN
+  setTimeout(() => {
+    document.getElementById('splashScreen')?.classList.add('hidden');
+  }, 800);
+
+  // 2. PROFIL USER
+  const profileModal = document.getElementById('profileModal');
+  const saveProfileBtn = document.getElementById('saveProfileBtn');
+  const userGreeting = document.getElementById('userGreeting');
+  let userProfile = JSON.parse(localStorage.getItem('laugra_user_profile')) || null;
+
+  function checkProfile() {
+    if (!userProfile) {
+      profileModal.classList.remove('hidden');
+    } else {
+      profileModal.classList.add('hidden');
+      userGreeting.textContent = `Bienvenue, ${userProfile.name} ! ✨`;
+    }
   }
-}
 
-/* --- LOGIQUE DU COFFRE-FORT --- */
-const CORRECT_PIN = "1234";
-let currentInput = "";
+  saveProfileBtn.addEventListener('click', () => {
+    const name = document.getElementById('userNameInput').value.trim();
+    const age = document.getElementById('userAgeInput').value.trim();
+    if (!name || !age) return alert('Entre ton prénom et ton âge !');
+    userProfile = { name, age };
+    localStorage.setItem('laugra_user_profile', JSON.stringify(userProfile));
+    checkProfile();
+  });
+  checkProfile();
 
-function pressPin(num) {
-  if (currentInput.length < 4) {
-    currentInput += num;
-    updatePinDisplay();
+  // 3. THÈME SOMBRE / CLAIR
+  const themeToggle = document.getElementById('themeToggle');
+  let currentTheme = localStorage.getItem('laugra_theme') || 'dark';
+  if (currentTheme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    themeToggle.textContent = '☀️';
   }
-}
+  themeToggle.addEventListener('click', () => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('laugra_theme', currentTheme);
+  });
 
-function clearPin() {
-  currentInput = "";
-  updatePinDisplay();
-  document.getElementById('vault-error').textContent = "";
-}
+  // 4. COFFRE-FORT SECRETS
+  const secretToggle = document.getElementById('secretToggle');
+  const secretModal = document.getElementById('secretModal');
+  const closeSecretBtn = document.getElementById('closeSecretBtn');
+  const unlockSecretBtn = document.getElementById('unlockSecretBtn');
+  const pinInput = document.getElementById('pinInput');
+  const pinInstruction = document.getElementById('pinInstruction');
+  const pinArea = document.getElementById('pinArea');
+  const secretContent = document.getElementById('secretContent');
 
-function updatePinDisplay() {
-  const display = document.getElementById('pin-display');
-  display.textContent = "•".repeat(currentInput.length) || "••••";
-}
+  let savedPin = localStorage.getItem('laugra_secret_pin') || null;
+  let secretIdeas = JSON.parse(localStorage.getItem('laugra_secret_ideas')) || [];
 
-function unlockVault() {
-  if (currentInput === CORRECT_PIN) {
-    document.getElementById('vault-lock').classList.add('hidden');
-    document.getElementById('vault-secret').classList.remove('hidden');
-    clearPin();
-  } else {
-    document.getElementById('vault-error').textContent = "Code incorrect ! Recommencez.";
-    currentInput = "";
-    updatePinDisplay();
+  secretToggle.addEventListener('click', () => {
+    secretModal.classList.remove('hidden');
+    pinInstruction.textContent = savedPin ? "Entre ton code PIN à 6 chiffres :" : "Crée ton code PIN à 6 chiffres :";
+    unlockSecretBtn.textContent = savedPin ? "Déverrouiller" : "Créer le code PIN";
+  });
+
+  closeSecretBtn.addEventListener('click', () => {
+    secretModal.classList.add('hidden');
+    pinArea.classList.remove('hidden');
+    secretContent.classList.add('hidden');
+    pinInput.value = '';
+  });
+
+  unlockSecretBtn.addEventListener('click', () => {
+    const enteredPin = pinInput.value.trim();
+    if (enteredPin.length !== 6 || isNaN(enteredPin)) return alert("Code à 6 chiffres requis !");
+
+    if (!savedPin) {
+      savedPin = enteredPin;
+      localStorage.setItem('laugra_secret_pin', savedPin);
+      alert("PIN enregistré !");
+    } else if (enteredPin !== savedPin) {
+      return alert("Code PIN incorrect !");
+    }
+
+    pinArea.classList.add('hidden');
+    secretContent.classList.remove('hidden');
+    renderSecretIdeas();
+  });
+
+  document.getElementById('addSecretBtn').addEventListener('click', () => {
+    const title = document.getElementById('secretTitle').value.trim();
+    const text = document.getElementById('secretText').value.trim();
+    if (!title && !text) return;
+
+    secretIdeas.unshift({ id: Date.now(), title: title || "Secret", text: text, date: new Date().toLocaleDateString('fr-FR') });
+    localStorage.setItem('laugra_secret_ideas', JSON.stringify(secretIdeas));
+    renderSecretIdeas();
+    document.getElementById('secretTitle').value = '';
+    document.getElementById('secretText').value = '';
+  });
+
+  function renderSecretIdeas() {
+    const container = document.getElementById('secretIdeasList');
+    container.innerHTML = '';
+    secretIdeas.forEach(i => {
+      const card = document.createElement('div');
+      card.className = 'idea-card glass-card';
+      card.innerHTML = `
+        <div class="idea-header"><span class="idea-title">🔒 ${escapeHtml(i.title)}</span></div>
+        <div class="idea-content">${escapeHtml(i.text)}</div>
+        <div class="idea-footer"><span>${i.date}</span><button class="delete-btn" onclick="deleteSecret(${i.id})">Supprimer</button></div>
+      `;
+      container.appendChild(card);
+    });
   }
-}
 
-function lockVault() {
-  document.getElementById('vault-secret').classList.add('hidden');
-  document.getElementById('vault-lock').classList.remove('hidden');
-}
+  window.deleteSecret = function(id) {
+    secretIdeas = secretIdeas.filter(i => i.id !== id);
+    localStorage.setItem('laugra_secret_ideas', JSON.stringify(secretIdeas));
+    renderSecretIdeas();
+  };
 
-/* --- MOTEUR TETRIS CORRIGÉ --- */
-const canvas = document.getElementById('tetris');
-const context = canvas.getContext('2d');
-context.scale(20, 20);
+  // 5. VOCAL ET APPAREIL PHOTO
+  const recordVoiceBtn = document.getElementById('recordVoiceBtn');
+  const recordTimer = document.getElementById('recordTimer');
+  const cameraInput = document.getElementById('cameraInput');
+  const mediaStatus = document.getElementById('mediaStatus');
 
-const arena = createMatrix(12, 20);
+  let mediaRecorder, audioChunks = [], isRecording = false;
+  let audioStream = null;
+  let currentAudioBase64 = null, currentMediaBase64 = null, currentMediaType = null;
+  let timerInterval, secondsRecorded = 0;
 
-const colors = [
-  null,
-  '#ef4444', // I
-  '#3b82f6', // L
-  '#f59e0b', // J
-  '#10b981', // O
-  '#ec4899', // Z
-  '#8b5cf6', // S
-  '#06b6d4'  // T
-];
-
-const player = {
-  pos: {x: 0, y: 0},
-  matrix: null,
-  score: 0
-};
-
-function createMatrix(w, h) {
-  const matrix = [];
-  while (h--) {
-    matrix.push(new Array(w).fill(0));
-  }
-  return matrix;
-}
-
-function createPiece(type) {
-  if (type === 'I') {
-    return [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
-  } else if (type === 'L') {
-    return [[0, 2, 0], [0, 2, 0], [0, 2, 2]];
-  } else if (type === 'J') {
-    return [[0, 3, 0], [0, 3, 0], [3, 3, 0]];
-  } else if (type === 'O') {
-    return [[4, 4], [4, 4]];
-  } else if (type === 'Z') {
-    return [[5, 5, 0], [0, 5, 5], [0, 0, 0]];
-  } else if (type === 'S') {
-    return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
-  } else if (type === 'T') {
-    return [[0, 7, 0], [7, 7, 7], [0, 0, 0]];
-  }
-}
-
-function merge(arena, player) {
-  player.matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
-        arena[y + player.pos.y][x + player.pos.x] = value;
+  recordVoiceBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(audioStream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => {
+            currentAudioBase64 = reader.result;
+            mediaStatus.textContent = "🎙️ Vocal prêt";
+          };
+          if (audioStream) {
+            audioStream.getTracks().forEach(track => track.stop());
+            audioStream = null;
+          }
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        recordVoiceBtn.classList.add('recording');
+        recordTimer.classList.remove('hidden');
+        secondsRecorded = 0;
+        timerInterval = setInterval(() => {
+          secondsRecorded++;
+          recordTimer.textContent = String(secondsRecorded).padStart(2, '0') + 's';
+        }, 1000);
+      } catch (err) { alert("Accès au micro refusé."); }
+    } else {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
       }
+      isRecording = false;
+      recordVoiceBtn.classList.remove('recording');
+      recordTimer.classList.add('hidden');
+      clearInterval(timerInterval);
+    }
+  });
+
+  cameraInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      currentMediaBase64 = reader.result;
+      currentMediaType = file.type.startsWith('video') ? 'video' : 'image';
+      mediaStatus.textContent = currentMediaType === 'video' ? "🎥 Vidéo prête" : "📸 Photo prête";
+    };
+  });
+
+  // 6. GESTION DES IDÉES + DASHBOARD + GENERATEUR D'INSPIRATION
+  const addBtn = document.getElementById('addBtn');
+  const ideasList = document.getElementById('ideasList');
+  let ideas = JSON.parse(localStorage.getItem('laugra_ideas')) || [];
+  let currentFilter = 'all';
+
+  function updateDashboard() {
+    document.getElementById('totalIdeasCount').textContent = ideas.length;
+    document.getElementById('favIdeasCount').textContent = ideas.filter(i => i.fav).length;
+  }
+
+  const prompts = [
+    "Une appli mobile qui prédit la météo selon l'humeur 🌤️",
+    "Un script de vidéo Short sur un mystère du Tokuverse 🎬",
+    "Un jeu 2D pixel art où le héros utilise la foudre ⚡",
+    "Un concept de chaîne YouTube spécialisé dans les théories Manga 📚",
+    "Une histoire fantasy d'un phénix ressuscité en détective 🔥"
+  ];
+
+  document.getElementById('randomPromptBtn').addEventListener('click', () => {
+    const random = prompts[Math.floor(Math.random() * prompts.length)];
+    document.getElementById('ideaTitle').value = "Idée Flash ⚡";
+    document.getElementById('ideaText').value = random;
+  });
+
+  function renderIdeas() {
+    ideasList.innerHTML = '';
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    
+    let filtered = ideas.filter(i => i.title.toLowerCase().includes(search) || i.text.toLowerCase().includes(search));
+
+    if (currentFilter === 'fav') {
+      filtered = filtered.filter(i => i.fav);
+    } else if (currentFilter !== 'all') {
+      filtered = filtered.filter(i => i.category === currentFilter);
+    }
+
+    filtered.forEach(i => {
+      const card = document.createElement('div');
+      card.className = 'idea-card glass-card';
+      let mediaHTML = '';
+      if (i.audio) mediaHTML += `<audio controls src="${i.audio}"></audio>`;
+      if (i.media) {
+        mediaHTML += i.mediaType === 'video' 
+          ? `<div class="media-preview"><video controls src="${i.media}"></video></div>`
+          : `<div class="media-preview"><img src="${i.media}" alt="Média" /></div>`;
+      }
+
+      card.innerHTML = `
+        <div class="idea-header">
+          <span class="idea-title">
+            <span class="fav-star ${i.fav ? 'active' : ''}" onclick="toggleFav(${i.id})">★</span>
+            ${escapeHtml(i.title)}
+          </span>
+          <span class="badge">${i.category}</span>
+        </div>
+        ${i.text ? `<div class="idea-content">${escapeHtml(i.text)}</div>` : ''}
+        ${mediaHTML}
+        <div class="idea-footer">
+          <span>${i.date}</span>
+          <div class="action-btns">
+            <button class="share-btn" onclick="shareIdea(${i.id})">📤 Partager</button>
+            <button class="edit-btn" onclick="editIdea(${i.id})">✏️ Éditer</button>
+            <button class="delete-btn" onclick="deleteIdea(${i.id})">Supprimer</button>
+          </div>
+        </div>
+      `;
+      ideasList.appendChild(card);
+    });
+
+    updateDashboard();
+  }
+
+  addBtn.addEventListener('click', () => {
+    const title = document.getElementById('ideaTitle').value.trim();
+    const text = document.getElementById('ideaText').value.trim();
+    if (!title && !text && !currentAudioBase64 && !currentMediaBase64) return;
+
+    ideas.unshift({
+      id: Date.now(),
+      title: title || "Nouvelle idée",
+      text: text,
+      category: document.getElementById('ideaCategory').value,
+      audio: currentAudioBase64,
+      media: currentMediaBase64,
+      mediaType: currentMediaType,
+      fav: false,
+      date: new Date().toLocaleDateString('fr-FR')
+    });
+
+    localStorage.setItem('laugra_ideas', JSON.stringify(ideas));
+    renderIdeas();
+
+    document.getElementById('ideaTitle').value = '';
+    document.getElementById('ideaText').value = '';
+    cameraInput.value = '';
+    currentAudioBase64 = currentMediaBase64 = currentMediaType = null;
+    mediaStatus.textContent = "Aucun média ajouté";
+  });
+
+  window.shareIdea = function(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (!idea) return;
+    
+    const textToShare = `🚀 Mon idée sur LaugraStok: "${idea.title}" - ${idea.text}`;
+    if (navigator.share) {
+      navigator.share({
+        title: idea.title,
+        text: textToShare
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(textToShare);
+      alert("Idée copiée dans le presse-papier !");
+    }
+  };
+
+  window.toggleFav = function(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (idea) {
+      idea.fav = !idea.fav;
+      localStorage.setItem('laugra_ideas', JSON.stringify(ideas));
+      renderIdeas();
+    }
+  };
+
+  window.editIdea = function(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (!idea) return;
+    const newText = prompt("Modifier le contenu de l'idée :", idea.text);
+    if (newText !== null) {
+      idea.text = newText.trim();
+      localStorage.setItem('laugra_ideas', JSON.stringify(ideas));
+      renderIdeas();
+    }
+  };
+
+  window.deleteIdea = function(id) {
+    ideas = ideas.filter(i => i.id !== id);
+    localStorage.setItem('laugra_ideas', JSON.stringify(ideas));
+    renderIdeas();
+  };
+
+  document.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderIdeas();
     });
   });
-}
 
-function collide(arena, player) {
-  const m = player.matrix;
-  const o = player.pos;
-  for (let y = 0; y < m.length; ++y) {
-    for (let x = 0; x < m[y].length; ++x) {
-      if (m[y][x] !== 0 &&
-         (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+  document.getElementById('searchInput').addEventListener('input', renderIdeas);
+  renderIdeas();
+
+  // 7. MOTEUR ARCADE JEUX
+  const gamesToggle = document.getElementById('gamesToggle');
+  const gamesModal = document.getElementById('gamesModal');
+  const closeGamesBtn = document.getElementById('closeGamesBtn');
+  const gameCanvas = document.getElementById('gameCanvas');
+  const ctx = gameCanvas.getContext('2d');
+  const gameScoreEl = document.getElementById('gameScore');
+  const gameHighScoreEl = document.getElementById('gameHighScore');
+
+  let currentGame = 'tetris', gameLoop, score = 0;
+  let activeDpadHandler = null;
+  let activeKeyHandler = null;
+  let highScores = JSON.parse(localStorage.getItem('laugra_high_scores')) || { tetris: 0, snake: 0 };
+
+  gamesToggle.addEventListener('click', () => {
+    gamesModal.classList.remove('hidden');
+    initGame();
+  });
+
+  closeGamesBtn.addEventListener('click', () => {
+    gamesModal.classList.add('hidden');
+    stopGame();
+  });
+
+  document.querySelectorAll('.game-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.game-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentGame = btn.dataset.game;
+      initGame();
+    });
+  });
+
+  document.getElementById('startGameBtn').addEventListener('click', () => initGame());
+
+  function updateScore(newScore) {
+    score = newScore;
+    gameScoreEl.textContent = score;
+    if (score > highScores[currentGame]) {
+      highScores[currentGame] = score;
+      localStorage.setItem('laugra_high_scores', JSON.stringify(highScores));
+    }
+    gameHighScoreEl.textContent = highScores[currentGame];
+  }
+
+  function stopGame() {
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    gameLoop = null;
+    if (activeKeyHandler) {
+      window.removeEventListener('keydown', activeKeyHandler);
+      activeKeyHandler = null;
+    }
+  }
+
+  function initGame() {
+    stopGame();
+    updateScore(0);
+    if (currentGame === 'tetris') startTetris();
+    else if (currentGame === 'snake') startSnake();
+  }
+
+  // --- TETRIS ---
+  function startTetris() {
+    const COLS = 10, ROWS = 16, BLOCK_SIZE = 20;
+    const OFFSET_X = (gameCanvas.width - COLS * BLOCK_SIZE) / 2; // Centrage
+    let board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+    
+    const SHAPES = [
+      [[1,1,1,1]],
+      [[1,1],[1,1]],
+      [[0,1,0],[1,1,1]],
+      [[1,0,0],[1,1,1]],
+      [[0,0,1],[1,1,1]]
+    ];
+    const COLORS = ['#10a37f', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'];
+
+    let currentPiece = getRandomPiece();
+    let lastTime = 0, dropCounter = 0;
+
+    function getRandomPiece() {
+      const idx = Math.floor(Math.random() * SHAPES.length);
+      return {
+        shape: SHAPES[idx],
+        color: COLORS[idx],
+        x: Math.floor(COLS / 2) - 1,
+        y: 0
+      };
+    }
+
+    function collide(b, p) {
+      for (let r = 0; r < p.shape.length; r++) {
+        for (let c = 0; c < p.shape[r].length; c++) {
+          if (p.shape[r][c]) {
+            let newY = p.y + r;
+            let newX = p.x + c;
+            if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && b[newY][newX] !== 0)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function merge(b, p) {
+      p.shape.forEach((row, r) => {
+        row.forEach((value, c) => {
+          if (value && (p.y + r) >= 0) {
+            b[p.y + r][p.x + c] = p.color;
+          }
+        });
+      });
+    }
+
+    function rotate(p) {
+      const rotated = p.shape[0].map((_, i) => p.shape.map(row => row[i]).reverse());
+      const oldShape = p.shape;
+      const oldX = p.x;
+      p.shape = rotated;
+      
+      let offset = 1;
+      while (collide(board, p)) {
+        p.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if (Math.abs(offset) > p.shape[0].length) {
+          p.shape = oldShape;
+          p.x = oldX;
+          return;
+        }
+      }
+    }
+
+    function clearLines() {
+      let linesCleared = 0;
+      board = board.filter(row => {
+        if (row.every(cell => cell !== 0)) {
+          linesCleared++;
+          return false;
+        }
         return true;
+      });
+      while (board.length < ROWS) {
+        board.unshift(Array(COLS).fill(0));
       }
+      if (linesCleared > 0) updateScore(score + linesCleared * 100);
     }
-  }
-  return false;
-}
 
-function arenaSweep() {
-  let rowCount = 1;
-  outer: for (let y = arena.length - 1; y >= 0; --y) {
-    for (let x = 0; x < arena[y].length; ++x) {
-      if (arena[y][x] === 0) {
-        continue outer;
+    function drop() {
+      currentPiece.y++;
+      if (collide(board, currentPiece)) {
+        currentPiece.y--;
+        merge(board, currentPiece);
+        clearLines();
+        currentPiece = getRandomPiece();
+        if (collide(board, currentPiece)) {
+          alert("Game Over ! Score final : " + score);
+          initGame();
+        }
       }
+      dropCounter = 0;
     }
-    const row = arena.splice(y, 1)[0].fill(0);
-    arena.unshift(row);
-    ++y;
 
-    player.score += rowCount * 10;
-    rowCount *= 2;
-  }
-  updateScore();
-}
-
-function playerDrop() {
-  player.pos.y++;
-  if (collide(arena, player)) {
-    player.pos.y--;
-    merge(arena, player);
-    playerReset();
-    arenaSweep();
-  }
-  dropCounter = 0;
-}
-
-function playerMove(dir) {
-  player.pos.x += dir;
-  if (collide(arena, player)) {
-    player.pos.x -= dir;
-  }
-}
-
-function playerRotate() {
-  const pos = player.pos.x;
-  let offset = 1;
-  rotate(player.matrix);
-  while (collide(arena, player)) {
-    player.pos.x += offset;
-    offset = -(offset + (offset > 0 ? 1 : -1));
-    if (offset > player.matrix[0].length) {
-      rotate(player.matrix, -1);
-      player.pos.x = pos;
-      return;
+    function handleAction(action) {
+      if (action === 'LEFT') { currentPiece.x--; if (collide(board, currentPiece)) currentPiece.x++; }
+      if (action === 'RIGHT') { currentPiece.x++; if (collide(board, currentPiece)) currentPiece.x--; }
+      if (action === 'DOWN') drop();
+      if (action === 'ROTATE' || action === 'UP') rotate(currentPiece);
     }
-  }
-}
 
-function rotate(matrix) {
-  for (let y = 0; y < matrix.length; ++y) {
-    for (let x = 0; x < y; ++x) {
-      [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+    bindControls(handleAction);
+
+    function update(time = 0) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+
+      if (dropCounter > 500) drop();
+
+      ctx.fillStyle = '#0a0b10';
+      ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+      // Dessin du fond de grille
+      board.forEach((row, r) => {
+        row.forEach((color, c) => {
+          if (color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(OFFSET_X + c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+          }
+        });
+      });
+
+      // Dessin pièce courante
+      currentPiece.shape.forEach((row, r) => {
+        row.forEach((val, c) => {
+          if (val) {
+            ctx.fillStyle = currentPiece.color;
+            ctx.fillRect(OFFSET_X + (currentPiece.x + c) * BLOCK_SIZE, (currentPiece.y + r) * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+          }
+        });
+      });
+
+      gameLoop = requestAnimationFrame(update);
     }
+
+    update();
   }
-  matrix.forEach(row => row.reverse());
-}
 
-function playerReset() {
-  const pieces = 'ILJOTSZ';
-  player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
-  player.pos.y = 0;
-  player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-  
-  if (collide(arena, player)) {
-    arena.forEach(row => row.fill(0));
-    player.score = 0;
-    updateScore();
-  }
-}
+  // --- SNAKE ---
+  function startSnake() {
+    const GRID_X = 16, GRID_Y = 21, TILE = 15;
+    let snake = [{x: 8, y: 10}];
+    let dir = {x: 1, y: 0}, nextDir = {x: 1, y: 0};
+    let food = {x: 3, y: 3};
+    let lastTime = 0;
 
-function draw() {
-  context.fillStyle = '#000';
-  context.fillRect(0, 0, canvas.width, canvas.height);
+    function handleAction(action) {
+      if (action === 'UP' && dir.y === 0) nextDir = {x: 0, y: -1};
+      if (action === 'DOWN' && dir.y === 0) nextDir = {x: 0, y: 1};
+      if (action === 'LEFT' && dir.x === 0) nextDir = {x: -1, y: 0};
+      if (action === 'RIGHT' && dir.x === 0) nextDir = {x: 1, y: 0};
+    }
 
-  drawMatrix(arena, {x: 0, y: 0});
-  drawMatrix(player.matrix, player.pos);
-}
+    bindControls(handleAction);
 
-function drawMatrix(matrix, offset) {
-  matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
-        context.fillStyle = colors[value];
-        context.fillRect(x + offset.x, y + offset.y, 1, 1);
+    function update(time = 0) {
+      if (time - lastTime > 180) {
+        lastTime = time;
+        dir = nextDir;
+        let head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+
+        // Collision mur
+        if (head.x < 0 || head.x >= GRID_X || head.y < 0 || head.y >= GRID_Y) {
+          alert("Game Over ! Score final : " + score);
+          return initGame();
+        }
+
+        // Collision corps
+        if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+          alert("Game Over ! Score final : " + score);
+          return initGame();
+        }
+
+        snake.unshift(head);
+        if (head.x === food.x && head.y === food.y) {
+          updateScore(score + 10);
+          food = {
+            x: Math.floor(Math.random() * GRID_X),
+            y: Math.floor(Math.random() * GRID_Y)
+          };
+        } else {
+          snake.pop();
+        }
       }
-    });
-  });
-}
 
-function updateScore() {
-  document.getElementById('score').textContent = player.score;
-}
+      ctx.fillStyle = '#0a0b10';
+      ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-function resetGame() {
-  arena.forEach(row => row.fill(0));
-  player.score = 0;
-  updateScore();
-  playerReset();
-}
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(food.x * TILE, food.y * TILE, TILE - 1, TILE - 1);
 
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
+      ctx.fillStyle = '#10a37f';
+      snake.forEach(part => ctx.fillRect(part.x * TILE, part.y * TILE, TILE - 1, TILE - 1));
 
-function update(time = 0) {
-  const deltaTime = time - lastTime;
-  lastTime = time;
+      gameLoop = requestAnimationFrame(update);
+    }
 
-  dropCounter += deltaTime;
-  if (dropCounter > dropInterval) {
-    playerDrop();
+    update();
   }
 
-  draw();
-  requestAnimationFrame(update);
-}
+  function bindControls(callback) {
+    document.getElementById('btnUp').onclick = () => callback('UP');
+    document.getElementById('btnDown').onclick = () => callback('DOWN');
+    document.getElementById('btnLeft').onclick = () => callback('LEFT');
+    document.getElementById('btnRight').onclick = () => callback('RIGHT');
+    document.getElementById('btnRotate').onclick = () => callback('ROTATE');
 
-document.addEventListener('keydown', event => {
-  if (!document.getElementById('tetris-section').classList.contains('active')) return;
+    if (activeKeyHandler) window.removeEventListener('keydown', activeKeyHandler);
+    activeKeyHandler = (e) => {
+      if (gamesModal.classList.contains('hidden')) return;
+      if (e.key === 'ArrowUp') callback('UP');
+      if (e.key === 'ArrowDown') callback('DOWN');
+      if (e.key === 'ArrowLeft') callback('LEFT');
+      if (e.key === 'ArrowRight') callback('RIGHT');
+      if (e.key === ' ' || e.key === 'r' || e.key === 'R') callback('ROTATE');
+    };
+    window.addEventListener('keydown', activeKeyHandler);
+  }
 
-  if (event.key === 'ArrowLeft') playerMove(-1);
-  else if (event.key === 'ArrowRight') playerMove(1);
-  else if (event.key === 'ArrowDown') playerDrop();
-  else if (event.key === 'ArrowUp') playerRotate();
+  function escapeHtml(text) {
+    return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : '';
+  }
+
 });
-
-playerReset();
-update();

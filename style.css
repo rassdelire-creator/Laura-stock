@@ -1,30 +1,33 @@
 :root {
-  --bg: #090a0f;
-  --panel: rgba(18, 21, 32, 0.95);
+  --bg: #000000;
+  --panel: rgba(28, 28, 30, 0.75);
+  --panel-solid: #1c1c1e;
   --border: rgba(255, 255, 255, 0.12);
-  --text: #e2e8f0;
-  --text-muted: #94a3b8;
-  --accent: #00f0ff;
-  --accent-glow: rgba(0, 240, 255, 0.2);
-  --danger: #ff0055;
-  --font: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --text: #f2f2f7;
+  --text-muted: #8e8e93;
+  --accent: #0a84ff;
+  --accent-glow: rgba(10, 132, 255, 0.25);
+  --danger: #ff453a;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Space Grotesk', sans-serif;
 }
 
 [data-theme="light"] {
-  --bg: #f4f6fb;
-  --panel: rgba(255, 255, 255, 0.95);
-  --border: rgba(0, 0, 0, 0.1);
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --accent: #0066ff;
-  --accent-glow: rgba(0, 102, 255, 0.15);
-  --danger: #e11d48;
+  --bg: #f2f2f7;
+  --panel: rgba(255, 255, 255, 0.8);
+  --panel-solid: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #1c1c1e;
+  --text-muted: #8e8e93;
+  --accent: #007aff;
+  --accent-glow: rgba(0, 122, 255, 0.15);
+  --danger: #ff3b30;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -42,7 +45,7 @@ body {
 
 .app-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   z-index: 1;
 }
 
@@ -52,51 +55,67 @@ header {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
 }
 
 h1 {
-  font-size: 1.3rem;
-  letter-spacing: 1px;
+  font-size: 1.4rem;
+  letter-spacing: -0.5px;
   font-weight: 700;
 }
 
 h1 span {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--accent);
-  font-weight: 400;
+  background: var(--accent-glow);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 6px;
 }
 
 .user-greeting {
   font-size: 0.85rem;
-  color: var(--accent);
-  margin-top: 4px;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .icon-btn {
   background: var(--panel);
+  backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   color: var(--text);
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
   font-size: 1.1rem;
 }
 
-/* FORMULAIRE PROFIL CENTRÉ */
+/* CARTE STYLE APPLE (iOS Glassmorphism) */
+.apple-card {
+  background: var(--panel);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* FORMULAIRE PROFIL */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10000;
-  padding: 16px;
+  padding: 20px;
 }
 
 .modal-overlay.hidden {
@@ -104,18 +123,19 @@ h1 span {
 }
 
 .modal-card {
-  background: #121520;
+  background: var(--panel-solid);
   border: 1px solid var(--border);
-  padding: 20px;
-  border-radius: 20px;
+  padding: 24px;
+  border-radius: 24px;
   width: 100%;
-  max-width: 380px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  max-width: 360px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .modal-card h2 {
   font-size: 1.3rem;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  font-weight: 700;
 }
 
 .modal-card p {
@@ -136,15 +156,116 @@ h1 span {
   color: var(--text-muted);
 }
 
-/* MINI-JEU GEOMETRY DASH */
-.game-section {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 20px;
+/* INPUTS ET BUTTONS APPLE */
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%;
+  background: rgba(120, 120, 128, 0.12);
+  border: 1px solid transparent;
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
 }
 
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  background: rgba(120, 120, 128, 0.18);
+}
+
+select {
+  width: auto;
+  min-width: 110px;
+}
+
+textarea {
+  resize: none;
+  margin-bottom: 10px;
+}
+
+.primary-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.mt-12 {
+  margin-top: 12px;
+}
+
+/* RECORD BAR (ENREGISTREMENT VOCAL) */
+.voice-recorder-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(120, 120, 128, 0.1);
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.voice-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.voice-btn.recording {
+  color: var(--danger);
+  font-weight: 600;
+  animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 1; }
+  to { opacity: 0.4; }
+}
+
+.record-timer {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.record-timer.hidden {
+  display: none;
+}
+
+/* LECTEUR AUDIO APPLE POUR IDÉES */
+.audio-player-container {
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+audio {
+  width: 100%;
+  height: 36px;
+  border-radius: 10px;
+  outline: none;
+}
+
+/* MINI-JEU GEOMETRY DASH */
 .game-header {
   display: flex;
   justify-content: space-between;
@@ -155,23 +276,22 @@ h1 span {
 
 .game-container {
   width: 100%;
-  height: 120px;
-  background: rgba(0, 0, 0, 0.4);
+  height: 110px;
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   position: relative;
   overflow: hidden;
 }
 
 .player {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 6px;
   position: absolute;
   bottom: 0;
   left: 20px;
-  box-shadow: 0 0 10px var(--accent);
 }
 
 .player.jump {
@@ -180,13 +300,13 @@ h1 span {
 
 @keyframes jumpAnimation {
   0% { bottom: 0; transform: rotate(0deg); }
-  50% { bottom: 70px; transform: rotate(180deg); }
+  50% { bottom: 65px; transform: rotate(180deg); }
   100% { bottom: 0; transform: rotate(360deg); }
 }
 
 .obstacle {
-  width: 18px;
-  height: 24px;
+  width: 16px;
+  height: 22px;
   background: var(--danger);
   position: absolute;
   bottom: 0;
@@ -209,10 +329,12 @@ h1 span {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 16px;
 }
 
 .game-hint {
@@ -222,71 +344,19 @@ h1 span {
   margin-top: 8px;
 }
 
-/* SECTION ADD & LISTE IDÉES */
-.add-idea-section {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.input-group {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-input[type="text"], input[type="number"], select, textarea {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-family: var(--font);
-  font-size: 0.9rem;
-  outline: none;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 8px var(--accent-glow);
-}
-
-select {
-  width: 140px;
-}
-
-textarea {
-  resize: vertical;
-  margin-bottom: 10px;
-}
-
-.primary-btn {
-  width: 100%;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-family: var(--font);
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
+/* RECHERCHE ET TAGS */
 .filter-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .tags {
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .tag-btn {
@@ -296,15 +366,15 @@ textarea {
   padding: 6px 14px;
   border-radius: 20px;
   font-family: var(--font);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .tag-btn.active {
   border-color: var(--accent);
-  color: var(--text);
-  background: var(--accent-glow);
+  color: #fff;
+  background: var(--accent);
 }
 
 .ideas-grid {
@@ -315,8 +385,10 @@ textarea {
 
 .idea-card {
   background: var(--panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 14px;
 }
 
@@ -324,28 +396,27 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .idea-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .badge {
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(120, 120, 128, 0.15);
+  color: var(--text-muted);
 }
 
 .idea-content {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.4;
   white-space: pre-wrap;
-  margin-bottom: 10px;
 }
 
 .idea-footer {
@@ -354,13 +425,26 @@ textarea {
   align-items: center;
   font-size: 0.75rem;
   color: var(--text-muted);
+  margin-top: 10px;
 }
 
 .delete-btn {
   background: transparent;
   border: none;
   color: var(--danger);
+  font-family: var(--font);
   cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  font-size: 0.85rem;
 }
 
 /* SPLASH SCREEN ACCUEIL */
@@ -370,37 +454,36 @@ textarea {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #090a0f;
+  background-color: var(--bg);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 99999;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 .splash-logo-box {
-  width: 100px;
-  height: 100px;
-  background: rgba(255, 255, 255, 0.05);
+  width: 90px;
+  height: 90px;
+  background: var(--panel-solid);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 22px;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 0 30px var(--accent-glow);
-  animation: pulseGlow 1.5s infinite alternate ease-in-out;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .splash-icon {
-  font-size: 3rem;
+  font-size: 2.8rem;
 }
 
 .splash-title {
-  margin-top: 18px;
-  font-size: 1.5rem;
-  letter-spacing: 3px;
-  color: #ffffff;
+  margin-top: 16px;
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  color: var(--text);
   font-weight: 700;
 }
 
@@ -408,9 +491,4 @@ textarea {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
-}
-
-@keyframes pulseGlow {
-  from { transform: scale(0.95); }
-  to { transform: scale(1.05); }
 }

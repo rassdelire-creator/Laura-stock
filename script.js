@@ -6,9 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (splash) {
       splash.classList.add('hidden');
     }
-  }, 1200);
+  }, 1000);
 
-  // --- 2. GESTION DU PROFIL USER ---
+  // --- 2. GESTION DU PROFIL ---
   const profileModal = document.getElementById('profileModal');
   const saveProfileBtn = document.getElementById('saveProfileBtn');
   const userGreeting = document.getElementById('userGreeting');
@@ -63,7 +63,65 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('laugra_theme', currentTheme);
   });
 
-  // --- 4. GESTION DES IDÉES ---
+  // --- 4. ENREGISTREUR VOCAL SIMPLE ---
+  const recordVoiceBtn = document.getElementById('recordVoiceBtn');
+  const recordStatus = document.getElementById('recordStatus');
+  const recordTimer = document.getElementById('recordTimer');
+
+  let mediaRecorder;
+  let audioChunks = [];
+  let isRecording = false;
+  let recordedAudioBase64 = null;
+  let timerInterval;
+  let secondsRecorded = 0;
+
+  recordVoiceBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+      // Démarrer enregistrement
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = () => {
+            recordedAudioBase64 = reader.result;
+            recordStatus.textContent = "Note vocale prête ✅";
+            recordVoiceBtn.classList.remove('recording');
+          };
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+        recordVoiceBtn.classList.add('recording');
+        recordStatus.textContent = "Enregistrement... (Toucher pour stopper)";
+        recordTimer.classList.remove('hidden');
+
+        secondsRecorded = 0;
+        recordTimer.textContent = "00:00";
+        timerInterval = setInterval(() => {
+          secondsRecorded++;
+          const mins = String(Math.floor(secondsRecorded / 60)).padStart(2, '0');
+          const secs = String(secondsRecorded % 60).padStart(2, '0');
+          recordTimer.textContent = `${mins}:${secs}`;
+        }, 1000);
+
+      } catch (err) {
+        alert("Accès au micro refusé ou non supporté.");
+      }
+    } else {
+      // Stopper enregistrement
+      mediaRecorder.stop();
+      isRecording = false;
+      clearInterval(timerInterval);
+    }
+  });
+
+  // --- 5. GESTION DES IDÉES ---
   const ideaTitle = document.getElementById('ideaTitle');
   const ideaCategory = document.getElementById('ideaCategory');
   const ideaText = document.getElementById('ideaText');
@@ -85,12 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filtered = ideas.filter(i => {
       const matchesFilter = currentFilter === 'all' || i.category === currentFilter;
-      const matchesSearch = i.title.toLowerCase().includes(search) || i.text.toLowerCase().includes(search);
+      const matchesSearch = i.title.toLowerCase().includes(search) || (i.text && i.text.toLowerCase().includes(search));
       return matchesFilter && matchesSearch;
     });
 
     if (filtered.length === 0) {
-      ideasList.innerHTML = '<div class="empty-state">Aucune idée sauvegardée pour le moment.</div>';
+      ideasList.innerHTML = '<div class="empty-state">Aucune idée enregistrée pour le moment.</div>';
       return;
     }
 
@@ -105,14 +163,26 @@ document.addEventListener('DOMContentLoaded', () => {
         other: '💡 Autre'
       };
 
+      let audioHTML = '';
+      if (i.audio) {
+        audioHTML = `
+          <div class="audio-player-container">
+            <audio controls src="${i.audio}"></audio>
+          </div>
+        `;
+      }
+
+      let contentHTML = i.text ? `<div class="idea-content">${escapeHtml(i.text)}</div>` : '';
+
       card.innerHTML = `
         <div class="idea-header">
           <span class="idea-title">${escapeHtml(i.title)}</span>
           <span class="badge">${categoryNames[i.category] || '💡 Autre'}</span>
         </div>
-        <div class="idea-content">${escapeHtml(i.text)}</div>
+        ${contentHTML}
+        ${audioHTML}
         <div class="idea-footer">
-          <span>Enregistré le ${i.date}</span>
+          <span>${i.date}</span>
           <button class="delete-btn" onclick="deleteIdea(${i.id})">Supprimer</button>
         </div>
       `;
@@ -125,16 +195,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = ideaText.value.trim();
     const category = ideaCategory.value;
 
-    if (!title || !text) {
-      alert('Ajoute au moins un titre et une description.');
+    if (!title && !text && !recordedAudioBase64) {
+      alert('Ajoute au moins un titre, un texte ou un enregistrement vocal !');
       return;
     }
 
+    const finalTitle = title || (recordedAudioBase64 ? "Note Vocale 🎙️" : "Nouvelle Idée");
+
     const newIdea = {
       id: Date.now(),
-      title,
-      text,
-      category,
+      title: finalTitle,
+      text: text,
+      category: category,
+      audio: recordedAudioBase64,
       date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
     };
 
@@ -142,8 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
     saveIdeas();
     renderIdeas();
 
+    // Reset formulaire
     ideaTitle.value = '';
     ideaText.value = '';
+    recordedAudioBase64 = null;
+    recordStatus.textContent = "Enregistrer une note vocale";
+    recordTimer.classList.add('hidden');
   });
 
   window.deleteIdea = function(id) {
@@ -165,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderIdeas();
 
-  // --- 5. MINI GEOMETRY DASH ---
+  // --- 6. MINI GEOMETRY DASH ---
   const player = document.getElementById('player');
   const obstacle = document.getElementById('obstacle');
   const startGameBtn = document.getElementById('startGameBtn');
@@ -220,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     obstacle.classList.remove('running');
     clearInterval(scoreInterval);
     clearInterval(checkCollisionInterval);
-    alert(`Game Over ! Score final : ${score}`);
+    alert(`Game Over ! Score : ${score}`);
     startScreen.style.display = 'flex';
   }
 

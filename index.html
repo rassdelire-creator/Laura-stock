@@ -7,7 +7,7 @@
   
   <meta name="apple-mobile-web-app-title" content="LaugraStok">
   <meta name="application-name" content="LaugraStok">
-  <meta name="theme-color" content="#171717">
+  <meta name="theme-color" content="#0d0d11">
 
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +15,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <!-- ARRIÈRE-PLAN BULLES DE LIQUIDE / APPLE GLASS -->
+  <div class="glass-bg">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+  </div>
 
   <!-- Écran d'accueil -->
   <div id="splashScreen" class="splash-screen">
@@ -26,7 +33,7 @@
 
   <!-- Formulaire Profil -->
   <div id="profileModal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card glass-card">
       <h2>Bienvenue ! 🚀</h2>
       <p>Configure ton profil pour commencer :</p>
       
@@ -46,7 +53,7 @@
 
   <!-- COFFRE-FORT / IDÉES SECRÈTES -->
   <div id="secretModal" class="modal-overlay hidden">
-    <div class="modal-card modal-large">
+    <div class="modal-card modal-large glass-card">
       <div class="modal-header">
         <h2>🔒 Idées Secrètes</h2>
         <button id="closeSecretBtn" class="close-btn">✕</button>
@@ -72,9 +79,9 @@
     </div>
   </div>
 
-  <!-- MODAL ARCADE (TETRIS & SNAKE) -->
+  <!-- MODAL ARCADE -->
   <div id="gamesModal" class="modal-overlay hidden">
-    <div class="modal-card modal-large">
+    <div class="modal-card modal-large glass-card">
       <div class="modal-header">
         <h2>🎮 Zone Arcade</h2>
         <button id="closeGamesBtn" class="close-btn">✕</button>
@@ -114,19 +121,36 @@
   <div class="app-container">
     <header>
       <div>
-        <h1>LAUGRASTOK <span class="version-tag">v1.1</span></h1>
+        <h1>LAUGRASTOK <span class="version-tag">v1.2</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       
       <div class="header-actions">
-        <button id="secretToggle" class="icon-btn" title="Idées Secrètes">🔒</button>
-        <button id="gamesToggle" class="icon-btn" title="Mini-jeux">🎮</button>
-        <button id="themeToggle" class="icon-btn" title="Thème">🌙</button>
+        <button id="secretToggle" class="icon-btn glass-btn" title="Idées Secrètes">🔒</button>
+        <button id="gamesToggle" class="icon-btn glass-btn" title="Mini-jeux">🎮</button>
+        <button id="themeToggle" class="icon-btn glass-btn" title="Thème">🌙</button>
       </div>
     </header>
 
-    <!-- CRÉATION D'IDÉE (DESIGN CHATGPT + APPLE) -->
-    <section class="gpt-card add-idea-section">
+    <!-- DASHBOARD ET STATS POUR MEUBLER L'INTERFACE -->
+    <section class="glass-card dashboard-widget">
+      <div class="dash-item">
+        <span class="dash-num" id="totalIdeasCount">0</span>
+        <span class="dash-label">Idées créées</span>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="dash-item">
+        <span class="dash-num" id="favIdeasCount">0</span>
+        <span class="dash-label">Favoris</span>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="dash-item">
+        <button id="randomPromptBtn" class="dash-action-btn">💡 Inspiration</button>
+      </div>
+    </section>
+
+    <!-- CRÉATION D'IDÉE EN VERRE TREMPÉ -->
+    <section class="glass-card add-idea-section">
       <div class="input-group">
         <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
         <select id="ideaCategory">
@@ -139,7 +163,7 @@
 
       <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
 
-      <!-- BARRE MÉDIA PROPRE SANS CHEVAUCHEMENT -->
+      <!-- BARRE MÉDIA PROPRE -->
       <div class="media-bar">
         <div class="media-actions-row">
           <button id="recordVoiceBtn" class="media-square-btn" title="Enregistrer un vocal">

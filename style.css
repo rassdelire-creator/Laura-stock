@@ -1,264 +1,257 @@
-/* ==========================================================================
-
-VARIABLES & THÈMES
-========================================================================== */
+/* VARIABLES FUTURISTES & THÈMES */
 :root {
---bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
---bg-color: #0f172a;
---card-bg: rgba(30, 41, 59, 0.65);
---card-hover-bg: rgba(45, 55, 72, 0.85);
---text-color: #f8fafc;
---text-secondary: #94a3b8;
---border-color: rgba(255, 255, 255, 0.12);
---border-hover: rgba(168, 85, 247, 0.6);
---accent-color: #38bdf8;
---accent-purple: #c084fc;
---shadow-color: rgba(0, 0, 0, 0.4);
---glow-color: rgba(168, 85, 247, 0.25);
---box-bg: rgba(15, 23, 42, 0.7);
+  --bg: #090a0f;
+  --panel: #121520;
+  --border: #23293e;
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --accent: #00f0ff;
+  --accent-glow: rgba(0, 240, 255, 0.15);
+  --danger: #ff0055;
+  --font: 'Space Grotesk', system-ui, -apple-system, sans-serif;
 }
+
 [data-theme="light"] {
---bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
---bg-color: #f8fafc;
---card-bg: rgba(255, 255, 255, 0.8);
---card-hover-bg: rgba(255, 255, 255, 0.95);
---text-color: #0f172a;
---text-secondary: #475569;
---border-color: rgba(0, 0, 0, 0.08);
---border-hover: rgba(147, 51, 234, 0.5);
---accent-color: #0284c7;
---accent-purple: #7e22ce;
---shadow-color: rgba(0, 0, 0, 0.08);
---glow-color: rgba(147, 51, 234, 0.15);
---box-bg: rgba(255, 255, 255, 0.6);
+  --bg: #f4f6fb;
+  --panel: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --accent: #0066ff;
+  --accent-glow: rgba(0, 102, 255, 0.12);
+  --danger: #e11d48;
 }
 
-/* ==========================================================================
-2. REINITIALISATION & BASE
-========================================================================== */
-
-{
-box-sizing: border-box;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
 body {
-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-background: var(--bg-gradient);
-background-attachment: fixed;
-color: var(--text-color);
-margin: 0;
-padding: 30px 20px;
-min-height: 100vh;
-transition: background 0.4s ease, color 0.4s ease;
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.container {
-max-width: 960px;
-margin: 0 auto;
+.app-container {
+  width: 100%;
+  max-width: 680px;
 }
 
-/* ==========================================================================
-3. HEADER & BOUTON THÈME
-========================================================================== */
 header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 30px;
-padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
-.header-content h1 {
-margin: 0 0 8px 0;
-font-size: 2.2rem;
-background: linear-gradient(135deg, var(--accent-color), var(--accent-purple));
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
+h1 {
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  font-weight: 700;
 }
 
-#fun-quote {
-margin: 0;
-font-style: italic;
-color: var(--text-secondary);
-font-size: 1rem;
+h1 span {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 400;
 }
 
-.theme-btn {
-background: var(--card-bg);
-border: 1px solid var(--border-color);
-color: var(--text-color);
-font-size: 22px;
-width: 50px;
-height: 50px;
-border-radius: 50%;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-box-shadow: 0 4px 12px var(--shadow-color);
-transition: transform 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+.icon-btn {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: 0.2s;
 }
 
-.theme-btn:hover {
-transform: scale(1.1) rotate(12deg);
-border-color: var(--accent-purple);
+.icon-btn:hover {
+  border-color: var(--accent);
 }
 
-/* ==========================================================================
-4. BARRE DE RECHERCHE
-========================================================================== */
-.search-bar {
-text-align: center;
-margin-bottom: 35px;
+/* FORMULAIRE D'AJOUT D'IDÉE */
+.add-idea-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.search-bar input {
-width: 80%;
-max-width: 550px;
-padding: 14px 22px;
-border-radius: 30px;
-border: 2px solid var(--border-color);
-background: var(--card-bg);
-color: var(--text-color);
-font-size: 1rem;
-outline: none;
-backdrop-filter: blur(12px);
--webkit-backdrop-filter: blur(12px);
-box-shadow: 0 8px 20px var(--shadow-color);
-transition: all 0.3s ease;
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.search-bar input:focus {
-width: 90%;
-border-color: var(--accent-color);
-box-shadow: 0 0 25px var(--glow-color);
+input[type="text"], select, textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* ==========================================================================
-5. GRILLE DES APPLICATIONS & CARTES GLASSMORPHISM
-========================================================================== */
-.drawer {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-gap: 22px;
-margin-bottom: 45px;
+input[type="text"]:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
-@Keyframes fadeInUp {
-from {
-opacity: 0;
-transform: translateY(20px);
-}
-to {
-opacity: 1;
-transform: translateY(0);
-}
+select {
+  width: 160px;
+  cursor: pointer;
 }
 
-.app-card {
-background: var(--card-bg);
-backdrop-filter: blur(16px);
--webkit-backdrop-filter: blur(16px);
-border: 1px solid var(--border-color);
-border-radius: 18px;
-padding: 24px 20px;
-text-align: center;
-cursor: pointer;
-box-shadow: 0 10px 25px var(--shadow-color);
-animation: fadeInUp 0.4s ease forwards;
-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+textarea {
+  resize: vertical;
+  margin-bottom: 12px;
 }
 
-.app-card:hover {
-transform: translateY(-8px) scale(1.02);
-background: var(--card-hover-bg);
-border-color: var(--border-hover);
-box-shadow: 0 15px 30px var(--shadow-color), 0 0 20px var(--glow-color);
+.primary-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
 }
 
-.app-card .icon {
-font-size: 48px;
-margin-bottom: 12px;
-display: inline-block;
-transition: transform 0.3s ease;
+.primary-btn:hover {
+  opacity: 0.9;
 }
 
-.app-card:hover .icon {
-transform: scale(1.2) rotate(6deg);
+.primary-btn:active {
+  transform: scale(0.99);
 }
 
-.app-card h3 {
-margin: 0 0 8px 0;
-font-size: 1.2rem;
-color: var(--accent-color);
+/* FILTRES & RECHERCHE */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.app-card p {
-margin: 0;
-font-size: 0.9rem;
-color: var(--text-secondary);
-line-height: 1.4;
+.tags {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
 }
 
-/* ==========================================================================
-6. BOÎTE À SUGGESTIONS & BOUTON ANIMÉ
-========================================================================== */
-.suggestions-box {
-background: var(--box-bg);
-backdrop-filter: blur(16px);
--webkit-backdrop-filter: blur(16px);
-padding: 30px 20px;
-border-radius: 20px;
-border: 2px dashed var(--accent-purple);
-text-align: center;
-box-shadow: 0 10px 25px var(--shadow-color);
+.tag-btn {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.suggestions-box h2 {
-margin-top: 0;
-font-size: 1.3rem;
-color: var(--accent-purple);
+.tag-btn.active, .tag-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-glow);
 }
 
-@Keyframes pulseGlow {
-0% {
-box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.6);
-}
-70% {
-box-shadow: 0 0 0 16px rgba(244, 63, 94, 0);
-}
-100% {
-box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
-}
+/* CARTE D'IDÉE */
+.ideas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.suggestions-box button {
-background: linear-gradient(135deg, #f43f5e, #e11d48);
-color: #ffffff;
-border: none;
-padding: 12px 26px;
-font-size: 0.95rem;
-font-weight: 700;
-border-radius: 50px;
-cursor: pointer;
-margin-top: 10px;
-animation: pulseGlow 2s infinite;
-transition: transform 0.2s ease, background 0.3s ease;
+.idea-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  transition: border-color 0.2s;
 }
 
-.suggestions-box button:hover {
-transform: scale(1.05);
+.idea-card:hover {
+  border-color: var(--accent);
 }
 
-.suggestions-box button:active {
-transform: scale(0.95);
+.idea-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-#suggestionText {
-margin-top: 18px;
-font-size: 1.05rem;
-font-weight: 500;
-color: var(--text-color);
-min-height: 1.5em;
+.idea-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.idea-content {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+}
+
+.idea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
 }

@@ -12,11 +12,11 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Écran d'accueil (Splash Screen) avec le cœur -->
+  <!-- Écran d'accueil (Splash Screen) -->
   <div id="splashScreen" class="splash-screen">
     <div class="splash-logo-box">
       <span class="splash-icon">🫶</span>
@@ -24,7 +24,7 @@
     <h1 class="splash-title">LAUGRASTOK</h1>
   </div>
 
-  <!-- Formulaire Profil Centré Mobile -->
+  <!-- Formulaire Profil Style Apple Centré -->
   <div id="profileModal" class="modal-overlay hidden">
     <div class="modal-card">
       <h2>Bienvenue ! 🚀</h2>
@@ -61,14 +61,14 @@
   <div class="app-container">
     <header>
       <div>
-        <h1>LAUGRASTOK <span>// v1.0</span></h1>
+        <h1>LAUGRASTOK <span>v1.0</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       <button id="themeToggle" class="icon-btn" title="Changer le thème">🌙</button>
     </header>
 
     <!-- MINI-JEU GEOMETRY DASH -->
-    <section class="game-section">
+    <section class="apple-card game-section">
       <div class="game-header">
         <h3>🎮 Mini Geometry Dash</h3>
         <span id="gameScore">Score: 0</span>
@@ -77,25 +77,36 @@
         <div id="player" class="player"></div>
         <div id="obstacle" class="obstacle"></div>
         <div id="startScreen" class="game-start-overlay">
-          <button id="startGameBtn" class="primary-btn">Sauter / Jouer</button>
+          <button id="startGameBtn" class="primary-btn">Jouer / Sauter</button>
         </div>
       </div>
       <p class="game-hint">Touche l'écran pour sauter !</p>
     </section>
 
-    <!-- SAUVEGARDE D'IDÉES -->
-    <section class="add-idea-section">
+    <!-- SAUVEGARDE D'IDÉES + VOCAL APPLE STYLE -->
+    <section class="apple-card add-idea-section">
       <div class="input-group">
         <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
         <select id="ideaCategory">
-          <option value="app">💻 App / Dev</option>
+          <option value="app">💻 Dev</option>
           <option value="story">✍️ Histoire</option>
           <option value="video">🎥 Vidéo</option>
           <option value="other">💡 Autre</option>
         </select>
       </div>
-      <textarea id="ideaText" placeholder="Écris les détails de ton idée ici pour ne pas la perdre..." rows="3"></textarea>
-      <button id="addBtn" class="primary-btn"><b>+</b> Sauvegarder l'idée</button>
+
+      <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
+
+      <!-- BARRE ENREGISTREMENT VOCAL STYLE DICTAPHONE APPLE -->
+      <div class="voice-recorder-bar">
+        <button id="recordVoiceBtn" class="voice-btn">
+          <span class="mic-icon">🎙️</span>
+          <span id="recordStatus">Enregistrer une note vocale</span>
+        </button>
+        <span id="recordTimer" class="record-timer hidden">00:00</span>
+      </div>
+
+      <button id="addBtn" class="primary-btn mt-12"><b>+</b> Sauvegarder l'idée</button>
     </section>
 
     <section class="filter-section">

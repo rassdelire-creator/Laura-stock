@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. SPLASH SCREEN
   setTimeout(() => {
     document.getElementById('splashScreen')?.classList.add('hidden');
-  }, 1000);
+  }, 800);
 
-  // 2. PROFIL UTILISATEUR
+  // 2. PROFIL
   const profileModal = document.getElementById('profileModal');
   const saveProfileBtn = document.getElementById('saveProfileBtn');
   const userGreeting = document.getElementById('userGreeting');
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('laugra_theme', currentTheme);
   });
 
-  // 4. COFFRE-FORT / IDÉES SECRÈTES
+  // 4. COFFRE-FORT SECRETS
   const secretToggle = document.getElementById('secretToggle');
   const secretModal = document.getElementById('secretModal');
   const closeSecretBtn = document.getElementById('closeSecretBtn');
@@ -59,13 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   secretToggle.addEventListener('click', () => {
     secretModal.classList.remove('hidden');
-    if (!savedPin) {
-      pinInstruction.textContent = "Crée ton code PIN à 6 chiffres :";
-      unlockSecretBtn.textContent = "Créer le code PIN";
-    } else {
-      pinInstruction.textContent = "Entre ton code PIN à 6 chiffres :";
-      unlockSecretBtn.textContent = "Déverrouiller";
-    }
+    pinInstruction.textContent = savedPin ? "Entre ton code PIN à 6 chiffres :" : "Crée ton code PIN à 6 chiffres :";
+    unlockSecretBtn.textContent = savedPin ? "Déverrouiller" : "Créer le code PIN";
   });
 
   closeSecretBtn.addEventListener('click', () => {
@@ -77,14 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   unlockSecretBtn.addEventListener('click', () => {
     const enteredPin = pinInput.value.trim();
-    if (enteredPin.length !== 6 || isNaN(enteredPin)) {
-      return alert("Le code doit contenir exactement 6 chiffres !");
-    }
+    if (enteredPin.length !== 6 || isNaN(enteredPin)) return alert("Code à 6 chiffres requis !");
 
     if (!savedPin) {
       savedPin = enteredPin;
       localStorage.setItem('laugra_secret_pin', savedPin);
-      alert("Code PIN enregistré avec succès !");
+      alert("PIN enregistré !");
     } else if (enteredPin !== savedPin) {
       return alert("Code PIN incorrect !");
     }
@@ -94,19 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSecretIdeas();
   });
 
-  const addSecretBtn = document.getElementById('addSecretBtn');
-  addSecretBtn.addEventListener('click', () => {
+  document.getElementById('addSecretBtn').addEventListener('click', () => {
     const title = document.getElementById('secretTitle').value.trim();
     const text = document.getElementById('secretText').value.trim();
     if (!title && !text) return;
 
-    secretIdeas.unshift({
-      id: Date.now(),
-      title: title || "Secret Sans Titre",
-      text: text,
-      date: new Date().toLocaleDateString('fr-FR')
-    });
-
+    secretIdeas.unshift({ id: Date.now(), title: title || "Secret", text: text, date: new Date().toLocaleDateString('fr-FR') });
     localStorage.setItem('laugra_secret_ideas', JSON.stringify(secretIdeas));
     renderSecretIdeas();
     document.getElementById('secretTitle').value = '';
@@ -134,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSecretIdeas();
   };
 
-  // 5. ENREGISTREUR VOCAL & PHOTO/VIDÉO
+  // 5. VOCAL ET CAMERA
   const recordVoiceBtn = document.getElementById('recordVoiceBtn');
   const recordTimer = document.getElementById('recordTimer');
   const cameraInput = document.getElementById('cameraInput');
@@ -157,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
           reader.readAsDataURL(blob);
           reader.onloadend = () => {
             currentAudioBase64 = reader.result;
-            mediaStatus.textContent = "🎙️ Vocal prêt !";
+            mediaStatus.textContent = "🎙️ Vocal enregistré";
           };
         };
         mediaRecorder.start();
@@ -186,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.onloadend = () => {
       currentMediaBase64 = reader.result;
       currentMediaType = file.type.startsWith('video') ? 'video' : 'image';
-      mediaStatus.textContent = currentMediaType === 'video' ? "🎥 Vidéo ajoutée !" : "📸 Photo ajoutée !";
+      mediaStatus.textContent = currentMediaType === 'video' ? "🎥 Vidéo prête" : "📸 Photo prête";
     };
   });
 
@@ -206,8 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (i.audio) mediaHTML += `<audio controls src="${i.audio}"></audio>`;
       if (i.media) {
         mediaHTML += i.mediaType === 'video' 
-          ? `<div class="media-preview-container"><video controls src="${i.media}"></video></div>`
-          : `<div class="media-preview-container"><img src="${i.media}" /></div>`;
+          ? `<div class="media-preview"><video controls src="${i.media}"></video></div>`
+          : `<div class="media-preview"><img src="${i.media}" /></div>`;
       }
 
       card.innerHTML = `
@@ -248,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ideaTitle').value = '';
     document.getElementById('ideaText').value = '';
     currentAudioBase64 = currentMediaBase64 = currentMediaType = null;
-    mediaStatus.textContent = "Aucun fichier média ajouté";
+    mediaStatus.textContent = "Aucun média sélectionné";
   });
 
   window.deleteIdea = function(id) {
@@ -260,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchInput').addEventListener('input', renderIdeas);
   renderIdeas();
 
-  // 7. ARCADE MINI JEUX (SNAKE, TETRIS, PACMAN, SUDOKU)
+  // 7. ARCADE - JEUX JOUABLES (SNAKE, TETRIS, PACMAN, SUDOKU)
   const gamesToggle = document.getElementById('gamesToggle');
   const gamesModal = document.getElementById('gamesModal');
   const closeGamesBtn = document.getElementById('closeGamesBtn');
@@ -268,12 +254,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const sudokuGrid = document.getElementById('sudokuGrid');
   const ctx = gameCanvas.getContext('2d');
 
-  let currentGame = 'snake', gameLoop;
+  let currentGame = 'snake', gameInterval;
 
   gamesToggle.addEventListener('click', () => gamesModal.classList.remove('hidden'));
   closeGamesBtn.addEventListener('click', () => {
     gamesModal.classList.add('hidden');
-    clearInterval(gameLoop);
+    clearInterval(gameInterval);
   });
 
   document.querySelectorAll('.game-tab-btn').forEach(btn => {
@@ -288,63 +274,140 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('startGameBtn').addEventListener('click', () => initGame());
 
   function initGame() {
-    clearInterval(gameLoop);
+    clearInterval(gameInterval);
     gameCanvas.classList.remove('hidden');
     sudokuGrid.classList.add('hidden');
 
-    if (currentGame === 'snake') startSnake();
-    else if (currentGame === 'tetris') startTetris();
-    else if (currentGame === 'pacman') startPacman();
-    else if (currentGame === 'sudoku') startSudoku();
+    if (currentGame === 'snake') playSnake();
+    else if (currentGame === 'tetris') playTetris();
+    else if (currentGame === 'pacman') playPacman();
+    else if (currentGame === 'sudoku') playSudoku();
   }
 
-  // --- SNAKE ---
-  let snake, dir, food;
-  function startSnake() {
-    snake = [{x: 10, y: 10}]; dir = {x: 1, y: 0};
-    food = {x: 5, y: 5};
-    gameLoop = setInterval(() => {
-      const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
-      if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) return initGame();
+  // CONTROLES D-PAD DYNAMIQUES
+  let dirAction = () => {};
+  document.getElementById('btnUp').onclick = () => onDpad('UP');
+  document.getElementById('btnDown').onclick = () => onDpad('DOWN');
+  document.getElementById('btnLeft').onclick = () => onDpad('LEFT');
+  document.getElementById('btnRight').onclick = () => onDpad('RIGHT');
+  document.getElementById('btnAction').onclick = () => onDpad('ACTION');
+
+  let currentMoveHandler = null;
+  function onDpad(type) {
+    if (currentMoveHandler) currentMoveHandler(type);
+  }
+
+  // --- 1. SNAKE ---
+  function playSnake() {
+    let snake = [{x: 8, y: 8}];
+    let dir = {x: 1, y: 0};
+    let food = {x: 3, y: 3};
+
+    currentMoveHandler = (type) => {
+      if (type === 'UP' && dir.y === 0) dir = {x: 0, y: -1};
+      if (type === 'DOWN' && dir.y === 0) dir = {x: 0, y: 1};
+      if (type === 'LEFT' && dir.x === 0) dir = {x: -1, y: 0};
+      if (type === 'RIGHT' && dir.x === 0) dir = {x: 1, y: 0};
+    };
+
+    gameInterval = setInterval(() => {
+      let head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+      if (head.x < 0 || head.x >= 16 || head.y < 0 || head.y >= 16) return initGame();
+      
       snake.unshift(head);
       if (head.x === food.x && head.y === food.y) {
-        food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20)};
+        food = {x: Math.floor(Math.random()*16), y: Math.floor(Math.random()*16)};
       } else snake.pop();
 
-      ctx.fillStyle = "#000"; ctx.fillRect(0,0,300,300);
-      ctx.fillStyle = "#ff453a"; ctx.fillRect(food.x*15, food.y*15, 14, 14);
-      ctx.fillStyle = "#0a84ff";
+      ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,240,240);
+      ctx.fillStyle = "#ef4444"; ctx.fillRect(food.x*15, food.y*15, 14, 14);
+      ctx.fillStyle = "#10a37f";
       snake.forEach(p => ctx.fillRect(p.x*15, p.y*15, 14, 14));
     }, 120);
   }
 
-  // CONTROLES D-PAD DU JEU
-  document.getElementById('btnUp').onclick = () => dir = {x: 0, y: -1};
-  document.getElementById('btnDown').onclick = () => dir = {x: 0, y: 1};
-  document.getElementById('btnLeft').onclick = () => dir = {x: -1, y: 0};
-  document.getElementById('btnRight').onclick = () => dir = {x: 1, y: 0};
+  // --- 2. TETRIS ---
+  function playTetris() {
+    let grid = Array(16).fill().map(() => Array(10).fill(0));
+    let piece = {x: 4, y: 0, shape: [[1,1],[1,1]]};
 
-  // --- TETRIS / PACMAN / SUDOKU (Simulations simples) ---
-  function startTetris() {
-    ctx.fillStyle = "#000"; ctx.fillRect(0,0,300,300);
-    ctx.fillStyle = "#fff"; ctx.fillText("🧱 Tetris Prêt - Appuie Démarrer", 50, 150);
+    currentMoveHandler = (type) => {
+      if (type === 'LEFT' && piece.x > 0) piece.x--;
+      if (type === 'RIGHT' && piece.x < 8) piece.x++;
+      if (type === 'DOWN') piece.y++;
+    };
+
+    gameInterval = setInterval(() => {
+      piece.y++;
+      if (piece.y > 14) {
+        piece.y = 0; piece.x = 4;
+      }
+
+      ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,240,240);
+      ctx.fillStyle = "#10a37f";
+      piece.shape.forEach((row, r) => {
+        row.forEach((v, c) => {
+          if (v) ctx.fillRect((piece.x + c) * 15, (piece.y + r) * 15, 14, 14);
+        });
+      });
+    }, 250);
   }
 
-  function startPacman() {
-    ctx.fillStyle = "#000"; ctx.fillRect(0,0,300,300);
-    ctx.fillStyle = "#ffff00"; ctx.beginPath(); ctx.arc(150, 150, 20, 0.2 * Math.PI, 1.8 * Math.PI); ctx.lineTo(150, 150); ctx.fill();
+  // --- 3. PAC-MAN ---
+  function playPacman() {
+    let pac = {x: 120, y: 120, dirX: 2, dirY: 0};
+    let ghost = {x: 30, y: 30};
+
+    currentMoveHandler = (type) => {
+      if (type === 'UP') { pac.dirX = 0; pac.dirY = -2; }
+      if (type === 'DOWN') { pac.dirX = 0; pac.dirY = 2; }
+      if (type === 'LEFT') { pac.dirX = -2; pac.dirY = 0; }
+      if (type === 'RIGHT') { pac.dirX = 2; pac.dirY = 0; }
+    };
+
+    gameInterval = setInterval(() => {
+      pac.x += pac.dirX; pac.y += pac.dirY;
+      if (pac.x < 10) pac.x = 230; if (pac.x > 230) pac.x = 10;
+      if (pac.y < 10) pac.y = 230; if (pac.y > 230) pac.y = 10;
+
+      ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,240,240);
+      // Pacman
+      ctx.fillStyle = "#eab308";
+      ctx.beginPath(); ctx.arc(pac.x, pac.y, 10, 0.2 * Math.PI, 1.8 * Math.PI); ctx.lineTo(pac.x, pac.y); ctx.fill();
+      // Fantôme
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(ghost.x, ghost.y, 14, 14);
+    }, 50);
   }
 
-  function startSudoku() {
+  // --- 4. SUDOKU INTERACTIF 4x4 ---
+  function playSudoku() {
     gameCanvas.classList.add('hidden');
     sudokuGrid.classList.remove('hidden');
     sudokuGrid.innerHTML = '';
-    const nums = [1, 2, 3, 4, 3, 4, 1, 2, 2, 1, 4, 3, 4, 3, 2, 1];
-    nums.forEach(n => {
-      const cell = document.createElement('div');
-      cell.className = 'sudoku-cell';
-      cell.textContent = n;
-      sudokuGrid.appendChild(cell);
+
+    const board = [
+      [1, 0, 3, 4],
+      [3, 4, 0, 2],
+      [0, 1, 4, 3],
+      [4, 3, 2, 0]
+    ];
+
+    board.forEach((row, r) => {
+      row.forEach((val, c) => {
+        const cell = document.createElement('div');
+        cell.className = 'sudoku-cell' + (val !== 0 ? ' fixed' : '');
+        cell.textContent = val !== 0 ? val : '';
+        
+        if (val === 0) {
+          cell.addEventListener('click', () => {
+            let currentVal = parseInt(cell.textContent) || 0;
+            currentVal = (currentVal % 4) + 1;
+            cell.textContent = currentVal;
+          });
+        }
+        sudokuGrid.appendChild(cell);
+      });
     });
   }
 

@@ -7,16 +7,16 @@
   
   <meta name="apple-mobile-web-app-title" content="LaugraStok">
   <meta name="application-name" content="LaugraStok">
-  <meta name="theme-color" content="#090a0f">
+  <meta name="theme-color" content="#171717">
 
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Söhne,Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Écran d'accueil (Splash Screen) -->
+  <!-- Écran d'accueil -->
   <div id="splashScreen" class="splash-screen">
     <div class="splash-logo-box">
       <span class="splash-icon">🫶</span>
@@ -24,7 +24,7 @@
     <h1 class="splash-title">LAUGRASTOK</h1>
   </div>
 
-  <!-- Formulaire Profil Initial -->
+  <!-- Formulaire Profil -->
   <div id="profileModal" class="modal-overlay hidden">
     <div class="modal-card">
       <h2>Bienvenue ! 🚀</h2>
@@ -32,7 +32,7 @@
       
       <div class="form-group">
         <label>Ton prénom ou pseudo *</label>
-        <input type="text" id="userNameInput" placeholder="Ex: Rayan">
+        <input type="text" id="userNameInput" placeholder="Ex: Rass">
       </div>
 
       <div class="form-group">
@@ -40,25 +40,11 @@
         <input type="number" id="userAgeInput" placeholder="Ex: 17">
       </div>
 
-      <div class="form-group">
-        <label>Genre / Pronoms *</label>
-        <select id="userGenderInput">
-          <option value="il">Homme (Il)</option>
-          <option value="elle">Femme (Elle)</option>
-          <option value="autre">Autre</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Nom de ton crush / âme sœur (Optionnel)</label>
-        <input type="text" id="userCrushInput" placeholder="Prénom...">
-      </div>
-
       <button id="saveProfileBtn" class="primary-btn">Valider et Entrer</button>
     </div>
   </div>
 
-  <!-- COFFRE-FORT / IDÉES SECRÈTES (MODAL) -->
+  <!-- COFFRE-FORT / IDÉES SECRÈTES -->
   <div id="secretModal" class="modal-overlay hidden">
     <div class="modal-card modal-large">
       <div class="modal-header">
@@ -66,7 +52,6 @@
         <button id="closeSecretBtn" class="close-btn">✕</button>
       </div>
 
-      <!-- Étape 1 : Saisie ou Création du PIN -->
       <div id="pinArea">
         <p id="pinInstruction">Entre ton mot de passe à 6 chiffres :</p>
         <div class="pin-inputs">
@@ -75,16 +60,13 @@
         <button id="unlockSecretBtn" class="primary-btn mt-12">Déverrouiller</button>
       </div>
 
-      <!-- Étape 2 : Contenu du Coffre-fort -->
       <div id="secretContent" class="hidden">
         <p class="secret-desc">Ces idées ne sont visibles qu'avec ton code PIN.</p>
-        
-        <div class="apple-card add-idea-section compact">
+        <div class="gpt-card add-idea-section compact">
           <input type="text" id="secretTitle" placeholder="Titre secret...">
           <textarea id="secretText" placeholder="Écris ton idée secrète..." rows="2"></textarea>
           <button id="addSecretBtn" class="primary-btn mt-12">🔒 Sauvegarder dans le coffre</button>
         </div>
-
         <div id="secretIdeasList" class="ideas-grid"></div>
       </div>
     </div>
@@ -106,42 +88,42 @@
       </div>
 
       <div class="game-display-area">
-        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <canvas id="gameCanvas" width="240" height="240"></canvas>
         <div id="sudokuGrid" class="sudoku-grid hidden"></div>
       </div>
 
       <div class="game-controls">
-        <button id="startGameBtn" class="primary-btn">Démarrer la partie</button>
+        <button id="startGameBtn" class="primary-btn">Lancer / Recommencer</button>
         <div id="mobileDpad" class="d-pad">
           <button id="btnUp">▲</button>
           <div class="d-pad-row">
             <button id="btnLeft">◄</button>
-            <button id="btnDown">▼</button>
+            <button id="btnAction" class="btn-action">🔄</button>
             <button id="btnRight">►</button>
           </div>
+          <button id="btnDown">▼</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CONTENEUR PRINCIPAL -->
+  <!-- APP CONTAINER PRINCIPAL -->
   <div class="app-container">
     <header>
       <div>
-        <h1>LAUGRASTOK <span>v1.0</span></h1>
+        <h1>LAUGRASTOK <span class="version-tag">v1.0</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       
-      <!-- ICÔNES EN HAUT À DROITE -->
       <div class="header-actions">
-        <button id="secretToggle" class="icon-btn" title="Coffre-fort Idées Secrètes">🔒</button>
+        <button id="secretToggle" class="icon-btn" title="Idées Secrètes">🔒</button>
         <button id="gamesToggle" class="icon-btn" title="Mini-jeux">🎮</button>
-        <button id="themeToggle" class="icon-btn" title="Changer le thème">🌙</button>
+        <button id="themeToggle" class="icon-btn" title="Thème">🌙</button>
       </div>
     </header>
 
-    <!-- CREATION D'IDÉE PUBLIQUE (AVEC AUDIO + PHOTO/VIDÉO) -->
-    <section class="apple-card add-idea-section">
+    <!-- CRÉATION D'IDÉE (DESIGN CHATGPT + APPLE) -->
+    <section class="gpt-card add-idea-section">
       <div class="input-group">
         <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
         <select id="ideaCategory">
@@ -154,29 +136,31 @@
 
       <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
 
-      <!-- BARRE MÉDIA & VOCAL (STYLE WHATSAPP / APPLE) -->
+      <!-- BARRE MÉDIA PROPRE SANS CHEVAUCHEMENT -->
       <div class="media-bar">
-        <!-- Carré / Bulle Vocal -->
-        <button id="recordVoiceBtn" class="media-btn voice-square" title="Enregistrer un vocal">
-          <span class="mic-icon">🎙️</span>
-          <span id="recordTimer" class="record-timer hidden">00:00</span>
-        </button>
+        <div class="media-actions-row">
+          <button id="recordVoiceBtn" class="media-square-btn" title="Enregistrer un vocal">
+            🎙️ <span id="recordTimer" class="record-timer hidden">00:00</span>
+          </button>
 
-        <!-- Bouton Photo / Vidéo -->
-        <label for="cameraInput" class="media-btn camera-square" title="Prendre une photo ou vidéo">
-          📷 / 🎥
-          <input type="file" id="cameraInput" accept="image/*,video/*" capture="environment" hidden>
-        </label>
+          <label for="cameraInput" class="media-square-btn" title="Ajouter une Photo ou Vidéo">
+            📷 / 🎥
+            <input type="file" id="cameraInput" accept="image/*,video/*" capture="environment" hidden>
+          </label>
+        </div>
 
-        <span id="mediaStatus" class="media-status-text">Aucun fichier média ajouté</span>
+        <div id="mediaStatus" class="media-status-tag">Aucun média sélectionné</div>
       </div>
 
-      <button id="addBtn" class="primary-btn mt-12"><b>+</b> Sauvegarder l'idée</button>
+      <button id="addBtn" class="primary-btn mt-12">+ Sauvegarder l'idée</button>
     </section>
 
-    <!-- RECHERCHE ET FILTRES -->
+    <!-- FILTRES ET RECHERCHE -->
     <section class="filter-section">
-      <input type="text" id="searchInput" placeholder="🔍 Rechercher dans mes idées...">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Rechercher dans mes idées...">
+      </div>
       <div class="tags">
         <button class="tag-btn active" data-filter="all">Toutes</button>
         <button class="tag-btn" data-filter="app">Dev</button>

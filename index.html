@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LaugraStok 🚀</title>
   
-  <!-- Icône pour le navigateur et l'application -->
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-
-  <!-- Configuration pour la conversion en App (PWA) -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-title" content="LaugraStok">
   <meta name="application-name" content="LaugraStok">
@@ -24,7 +21,9 @@
 
   <!-- Écran d'accueil (Splash Screen) -->
   <div id="splashScreen" class="splash-screen">
-    <img src="icon.png" alt="LaugraStok" class="splash-logo">
+    <div class="splash-logo-box">
+      <span class="splash-icon">🫶</span>
+    </div>
     <h1 class="splash-title">LAUGRASTOK</h1>
   </div>
 
@@ -34,7 +33,6 @@
       <button id="themeToggle" class="icon-btn" title="Changer le thème">🌙</button>
     </header>
 
-    <!-- Zone pour ajouter une nouvelle idée -->
     <section class="add-idea-section">
       <div class="input-group">
         <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
@@ -49,7 +47,6 @@
       <button id="addBtn" class="primary-btn"><b>+</b> Sauvegarder l'idée</button>
     </section>
 
-    <!-- Filtres et recherche -->
     <section class="filter-section">
       <input type="text" id="searchInput" placeholder="🔍 Rechercher dans mes idées...">
       <div class="tags">
@@ -60,9 +57,7 @@
       </div>
     </section>
 
-    <!-- Liste des idées enregistrées -->
     <main id="ideasList" class="ideas-grid">
-      <!-- Les cartes d'idées apparaîtront ici -->
     </main>
   </div>
 

@@ -2,76 +2,203 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Application - Tetris & Coffre-fort</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LaugraStok 🚀</title>
+  
+  <meta name="apple-mobile-web-app-title" content="LaugraStok">
+  <meta name="application-name" content="LaugraStok">
+  <meta name="theme-color" content="#0d0d11">
+
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Bulles d'ambiance style Apple -->
-  <div class="bubbles-bg">
-    <div class="bubble b1"></div>
-    <div class="bubble b2"></div>
-    <div class="bubble b3"></div>
-    <div class="bubble b4"></div>
+  <!-- ARRIÈRE-PLAN BULLES DE LIQUIDE / APPLE GLASS -->
+  <div class="glass-bg">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
   </div>
 
-  <nav>
-    <button id="tab-tetris" class="nav-btn active" onclick="switchTab('tetris')">🎮 Tetris</button>
-    <button id="tab-vault" class="nav-btn" onclick="switchTab('vault')">🔒 Coffre-fort</button>
-  </nav>
+  <!-- Écran d'accueil -->
+  <div id="splashScreen" class="splash-screen">
+    <div class="splash-logo-box">
+      <span class="splash-icon">🫶</span>
+    </div>
+    <h1 class="splash-title">LAUGRASTOK</h1>
+  </div>
 
-  <!-- SECTION TETRIS (Page d'accueil par défaut) -->
-  <div id="tetris-section" class="section active">
-    <div class="glass-card tetris-container">
-      <div class="score-board">Score : <span id="score">0</span></div>
-      <canvas id="tetris" width="240" height="400"></canvas>
-      <button class="action-btn" onclick="resetGame()">Recommencer</button>
-      <div class="controls-hint">
-        Flèches : ⬅️ ➡️ Déplacer | ⬆️ Tourner | ⬇️ Accélérer
+  <!-- Formulaire Profil -->
+  <div id="profileModal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <h2>Bienvenue ! 🚀</h2>
+      <p>Configure ton profil pour commencer :</p>
+      
+      <div class="form-group">
+        <label for="userNameInput">Ton prénom ou pseudo *</label>
+        <input type="text" id="userNameInput" placeholder="Ex: Rass">
+      </div>
+
+      <div class="form-group">
+        <label for="userAgeInput">Ton âge *</label>
+        <input type="number" id="userAgeInput" placeholder="Ex: 17">
+      </div>
+
+      <button id="saveProfileBtn" class="primary-btn mt-12">Valider et Entrer</button>
+    </div>
+  </div>
+
+  <!-- COFFRE-FORT / IDÉES SECRÈTES -->
+  <div id="secretModal" class="modal-overlay hidden">
+    <div class="modal-card modal-large glass-card">
+      <div class="modal-header">
+        <h2>🔒 Idées Secrètes</h2>
+        <button id="closeSecretBtn" class="close-btn">✕</button>
+      </div>
+
+      <div id="pinArea">
+        <p id="pinInstruction">Entre ton mot de passe à 6 chiffres :</p>
+        <div class="pin-inputs">
+          <input type="password" maxlength="6" id="pinInput" placeholder="••••••" inputmode="numeric">
+        </div>
+        <button id="unlockSecretBtn" class="primary-btn mt-12">Déverrouiller</button>
+      </div>
+
+      <div id="secretContent" class="hidden">
+        <p class="secret-desc">Ces idées ne sont visibles qu'avec ton code PIN.</p>
+        <div class="glass-card add-idea-section compact">
+          <input type="text" id="secretTitle" placeholder="Titre secret...">
+          <textarea id="secretText" placeholder="Écris ton idée secrète..." rows="2"></textarea>
+          <button id="addSecretBtn" class="primary-btn mt-12">🔒 Sauvegarder dans le coffre</button>
+        </div>
+        <div id="secretIdeasList" class="ideas-grid"></div>
       </div>
     </div>
   </div>
 
-  <!-- SECTION COFFRE FORT (Séparée, accessible uniquement via l'onglet) -->
-  <div id="vault-section" class="section">
-    <!-- ÉCRAN DE VERROUILLAGE -->
-    <div id="vault-lock" class="glass-card vault-card">
-      <h2>Coffre-fort Sécurisé</h2>
-      <p class="subtitle">Entrez le code secret pour accéder à votre page</p>
-      
-      <div id="pin-display" class="pin-display">••••</div>
-      
-      <div class="keypad">
-        <button class="key-btn" onclick="pressPin('1')">1</button>
-        <button class="key-btn" onclick="pressPin('2')">2</button>
-        <button class="key-btn" onclick="pressPin('3')">3</button>
-        <button class="key-btn" onclick="pressPin('4')">4</button>
-        <button class="key-btn" onclick="pressPin('5')">5</button>
-        <button class="key-btn" onclick="pressPin('6')">6</button>
-        <button class="key-btn" onclick="pressPin('7')">7</button>
-        <button class="key-btn" onclick="pressPin('8')">8</button>
-        <button class="key-btn" onclick="pressPin('9')">9</button>
-        <button class="key-btn clear" onclick="clearPin()">C</button>
-        <button class="key-btn" onclick="pressPin('0')">0</button>
-        <button class="key-btn enter" onclick="unlockVault()">🔓</button>
-      </div>
-      <div id="vault-error" class="error-msg"></div>
-    </div>
-
-    <!-- PAGE SECRÈTE (Masquée jusqu'à la saisie du bon code) -->
-    <div id="vault-secret" class="glass-card secret-page hidden">
-      <h2>🔐 Espace Secret Déverrouillé</h2>
-      <p class="secret-sub">Bienvenue dans votre espace privé.</p>
-      
-      <div class="secret-content">
-        <h3>Vos Notes Confidentielles :</h3>
-        <p style="margin-top: 10px;">• Projet secret en cours...</p>
-        <p>• Identifiants de secours enregistrés.</p>
+  <!-- MODAL ARCADE -->
+  <div id="gamesModal" class="modal-overlay hidden">
+    <div class="modal-card modal-large glass-card">
+      <div class="modal-header">
+        <h2>🎮 Zone Arcade</h2>
+        <button id="closeGamesBtn" class="close-btn">✕</button>
       </div>
 
-      <button class="action-btn danger" onclick="lockVault()">🔒 Verrouiller le coffre</button>
+      <div class="games-tabs">
+        <button class="game-tab-btn active" data-game="tetris">🧱 Tetris Pro</button>
+        <button class="game-tab-btn" data-game="snake">🐍 Snake Pro</button>
+      </div>
+
+      <div class="game-score-bar">
+        <span>Score : <strong id="gameScore">0</strong></span>
+        <span>Meilleur : <strong id="gameHighScore">0</strong></span>
+      </div>
+
+      <div class="game-display-area">
+        <canvas id="gameCanvas" width="240" height="320"></canvas>
+      </div>
+
+      <div class="game-controls">
+        <button id="startGameBtn" class="primary-btn">▶️ Lancer / Recommencer</button>
+        
+        <div id="mobileDpad" class="d-pad">
+          <button id="btnUp" class="dpad-btn">▲</button>
+          <div class="d-pad-row">
+            <button id="btnLeft" class="dpad-btn">◄</button>
+            <button id="btnRotate" class="dpad-btn btn-action" title="Tourner">🔄</button>
+            <button id="btnRight" class="dpad-btn">►</button>
+          </div>
+          <button id="btnDown" class="dpad-btn">▼</button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- APP CONTAINER PRINCIPAL -->
+  <div class="app-container">
+    <header>
+      <div>
+        <h1>LAUGRASTOK <span class="version-tag">v1.2</span></h1>
+        <p id="userGreeting" class="user-greeting"></p>
+      </div>
+      
+      <div class="header-actions">
+        <button id="secretToggle" class="icon-btn glass-btn" title="Idées Secrètes">🔒</button>
+        <button id="gamesToggle" class="icon-btn glass-btn" title="Mini-jeux">🎮</button>
+        <button id="themeToggle" class="icon-btn glass-btn" title="Thème">🌙</button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD ET STATS -->
+    <section class="glass-card dashboard-widget">
+      <div class="dash-item">
+        <span class="dash-num" id="totalIdeasCount">0</span>
+        <span class="dash-label">Idées créées</span>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="dash-item">
+        <span class="dash-num" id="favIdeasCount">0</span>
+        <span class="dash-label">Favoris</span>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="dash-item">
+        <button id="randomPromptBtn" class="dash-action-btn">💡 Inspiration</button>
+      </div>
+    </section>
+
+    <!-- CRÉATION D'IDÉE EN VERRE TREMPÉ -->
+    <section class="glass-card add-idea-section">
+      <div class="input-group">
+        <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
+        <select id="ideaCategory">
+          <option value="app">💻 Dev</option>
+          <option value="story">✍️ Histoire</option>
+          <option value="video">🎥 Vidéo</option>
+          <option value="other">💡 Autre</option>
+        </select>
+      </div>
+
+      <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
+
+      <!-- BARRE MÉDIA PROPRE -->
+      <div class="media-bar">
+        <div class="media-actions-row">
+          <button id="recordVoiceBtn" class="media-square-btn" title="Enregistrer un vocal">
+            🎙️ <span id="recordTimer" class="record-timer hidden">00:00</span>
+          </button>
+
+          <label for="cameraInput" class="media-square-btn" title="Ajouter une Photo ou Vidéo">
+            📷 / 🎥
+            <input type="file" id="cameraInput" accept="image/*,video/*" capture="environment" hidden>
+          </label>
+        </div>
+
+        <div id="mediaStatus" class="media-status-tag">Aucun média ajouté</div>
+      </div>
+
+      <button id="addBtn" class="primary-btn mt-12">+ Sauvegarder l'idée</button>
+    </section>
+
+    <!-- FILTRES ET RECHERCHE -->
+    <section class="filter-section">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Rechercher dans mes idées...">
+      </div>
+      <div class="tags">
+        <button class="tag-btn active" data-filter="all">Toutes</button>
+        <button class="tag-btn" data-filter="fav">⭐ Favoris</button>
+        <button class="tag-btn" data-filter="app">Dev</button>
+        <button class="tag-btn" data-filter="story">Histoires</button>
+        <button class="tag-btn" data-filter="video">Vidéos</button>
+      </div>
+    </section>
+
+    <!-- LISTE DES IDÉES -->
+    <main id="ideasList" class="ideas-grid"></main>
   </div>
 
   <script src="script.js"></script>

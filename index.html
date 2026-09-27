@@ -19,16 +19,17 @@
 </head>
 <body>
 
-  <!-- Écran d'accueil avec la vraie icône -->
+  <!-- Écran d'accueil avec détection de l'icône -->
   <div id="splashScreen" class="splash-screen">
     <div class="splash-logo-box">
-      <img src="icon.png" alt="LaugraStok Icon" class="splash-img">
+      <img id="splashImg" src="icon.png" alt="LaugraStok" class="splash-img" onerror="handleImageError(this)">
+      <span id="splashFallback" class="splash-fallback" style="display: none;">🫶</span>
     </div>
     <h1 class="splash-title">LAUGRASTOK</h1>
   </div>
 
-  <!-- Image d'arrière-plan avec overlay -->
-  <div class="bg-overlay"></div>
+  <!-- Fond d'écran avec flou -->
+  <div class="bg-overlay" id="bgOverlay"></div>
 
   <div class="app-container">
     <header>

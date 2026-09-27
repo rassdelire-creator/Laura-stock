@@ -1,19 +1,19 @@
-/* --- GESTION DES ONGLETS --- */
+/* --- GESTION DES ONGLETS (Tetris activé par défaut) --- */
 function switchTab(tab) {
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
 
   if(tab === 'vault') {
-    document.querySelectorAll('.nav-btn')[0].classList.add('active');
+    document.getElementById('tab-vault').classList.add('active');
     document.getElementById('vault-section').classList.add('active');
   } else {
-    document.querySelectorAll('.nav-btn')[1].classList.add('active');
+    document.getElementById('tab-tetris').classList.add('active');
     document.getElementById('tetris-section').classList.add('active');
   }
 }
 
 /* --- LOGIQUE DU COFFRE-FORT --- */
-const CORRECT_PIN = "1234"; // Code d'accès par défaut
+const CORRECT_PIN = "1234";
 let currentInput = "";
 
 function pressPin(num) {
@@ -51,12 +51,11 @@ function lockVault() {
   document.getElementById('vault-lock').classList.remove('hidden');
 }
 
-/* --- LOGIQUE TETRIS CORRIGÉE --- */
+/* --- MOTEUR TETRIS CORRIGÉ --- */
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 context.scale(20, 20);
 
-// Matrice du plateau (12 colonnes x 20 lignes)
 const arena = createMatrix(12, 20);
 
 const colors = [
@@ -102,7 +101,6 @@ function createPiece(type) {
   }
 }
 
-// Fusion de la pièce bloquée dans la grille permanente
 function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
@@ -113,7 +111,6 @@ function merge(arena, player) {
   });
 }
 
-// Gestion des collisions avec les bords et le sol
 function collide(arena, player) {
   const m = player.matrix;
   const o = player.pos;
@@ -128,7 +125,6 @@ function collide(arena, player) {
   return false;
 }
 
-// Nettoyage SEULEMENT des lignes 100% remplies
 function arenaSweep() {
   let rowCount = 1;
   outer: for (let y = arena.length - 1; y >= 0; --y) {
@@ -151,9 +147,9 @@ function playerDrop() {
   player.pos.y++;
   if (collide(arena, player)) {
     player.pos.y--;
-    merge(arena, player); // On fixe la pièce au sol
-    playerReset();        // Nouvelle pièce
-    arenaSweep();         // Vérification des lignes
+    merge(arena, player);
+    playerReset();
+    arenaSweep();
   }
   dropCounter = 0;
 }
@@ -195,7 +191,6 @@ function playerReset() {
   player.pos.y = 0;
   player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
   
-  // Fin de partie
   if (collide(arena, player)) {
     arena.forEach(row => row.fill(0));
     player.score = 0;
@@ -250,7 +245,6 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
-// Écouteurs de clavier
 document.addEventListener('keydown', event => {
   if (!document.getElementById('tetris-section').classList.contains('active')) return;
 
@@ -260,6 +254,5 @@ document.addEventListener('keydown', event => {
   else if (event.key === 'ArrowUp') playerRotate();
 });
 
-// Démarrage du moteur
 playerReset();
 update();

@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   checkProfile();
 
-  // 3. MODE SOMBRE / CLAIR
+  // 3. THÈME SOMBRE / CLAIR
   const themeToggle = document.getElementById('themeToggle');
   let currentTheme = localStorage.getItem('laugra_theme') || 'dark';
   if (currentTheme === 'light') {
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     container.innerHTML = '';
     secretIdeas.forEach(i => {
       const card = document.createElement('div');
-      card.className = 'idea-card';
+      card.className = 'idea-card glass-card';
       card.innerHTML = `
         <div class="idea-header"><span class="idea-title">🔒 ${escapeHtml(i.title)}</span></div>
         <div class="idea-content">${escapeHtml(i.text)}</div>
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSecretIdeas();
   };
 
-  // 5. ENREGISTREUR VOCAL ET CAMERA
+  // 5. VOCAL ET APPAREIL PHOTO
   const recordVoiceBtn = document.getElementById('recordVoiceBtn');
   const recordTimer = document.getElementById('recordTimer');
   const cameraInput = document.getElementById('cameraInput');
@@ -176,11 +176,31 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-  // 6. GESTION IDÉES PUBLIQUES (ÉDITION + FAVORIS)
+  // 6. GESTION DES IDÉES + DASHBOARD + GENERATEUR D'INSPIRATION
   const addBtn = document.getElementById('addBtn');
   const ideasList = document.getElementById('ideasList');
   let ideas = JSON.parse(localStorage.getItem('laugra_ideas')) || [];
   let currentFilter = 'all';
+
+  function updateDashboard() {
+    document.getElementById('totalIdeasCount').textContent = ideas.length;
+    document.getElementById('favIdeasCount').textContent = ideas.filter(i => i.fav).length;
+  }
+
+  // SUGGESTIONS VIRALES QUAND ON MANQUE D'INSPIRATION
+  const prompts = [
+    "Une appli mobile qui prédit la météo selon l'humeur 🌤️",
+    "Un script de vidéo Short sur un mystère du Tokuverse 🎬",
+    "Un jeu 2D pixel art où le héros utilise la foudre ⚡",
+    "Un concept de chaîne YouTube spécialisé dans les théories Manga 📚",
+    "Une histoire fantasy d'un phénix ressuscité en détective 🔥"
+  ];
+
+  document.getElementById('randomPromptBtn').addEventListener('click', () => {
+    const random = prompts[Math.floor(Math.random() * prompts.length)];
+    document.getElementById('ideaTitle').value = "Idée Flash ⚡";
+    document.getElementById('ideaText').value = random;
+  });
 
   function renderIdeas() {
     ideasList.innerHTML = '';
@@ -196,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filtered.forEach(i => {
       const card = document.createElement('div');
-      card.className = 'idea-card';
+      card.className = 'idea-card glass-card';
       let mediaHTML = '';
       if (i.audio) mediaHTML += `<audio controls src="${i.audio}"></audio>`;
       if (i.media) {
@@ -218,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="idea-footer">
           <span>${i.date}</span>
           <div class="action-btns">
+            <button class="share-btn" onclick="shareIdea('${escapeHtml(i.title)}', '${escapeHtml(i.text)}')">📤 Partager</button>
             <button class="edit-btn" onclick="editIdea(${i.id})">✏️ Éditer</button>
             <button class="delete-btn" onclick="deleteIdea(${i.id})">Supprimer</button>
           </div>
@@ -225,6 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       ideasList.appendChild(card);
     });
+
+    updateDashboard();
   }
 
   addBtn.addEventListener('click', () => {
@@ -252,6 +275,18 @@ document.addEventListener('DOMContentLoaded', () => {
     currentAudioBase64 = currentMediaBase64 = currentMediaType = null;
     mediaStatus.textContent = "Aucun média ajouté";
   });
+
+  window.shareIdea = function(title, text) {
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        text: `🚀 Mon idée sur LaugraStok: "${title}" - ${text}`
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`🚀 Mon idée LaugraStok: "${title}" - ${text}`);
+      alert("Idée copiée dans le presse-papier !");
+    }
+  };
 
   window.toggleFav = function(id) {
     const idea = ideas.find(i => i.id === id);
@@ -291,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchInput').addEventListener('input', renderIdeas);
   renderIdeas();
 
-  // 7. MOTEUR ARCADE OPTIMISÉ (TETRIS & SNAKE UNICEMENT)
+  // 7. MOTEUR ARCADE JEUX (TETRIS FIX SOL + SNAKE RALENTI)
   const gamesToggle = document.getElementById('gamesToggle');
   const gamesModal = document.getElementById('gamesModal');
   const closeGamesBtn = document.getElementById('closeGamesBtn');
@@ -346,17 +381,17 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (currentGame === 'snake') startSnake();
   }
 
-  // --- TETRIS PRO ENGINE ---
+  // --- TETRIS AVEC SOL QUI FIXE LES BLOCS ---
   function startTetris() {
     const COLS = 10, ROWS = 16, BLOCK_SIZE = 24;
     let board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     
     const SHAPES = [
-      [[1,1,1,1]], // I
-      [[1,1],[1,1]], // O
-      [[0,1,0],[1,1,1]], // T
-      [[1,0,0],[1,1,1]], // L
-      [[0,0,1],[1,1,1]]  // J
+      [[1,1,1,1]],
+      [[1,1],[1,1]],
+      [[0,1,0],[1,1,1]],
+      [[1,0,0],[1,1,1]],
+      [[0,0,1],[1,1,1]]
     ];
     const COLORS = ['#10a37f', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'];
 
@@ -376,7 +411,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function collide(b, p) {
       for (let r = 0; r < p.shape.length; r++) {
         for (let c = 0; c < p.shape[r].length; c++) {
-          if (p.shape[r][c] && (b[p.y + r] && b[p.y + r][p.x + c]) !== 0) return true;
+          if (p.shape[r][c]) {
+            let newY = p.y + r;
+            let newX = p.x + c;
+            if (newY >= ROWS || newX < 0 || newX >= COLS || (newY >= 0 && b[newY][newX] !== 0)) {
+              return true;
+            }
+          }
         }
       }
       return false;
@@ -385,7 +426,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function merge(b, p) {
       p.shape.forEach((row, r) => {
         row.forEach((value, c) => {
-          if (value) b[p.y + r][p.x + c] = p.color;
+          if (value && (p.y + r) >= 0) {
+            b[p.y + r][p.x + c] = p.color;
+          }
         });
       });
     }
@@ -420,14 +463,13 @@ document.addEventListener('DOMContentLoaded', () => {
         clearLines();
         currentPiece = getRandomPiece();
         if (collide(board, currentPiece)) {
-          alert("Game Over ! Score: " + score);
+          alert("Game Over ! Score final : " + score);
           initGame();
         }
       }
       dropCounter = 0;
     }
 
-    // COMMANDES TACTILES ET D-PAD
     bindDpad((action) => {
       if (action === 'LEFT') { currentPiece.x--; if (collide(board, currentPiece)) currentPiece.x++; }
       if (action === 'RIGHT') { currentPiece.x++; if (collide(board, currentPiece)) currentPiece.x--; }
@@ -440,13 +482,12 @@ document.addEventListener('DOMContentLoaded', () => {
       lastTime = time;
       dropCounter += deltaTime;
 
-      if (dropCounter > 600) drop();
+      if (dropCounter > 500) drop();
 
-      // DESSIN
-      ctx.fillStyle = '#0d0d0d';
+      ctx.fillStyle = '#0a0b10';
       ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-      // Plateau
+      // Dessin des blocs au sol
       board.forEach((row, r) => {
         row.forEach((color, c) => {
           if (color) {
@@ -456,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // Pièce courante
+      // Dessin pièce qui tombe
       currentPiece.shape.forEach((row, r) => {
         row.forEach((val, c) => {
           if (val) {
@@ -472,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
     update();
   }
 
-  // --- SNAKE PRO ENGINE ---
+  // --- SNAKE AVEC VITESSE ADAPTÉE ET CONTROLABLE ---
   function startSnake() {
     const GRID_SIZE = 16, TILE = 15;
     let snake = [{x: 8, y: 8}];
@@ -488,14 +529,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function update(time = 0) {
-      if (time - lastTime > 120) {
+      // Ralenti à 180ms pour une vraie sensation de jeu fluide et maîtrisée
+      if (time - lastTime > 180) {
         lastTime = time;
         dir = nextDir;
         let head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
 
-        // Collision murs
         if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= 21) {
-          alert("Game Over ! Score: " + score);
+          alert("Game Over ! Score final : " + score);
           return initGame();
         }
 
@@ -508,14 +549,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      ctx.fillStyle = '#0d0d0d';
+      ctx.fillStyle = '#0a0b10';
       ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-      // Pomme
       ctx.fillStyle = '#ef4444';
       ctx.fillRect(food.x * TILE, food.y * TILE, TILE - 1, TILE - 1);
 
-      // Serpent
       ctx.fillStyle = '#10a37f';
       snake.forEach(part => ctx.fillRect(part.x * TILE, part.y * TILE, TILE - 1, TILE - 1));
 

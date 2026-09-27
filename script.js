@@ -1,3 +1,9 @@
+// --- SERVICE WORKER (Débloque l'installation mobile PWA) ---
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch((err) => console.log(err));
+}
+
+// --- DONNÉES ET VARIABLES ---
 let ideas = JSON.parse(localStorage.getItem('my_ideas')) || [];
 let currentFilter = 'all';
 
@@ -10,7 +16,7 @@ const searchInput = document.getElementById('searchInput');
 const tagBtns = document.querySelectorAll('.tag-btn');
 const themeToggle = document.getElementById('themeToggle');
 
-// Masquer le splash screen au chargement
+// --- GESTION DE L'ÉCRAN D'ACCUEIL (SPLASH SCREEN) ---
 window.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splashScreen');
   setTimeout(() => {
@@ -20,7 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 1400);
 });
 
-// Thème
+// --- THÈME (DARK / LIGHT) ---
 const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
@@ -33,7 +39,7 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', newTheme);
 });
 
-// Ajout
+// --- AJOUTER UNE IDÉE ---
 addBtn.addEventListener('click', () => {
   const title = ideaTitleInput.value.trim();
   const text = ideaTextInput.value.trim();
@@ -59,11 +65,13 @@ addBtn.addEventListener('click', () => {
   ideaTextInput.value = '';
 });
 
+// --- SUPPRIMER UNE IDÉE ---
 function deleteIdea(id) {
   ideas = ideas.filter(idea => idea.id !== id);
   saveAndRender();
 }
 
+// --- SAUVEGARDE ET RENDU ---
 function saveAndRender() {
   localStorage.setItem('my_ideas', JSON.stringify(ideas));
   renderIdeas();
@@ -119,6 +127,7 @@ function escapeHtml(str) {
   });
 }
 
+// --- RECHERCHE ET FILTRES ---
 searchInput.addEventListener('input', renderIdeas);
 
 tagBtns.forEach(btn => {

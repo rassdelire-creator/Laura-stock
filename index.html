@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Söhne,Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -72,36 +72,39 @@
     </div>
   </div>
 
-  <!-- MODAL MINI-JEUX -->
+  <!-- MODAL ARCADE (TETRIS & SNAKE) -->
   <div id="gamesModal" class="modal-overlay hidden">
     <div class="modal-card modal-large">
       <div class="modal-header">
-        <h2>🎮 Arcade Mini-Jeux</h2>
+        <h2>🎮 Zone Arcade</h2>
         <button id="closeGamesBtn" class="close-btn">✕</button>
       </div>
 
       <div class="games-tabs">
-        <button class="game-tab-btn active" data-game="snake">🐍 Snake</button>
-        <button class="game-tab-btn" data-game="tetris">🧱 Tetris</button>
-        <button class="game-tab-btn" data-game="pacman">🟡 Pac-Man</button>
-        <button class="game-tab-btn" data-game="sudoku">🔢 Sudoku</button>
+        <button class="game-tab-btn active" data-game="tetris">🧱 Tetris Pro</button>
+        <button class="game-tab-btn" data-game="snake">🐍 Snake Pro</button>
+      </div>
+
+      <div class="game-score-bar">
+        <span>Score : <strong id="gameScore">0</strong></span>
+        <span>Meilleur : <strong id="gameHighScore">0</strong></span>
       </div>
 
       <div class="game-display-area">
-        <canvas id="gameCanvas" width="240" height="240"></canvas>
-        <div id="sudokuGrid" class="sudoku-grid hidden"></div>
+        <canvas id="gameCanvas" width="240" height="320"></canvas>
       </div>
 
       <div class="game-controls">
-        <button id="startGameBtn" class="primary-btn">Lancer / Recommencer</button>
+        <button id="startGameBtn" class="primary-btn">▶️ Lancer / Recommencer</button>
+        
         <div id="mobileDpad" class="d-pad">
-          <button id="btnUp">▲</button>
+          <button id="btnUp" class="dpad-btn">▲</button>
           <div class="d-pad-row">
-            <button id="btnLeft">◄</button>
-            <button id="btnAction" class="btn-action">🔄</button>
-            <button id="btnRight">►</button>
+            <button id="btnLeft" class="dpad-btn">◄</button>
+            <button id="btnRotate" class="dpad-btn btn-action" title="Tourner">🔄</button>
+            <button id="btnRight" class="dpad-btn">►</button>
           </div>
-          <button id="btnDown">▼</button>
+          <button id="btnDown" class="dpad-btn">▼</button>
         </div>
       </div>
     </div>
@@ -111,7 +114,7 @@
   <div class="app-container">
     <header>
       <div>
-        <h1>LAUGRASTOK <span class="version-tag">v1.0</span></h1>
+        <h1>LAUGRASTOK <span class="version-tag">v1.1</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       
@@ -149,7 +152,7 @@
           </label>
         </div>
 
-        <div id="mediaStatus" class="media-status-tag">Aucun média sélectionné</div>
+        <div id="mediaStatus" class="media-status-tag">Aucun média ajouté</div>
       </div>
 
       <button id="addBtn" class="primary-btn mt-12">+ Sauvegarder l'idée</button>
@@ -163,6 +166,7 @@
       </div>
       <div class="tags">
         <button class="tag-btn active" data-filter="all">Toutes</button>
+        <button class="tag-btn" data-filter="fav">⭐ Favoris</button>
         <button class="tag-btn" data-filter="app">Dev</button>
         <button class="tag-btn" data-filter="story">Histoires</button>
         <button class="tag-btn" data-filter="video">Vidéos</button>

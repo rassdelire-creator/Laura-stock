@@ -1,8 +1,6 @@
-// --- STOCKAGE ET INITIALISATION ---
 let ideas = JSON.parse(localStorage.getItem('my_ideas')) || [];
 let currentFilter = 'all';
 
-// --- RÉCUPÉRATION DES ÉLÉMENTS DOM ---
 const ideaTitleInput = document.getElementById('ideaTitle');
 const ideaCategorySelect = document.getElementById('ideaCategory');
 const ideaTextInput = document.getElementById('ideaText');
@@ -12,7 +10,17 @@ const searchInput = document.getElementById('searchInput');
 const tagBtns = document.querySelectorAll('.tag-btn');
 const themeToggle = document.getElementById('themeToggle');
 
-// --- THÈME (DARK / LIGHT) ---
+// Masquer le splash screen au chargement
+window.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splashScreen');
+  setTimeout(() => {
+    if (splash) {
+      splash.classList.add('hidden');
+    }
+  }, 1400);
+});
+
+// Thème
 const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
@@ -25,14 +33,14 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', newTheme);
 });
 
-// --- AJOUTER UNE IDÉE ---
+// Ajout
 addBtn.addEventListener('click', () => {
   const title = ideaTitleInput.value.trim();
   const text = ideaTextInput.value.trim();
   const category = ideaCategorySelect.value;
 
   if (!title) {
-    alert("Veuillez donner un titre à votre idée !");
+    alert("Donne un titre à ton idée !");
     return;
   }
 
@@ -47,18 +55,15 @@ addBtn.addEventListener('click', () => {
   ideas.unshift(newIdea);
   saveAndRender();
 
-  // Réinitialiser les champs
   ideaTitleInput.value = '';
   ideaTextInput.value = '';
 });
 
-// --- SUPPRIMER UNE IDÉE ---
 function deleteIdea(id) {
   ideas = ideas.filter(idea => idea.id !== id);
   saveAndRender();
 }
 
-// --- SAUVEGARDER ET AFFICHER ---
 function saveAndRender() {
   localStorage.setItem('my_ideas', JSON.stringify(ideas));
   renderIdeas();
@@ -84,7 +89,7 @@ function renderIdeas() {
   if (filtered.length === 0) {
     ideasList.innerHTML = `
       <div class="empty-state">
-        <p>Aucune idée enregistrée pour le moment.</p>
+        <p>Aucune idée enregistrée.</p>
       </div>
     `;
     return;
@@ -114,7 +119,6 @@ function escapeHtml(str) {
   });
 }
 
-// --- FILTRES ET RECHERCHE ---
 searchInput.addEventListener('input', renderIdeas);
 
 tagBtns.forEach(btn => {
@@ -126,15 +130,4 @@ tagBtns.forEach(btn => {
   });
 });
 
-// --- MASQUER L'ÉCRAN D'ACCUEIL APRÈS CHARGEMENT ---
-window.addEventListener('load', () => {
-  const splash = document.getElementById('splashScreen');
-  setTimeout(() => {
-    if (splash) {
-      splash.classList.add('hidden');
-    }
-  }, 1500); // S'affiche pendant 1,5 seconde
-});
-
-// Initialisation
 renderIdeas();

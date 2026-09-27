@@ -1,23 +1,23 @@
 :root {
   --bg: #090a0f;
-  --panel: #121520;
-  --border: #23293e;
+  --panel: rgba(18, 21, 32, 0.85);
+  --border: rgba(255, 255, 255, 0.12);
   --text: #e2e8f0;
-  --text-muted: #64748b;
+  --text-muted: #94a3b8;
   --accent: #00f0ff;
-  --accent-glow: rgba(0, 240, 255, 0.15);
+  --accent-glow: rgba(0, 240, 255, 0.2);
   --danger: #ff0055;
   --font: 'Space Grotesk', system-ui, -apple-system, sans-serif;
 }
 
 [data-theme="light"] {
   --bg: #f4f6fb;
-  --panel: #ffffff;
-  --border: #e2e8f0;
+  --panel: rgba(255, 255, 255, 0.88);
+  --border: rgba(0, 0, 0, 0.1);
   --text: #0f172a;
   --text-muted: #64748b;
   --accent: #0066ff;
-  --accent-glow: rgba(0, 102, 255, 0.12);
+  --accent-glow: rgba(0, 102, 255, 0.15);
   --danger: #e11d48;
 }
 
@@ -36,12 +36,30 @@ body {
   display: flex;
   justify-content: center;
   transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
   overflow-x: hidden;
+}
+
+/* FOND D'ÉCRAN AVEC L'ICÔNE FLOUTÉE */
+.bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('icon.png');
+  background-size: cover;
+  background-position: center;
+  filter: blur(25px) brightness(0.25);
+  transform: scale(1.1);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .app-container {
   width: 100%;
   max-width: 680px;
+  z-index: 1;
 }
 
 header {
@@ -73,14 +91,17 @@ h1 span {
   border-radius: 8px;
   cursor: pointer;
   font-size: 1.1rem;
+  backdrop-filter: blur(10px);
 }
 
 .add-idea-section {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 18px;
   margin-bottom: 25px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.37);
 }
 
 .input-group {
@@ -91,11 +112,11 @@ h1 span {
 
 input[type="text"], select, textarea {
   width: 100%;
-  background: var(--bg);
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border);
   color: var(--text);
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-family: var(--font);
   font-size: 0.95rem;
   outline: none;
@@ -121,7 +142,7 @@ textarea {
   color: #000;
   border: none;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-family: var(--font);
   font-weight: 700;
   font-size: 0.95rem;
@@ -149,6 +170,7 @@ textarea {
   font-family: var(--font);
   font-size: 0.85rem;
   cursor: pointer;
+  backdrop-filter: blur(8px);
 }
 
 .tag-btn.active {
@@ -166,8 +188,9 @@ textarea {
 .idea-card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 16px;
+  backdrop-filter: blur(12px);
 }
 
 .idea-header {
@@ -184,9 +207,9 @@ textarea {
 
 .badge {
   font-size: 0.75rem;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--bg);
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
 }
 
@@ -219,9 +242,10 @@ textarea {
   color: var(--text-muted);
   border: 1px dashed var(--border);
   border-radius: 12px;
+  background: var(--panel);
 }
 
-/* ÉCRAN D'ACCUEIL (SPLASH SCREEN PARFAITEMENT CENTRÉ) */
+/* ÉCRAN D'ACCUEIL (SPLASH SCREEN AVEC L'IMAGE DE L'ICÔNE) */
 .splash-screen {
   position: fixed;
   top: 0;
@@ -238,20 +262,18 @@ textarea {
 }
 
 .splash-logo-box {
-  width: 110px;
-  height: 110px;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  border: 2px solid var(--accent);
+  width: 130px;
+  height: 130px;
   border-radius: 28px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+  overflow: hidden;
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
   animation: pulseGlow 1.5s infinite alternate ease-in-out;
 }
 
-.splash-icon {
-  font-size: 3rem;
+.splash-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .splash-title {
@@ -271,10 +293,10 @@ textarea {
 @keyframes pulseGlow {
   from {
     transform: scale(0.95);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
   }
   to {
     transform: scale(1.05);
-    box-shadow: 0 0 35px rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.7);
   }
 }

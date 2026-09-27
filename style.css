@@ -40,7 +40,7 @@ body {
   overflow-x: hidden;
 }
 
-/* FOND D'ÉCRAN AVEC L'ICÔNE FLOUTÉE */
+/* FOND D'ÉCRAN FLOUTÉ */
 .bg-overlay {
   position: fixed;
   top: 0;
@@ -245,7 +245,7 @@ textarea {
   background: var(--panel);
 }
 
-/* ÉCRAN D'ACCUEIL (SPLASH SCREEN AVEC L'IMAGE DE L'ICÔNE) */
+/* ÉCRAN D'ACCUEIL (SPLASH SCREEN) */
 .splash-screen {
   position: fixed;
   top: 0;
@@ -268,12 +268,20 @@ textarea {
   overflow: hidden;
   box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
   animation: pulseGlow 1.5s infinite alternate ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #121520;
 }
 
 .splash-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.splash-fallback {
+  font-size: 3rem;
 }
 
 .splash-title {

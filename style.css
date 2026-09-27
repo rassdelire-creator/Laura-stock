@@ -1,26 +1,26 @@
 :root {
-  --bg: #171717;
-  --card-bg: #212121;
-  --input-bg: #2f2f2f;
-  --border: #383838;
-  --text: #ececec;
-  --text-muted: #b4b4b4;
+  --bg: #0b0c10;
+  --card-bg: rgba(26, 27, 35, 0.65);
+  --input-bg: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #ffffff;
+  --text-muted: #a0a5b5;
   --accent: #10a37f;
-  --accent-hover: #1a7f64;
+  --accent-hover: #16be95;
   --star-color: #f59e0b;
   --danger: #ef4444;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 [data-theme="light"] {
-  --bg: #f9f9fb;
-  --card-bg: #ffffff;
-  --input-bg: #f4f4f6;
-  --border: #e5e5e7;
-  --text: #0d0d0d;
-  --text-muted: #6e6e73;
+  --bg: #f2f4f8;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --input-bg: rgba(0, 0, 0, 0.04);
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #0f172a;
+  --text-muted: #64748b;
   --accent: #10a37f;
-  --accent-hover: #0e8a6c;
+  --accent-hover: #0d8a6c;
   --star-color: #d97706;
   --danger: #e53e3e;
 }
@@ -40,12 +40,77 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* EFFET LIQUID GLASS & BULLES D'EAU / APPLE STYLES */
+.glass-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  animation: floatBubble 12s infinite ease-in-out alternate;
+}
+
+.bubble-1 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, #10a37f, #3b82f6);
+  top: -40px;
+  left: -50px;
+}
+
+.bubble-2 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, #8b5cf6, #ec4899);
+  bottom: 10%;
+  right: -60px;
+  animation-delay: -4s;
+}
+
+.bubble-3 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, #f59e0b, #ef4444);
+  top: 45%;
+  left: 20%;
+  animation-delay: -7s;
+}
+
+@keyframes floatBubble {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-40px) scale(1.1); }
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  margin-bottom: 16px;
 }
 
 .app-container {
   width: 100%;
   max-width: 480px;
+  z-index: 1;
 }
 
 header {
@@ -71,10 +136,11 @@ h1 {
 
 .version-tag {
   font-size: 0.65rem;
-  background: rgba(16, 163, 127, 0.2);
+  background: rgba(16, 163, 127, 0.25);
   color: var(--accent);
   padding: 2px 6px;
   border-radius: 6px;
+  border: 1px solid rgba(16, 163, 127, 0.3);
 }
 
 .user-greeting {
@@ -85,30 +151,70 @@ h1 {
 
 .icon-btn {
   background: var(--card-bg);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   color: var(--text);
   width: 38px;
   height: 38px;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .icon-btn:hover {
-  background: var(--input-bg);
+  transform: scale(1.05);
 }
 
-.gpt-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* WIDGET DASHBOARD POUR COMBLER LE VIDE */
+.dashboard-widget {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+}
+
+.dash-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dash-num {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dash-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.dash-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
+
+.dash-action-btn {
+  background: rgba(16, 163, 127, 0.2);
+  color: var(--accent);
+  border: 1px solid rgba(16, 163, 127, 0.3);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dash-action-btn:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 .input-group {
@@ -123,7 +229,7 @@ input[type="text"], input[type="number"], input[type="password"], select, textar
   border: 1px solid var(--border);
   color: var(--text);
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: var(--font);
   font-size: 0.9rem;
   outline: none;
@@ -198,16 +304,16 @@ textarea {
   color: #ffffff;
   border: none;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: var(--font);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.primary-btn:hover {
-  background: var(--accent-hover);
+.primary-btn:active {
+  transform: scale(0.98);
 }
 
 .mt-12 {
@@ -247,6 +353,7 @@ textarea {
 
 .tag-btn {
   background: var(--card-bg);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   color: var(--text-muted);
   padding: 6px 14px;
@@ -262,7 +369,7 @@ textarea {
   border-color: var(--accent);
 }
 
-/* CARTES D'IDÉES */
+/* CARTES D'IDÉES EN VERRE */
 .ideas-grid {
   display: flex;
   flex-direction: column;
@@ -270,10 +377,6 @@ textarea {
 }
 
 .idea-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px;
   position: relative;
 }
 
@@ -307,6 +410,7 @@ textarea {
   padding: 3px 8px;
   border-radius: 6px;
   background: var(--input-bg);
+  border: 1px solid var(--border);
   color: var(--text-muted);
 }
 
@@ -322,7 +426,7 @@ textarea {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-top: 8px;
 }
 
@@ -346,17 +450,18 @@ audio {
   gap: 10px;
 }
 
-.edit-btn, .delete-btn {
+.share-btn, .edit-btn, .delete-btn {
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: 0.8rem;
 }
 
+.share-btn { color: #3b82f6; }
 .edit-btn { color: var(--accent); }
 .delete-btn { color: var(--danger); }
 
-/* MODALES & JEUX ARCADE */
+/* MODALES & JEUX */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -364,7 +469,7 @@ audio {
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -377,10 +482,6 @@ audio {
 }
 
 .modal-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 20px;
-  border-radius: 18px;
   width: 100%;
   max-width: 380px;
   max-height: 90vh;
@@ -409,7 +510,6 @@ audio {
   margin-top: 10px;
 }
 
-/* ARCADE STYLES */
 .games-tabs {
   display: flex;
   gap: 8px;
@@ -446,16 +546,16 @@ audio {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #000;
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 14px;
   padding: 10px;
   margin-bottom: 12px;
 }
 
 canvas {
   background: #0d0d0d;
-  border-radius: 6px;
-  border: 1px solid #282828;
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 .d-pad {
@@ -483,7 +583,6 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  user-select: none;
 }
 
 .dpad-btn:active {
@@ -512,7 +611,7 @@ canvas {
   height: 70px;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 18px;
   display: flex;
   justify-content: center;
   align-items: center;

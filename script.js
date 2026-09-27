@@ -1,6 +1,24 @@
-// --- SERVICE WORKER (Débloque l'installation mobile PWA) ---
+// --- SERVICE WORKER ---
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch((err) => console.log(err));
+}
+
+// --- GESTION DES FORMATS D'IMAGE ---
+const possibleExtensions = ['icon.jpg', 'icon.jpeg', 'icon.png', 'icon.webp', 'icon.PNG'];
+let currentExtensionIndex = 0;
+
+function handleImageError(imgElement) {
+  currentExtensionIndex++;
+  if (currentExtensionIndex < possibleExtensions.length) {
+    const nextSrc = possibleExtensions[currentExtensionIndex];
+    imgElement.src = nextSrc;
+    const bgOverlay = document.getElementById('bgOverlay');
+    if (bgOverlay) bgOverlay.style.backgroundImage = `url('${nextSrc}')`;
+  } else {
+    imgElement.style.display = 'none';
+    const fallback = document.getElementById('splashFallback');
+    if (fallback) fallback.style.display = 'block';
+  }
 }
 
 // --- DONNÉES ET VARIABLES ---
@@ -16,7 +34,7 @@ const searchInput = document.getElementById('searchInput');
 const tagBtns = document.querySelectorAll('.tag-btn');
 const themeToggle = document.getElementById('themeToggle');
 
-// --- GESTION DE L'ÉCRAN D'ACCUEIL (SPLASH SCREEN) ---
+// --- SPLASH SCREEN ---
 window.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splashScreen');
   setTimeout(() => {
@@ -26,7 +44,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 1400);
 });
 
-// --- THÈME (DARK / LIGHT) ---
+// --- THÈME ---
 const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';

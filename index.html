@@ -3,22 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Application - Coffre-fort & Tetris</title>
+  <title>Application - Tetris & Coffre-fort</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- Bulles d'ambiance style Apple -->
+  <div class="bubbles-bg">
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="bubble b4"></div>
+  </div>
+
   <nav>
-    <button class="nav-btn active" onclick="switchTab('vault')">🔒 Coffre-fort</button>
-    <button class="nav-btn" onclick="switchTab('tetris')">🎮 Tetris</button>
+    <button id="tab-tetris" class="nav-btn active" onclick="switchTab('tetris')">🎮 Tetris</button>
+    <button id="tab-vault" class="nav-btn" onclick="switchTab('vault')">🔒 Coffre-fort</button>
   </nav>
 
-  <!-- SECTION COFFRE FORT -->
-  <div id="vault-section" class="section active">
+  <!-- SECTION TETRIS (Page d'accueil par défaut) -->
+  <div id="tetris-section" class="section active">
+    <div class="glass-card tetris-container">
+      <div class="score-board">Score : <span id="score">0</span></div>
+      <canvas id="tetris" width="240" height="400"></canvas>
+      <button class="action-btn" onclick="resetGame()">Recommencer</button>
+      <div class="controls-hint">
+        Flèches : ⬅️ ➡️ Déplacer | ⬆️ Tourner | ⬇️ Accélérer
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION COFFRE FORT (Séparée, accessible uniquement via l'onglet) -->
+  <div id="vault-section" class="section">
     <!-- ÉCRAN DE VERROUILLAGE -->
-    <div id="vault-lock" class="vault-card">
+    <div id="vault-lock" class="glass-card vault-card">
       <h2>Coffre-fort Sécurisé</h2>
-      <p style="color: #94a3b8; font-size: 0.9rem;">Entrez le code secret pour accéder à votre page</p>
+      <p class="subtitle">Entrez le code secret pour accéder à votre page</p>
       
       <div id="pin-display" class="pin-display">••••</div>
       
@@ -39,10 +59,10 @@
       <div id="vault-error" class="error-msg"></div>
     </div>
 
-    <!-- PAGE SECRÈTE -->
-    <div id="vault-secret" class="secret-page hidden">
+    <!-- PAGE SECRÈTE (Masquée jusqu'à la saisie du bon code) -->
+    <div id="vault-secret" class="glass-card secret-page hidden">
       <h2>🔐 Espace Secret Déverrouillé</h2>
-      <p style="color: #6ee7b7;">Bienvenue dans votre espace privé.</p>
+      <p class="secret-sub">Bienvenue dans votre espace privé.</p>
       
       <div class="secret-content">
         <h3>Vos Notes Confidentielles :</h3>
@@ -50,19 +70,7 @@
         <p>• Identifiants de secours enregistrés.</p>
       </div>
 
-      <button class="nav-btn" style="background: var(--danger); border: none;" onclick="lockVault()">🔒 Verrouiller le coffre</button>
-    </div>
-  </div>
-
-  <!-- SECTION TETRIS -->
-  <div id="tetris-section" class="section">
-    <div class="tetris-container">
-      <div class="score-board">Score : <span id="score">0</span></div>
-      <canvas id="tetris" width="240" height="400"></canvas>
-      <button class="nav-btn" onclick="resetGame()">Recommencer</button>
-      <div class="controls-hint">
-        Flèches : ⬅️ ➡️ Déplacer | ⬆️ Tourner | ⬇️ Accélérer
-      </div>
+      <button class="action-btn danger" onclick="lockVault()">🔒 Verrouiller le coffre</button>
     </div>
   </div>
 

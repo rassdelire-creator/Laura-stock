@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('splashScreen')?.classList.add('hidden');
   }, 800);
 
-  // 2. PROFIL
+  // 2. PROFIL USER
   const profileModal = document.getElementById('profileModal');
   const saveProfileBtn = document.getElementById('saveProfileBtn');
   const userGreeting = document.getElementById('userGreeting');
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   checkProfile();
 
-  // 3. THÈME SOMBRE / CLAIR
+  // 3. MODE SOMBRE / CLAIR
   const themeToggle = document.getElementById('themeToggle');
   let currentTheme = localStorage.getItem('laugra_theme') || 'dark';
   if (currentTheme === 'light') {
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSecretIdeas();
   };
 
-  // 5. VOCAL ET CAMERA
+  // 5. ENREGISTREUR VOCAL ET CAMERA
   const recordVoiceBtn = document.getElementById('recordVoiceBtn');
   const recordTimer = document.getElementById('recordTimer');
   const cameraInput = document.getElementById('cameraInput');
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
           reader.readAsDataURL(blob);
           reader.onloadend = () => {
             currentAudioBase64 = reader.result;
-            mediaStatus.textContent = "🎙️ Vocal enregistré";
+            mediaStatus.textContent = "🎙️ Vocal prêt";
           };
         };
         mediaRecorder.start();
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
           secondsRecorded++;
           recordTimer.textContent = String(secondsRecorded).padStart(2, '0') + 's';
         }, 1000);
-      } catch (err) { alert("Accès micro refusé."); }
+      } catch (err) { alert("Accès au micro refusé."); }
     } else {
       mediaRecorder.stop();
       isRecording = false;
@@ -176,16 +176,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-  // 6. GESTION DES IDÉES PUBLIQUES
+  // 6. GESTION IDÉES PUBLIQUES (ÉDITION + FAVORIS)
   const addBtn = document.getElementById('addBtn');
   const ideasList = document.getElementById('ideasList');
   let ideas = JSON.parse(localStorage.getItem('laugra_ideas')) || [];
+  let currentFilter = 'all';
 
   function renderIdeas() {
     ideasList.innerHTML = '';
     const search = document.getElementById('searchInput').value.toLowerCase();
     
-    ideas.filter(i => i.title.toLowerCase().includes(search)).forEach(i => {
+    let filtered = ideas.filter(i => i.title.toLowerCase().includes(search) || i.text.toLowerCase().includes(search));
+
+    if (currentFilter === 'fav') {
+      filtered = filtered.filter(i => i.fav);
+    } else if (currentFilter !== 'all') {
+      filtered = filtered.filter(i => i.category === currentFilter);
+    }
+
+    filtered.forEach(i => {
       const card = document.createElement('div');
       card.className = 'idea-card';
       let mediaHTML = '';
@@ -198,14 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       card.innerHTML = `
         <div class="idea-header">
-          <span class="idea-title">${escapeHtml(i.title)}</span>
+          <span class="idea-title">
+            <span class="fav-star ${i.fav ? 'active' : ''}" onclick="toggleFav(${i.id})">★</span>
+            ${escapeHtml(i.title)}
+          </span>
           <span class="badge">${i.category}</span>
         </div>
         ${i.text ? `<div class="idea-content">${escapeHtml(i.text)}</div>` : ''}
         ${mediaHTML}
         <div class="idea-footer">
           <span>${i.date}</span>
-          <button class="delete-btn" onclick="deleteIdea(${i.id})">Supprimer</button>
+          <div class="action-btns">
+            <button class="edit-btn" onclick="editIdea(${i.id})">✏️ Éditer</button>
+            <button class="delete-btn" onclick="deleteIdea(${i.id})">Supprimer</button>
+          </div>
         </div>
       `;
       ideasList.appendChild(card);
@@ -225,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       audio: currentAudioBase64,
       media: currentMediaBase64,
       mediaType: currentMediaType,
+      fav: false,
       date: new Date().toLocaleDateString('fr-FR')
     });
 
@@ -234,8 +250,28 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ideaTitle').value = '';
     document.getElementById('ideaText').value = '';
     currentAudioBase64 = currentMediaBase64 = currentMediaType = null;
-    mediaStatus.textContent = "Aucun média sélectionné";
+    mediaStatus.textContent = "Aucun média ajouté";
   });
+
+  window.toggleFav = function(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (idea) {
+      idea.fav = !idea.fav;
+      localStorage.setItem('laugra_ideas', JSON.stringify(ideas));
+      renderIdeas();
+    }
+  };
+
+  window.editIdea = function(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (!idea) return;
+    const newText = prompt("Modifier le contenu de l'idée :", idea.text);
+    if (newText !== null) {
+      idea.text = newText.trim();
+      localStorage.setItem('laugra_ideas', JSON.stringify(ideas));
+      renderIdeas();
+    }
+  };
 
   window.deleteIdea = function(id) {
     ideas = ideas.filter(i => i.id !== id);
@@ -243,23 +279,38 @@ document.addEventListener('DOMContentLoaded', () => {
     renderIdeas();
   };
 
+  document.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderIdeas();
+    });
+  });
+
   document.getElementById('searchInput').addEventListener('input', renderIdeas);
   renderIdeas();
 
-  // 7. ARCADE - JEUX JOUABLES (SNAKE, TETRIS, PACMAN, SUDOKU)
+  // 7. MOTEUR ARCADE OPTIMISÉ (TETRIS & SNAKE UNICEMENT)
   const gamesToggle = document.getElementById('gamesToggle');
   const gamesModal = document.getElementById('gamesModal');
   const closeGamesBtn = document.getElementById('closeGamesBtn');
   const gameCanvas = document.getElementById('gameCanvas');
-  const sudokuGrid = document.getElementById('sudokuGrid');
   const ctx = gameCanvas.getContext('2d');
+  const gameScoreEl = document.getElementById('gameScore');
+  const gameHighScoreEl = document.getElementById('gameHighScore');
 
-  let currentGame = 'snake', gameInterval;
+  let currentGame = 'tetris', gameLoop, score = 0;
+  let highScores = JSON.parse(localStorage.getItem('laugra_high_scores')) || { tetris: 0, snake: 0 };
 
-  gamesToggle.addEventListener('click', () => gamesModal.classList.remove('hidden'));
+  gamesToggle.addEventListener('click', () => {
+    gamesModal.classList.remove('hidden');
+    initGame();
+  });
+
   closeGamesBtn.addEventListener('click', () => {
     gamesModal.classList.add('hidden');
-    clearInterval(gameInterval);
+    stopGame();
   });
 
   document.querySelectorAll('.game-tab-btn').forEach(btn => {
@@ -273,142 +324,213 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('startGameBtn').addEventListener('click', () => initGame());
 
+  function updateScore(newScore) {
+    score = newScore;
+    gameScoreEl.textContent = score;
+    if (score > highScores[currentGame]) {
+      highScores[currentGame] = score;
+      localStorage.setItem('laugra_high_scores', JSON.stringify(highScores));
+    }
+    gameHighScoreEl.textContent = highScores[currentGame];
+  }
+
+  function stopGame() {
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    gameLoop = null;
+  }
+
   function initGame() {
-    clearInterval(gameInterval);
-    gameCanvas.classList.remove('hidden');
-    sudokuGrid.classList.add('hidden');
-
-    if (currentGame === 'snake') playSnake();
-    else if (currentGame === 'tetris') playTetris();
-    else if (currentGame === 'pacman') playPacman();
-    else if (currentGame === 'sudoku') playSudoku();
+    stopGame();
+    updateScore(0);
+    if (currentGame === 'tetris') startTetris();
+    else if (currentGame === 'snake') startSnake();
   }
 
-  // CONTROLES D-PAD DYNAMIQUES
-  let dirAction = () => {};
-  document.getElementById('btnUp').onclick = () => onDpad('UP');
-  document.getElementById('btnDown').onclick = () => onDpad('DOWN');
-  document.getElementById('btnLeft').onclick = () => onDpad('LEFT');
-  document.getElementById('btnRight').onclick = () => onDpad('RIGHT');
-  document.getElementById('btnAction').onclick = () => onDpad('ACTION');
+  // --- TETRIS PRO ENGINE ---
+  function startTetris() {
+    const COLS = 10, ROWS = 16, BLOCK_SIZE = 24;
+    let board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+    
+    const SHAPES = [
+      [[1,1,1,1]], // I
+      [[1,1],[1,1]], // O
+      [[0,1,0],[1,1,1]], // T
+      [[1,0,0],[1,1,1]], // L
+      [[0,0,1],[1,1,1]]  // J
+    ];
+    const COLORS = ['#10a37f', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'];
 
-  let currentMoveHandler = null;
-  function onDpad(type) {
-    if (currentMoveHandler) currentMoveHandler(type);
-  }
+    let currentPiece = getRandomPiece();
+    let lastTime = 0, dropCounter = 0;
 
-  // --- 1. SNAKE ---
-  function playSnake() {
-    let snake = [{x: 8, y: 8}];
-    let dir = {x: 1, y: 0};
-    let food = {x: 3, y: 3};
+    function getRandomPiece() {
+      const idx = Math.floor(Math.random() * SHAPES.length);
+      return {
+        shape: SHAPES[idx],
+        color: COLORS[idx],
+        x: Math.floor(COLS / 2) - 1,
+        y: 0
+      };
+    }
 
-    currentMoveHandler = (type) => {
-      if (type === 'UP' && dir.y === 0) dir = {x: 0, y: -1};
-      if (type === 'DOWN' && dir.y === 0) dir = {x: 0, y: 1};
-      if (type === 'LEFT' && dir.x === 0) dir = {x: -1, y: 0};
-      if (type === 'RIGHT' && dir.x === 0) dir = {x: 1, y: 0};
-    };
-
-    gameInterval = setInterval(() => {
-      let head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
-      if (head.x < 0 || head.x >= 16 || head.y < 0 || head.y >= 16) return initGame();
-      
-      snake.unshift(head);
-      if (head.x === food.x && head.y === food.y) {
-        food = {x: Math.floor(Math.random()*16), y: Math.floor(Math.random()*16)};
-      } else snake.pop();
-
-      ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,240,240);
-      ctx.fillStyle = "#ef4444"; ctx.fillRect(food.x*15, food.y*15, 14, 14);
-      ctx.fillStyle = "#10a37f";
-      snake.forEach(p => ctx.fillRect(p.x*15, p.y*15, 14, 14));
-    }, 120);
-  }
-
-  // --- 2. TETRIS ---
-  function playTetris() {
-    let grid = Array(16).fill().map(() => Array(10).fill(0));
-    let piece = {x: 4, y: 0, shape: [[1,1],[1,1]]};
-
-    currentMoveHandler = (type) => {
-      if (type === 'LEFT' && piece.x > 0) piece.x--;
-      if (type === 'RIGHT' && piece.x < 8) piece.x++;
-      if (type === 'DOWN') piece.y++;
-    };
-
-    gameInterval = setInterval(() => {
-      piece.y++;
-      if (piece.y > 14) {
-        piece.y = 0; piece.x = 4;
+    function collide(b, p) {
+      for (let r = 0; r < p.shape.length; r++) {
+        for (let c = 0; c < p.shape[r].length; c++) {
+          if (p.shape[r][c] && (b[p.y + r] && b[p.y + r][p.x + c]) !== 0) return true;
+        }
       }
+      return false;
+    }
 
-      ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,240,240);
-      ctx.fillStyle = "#10a37f";
-      piece.shape.forEach((row, r) => {
-        row.forEach((v, c) => {
-          if (v) ctx.fillRect((piece.x + c) * 15, (piece.y + r) * 15, 14, 14);
+    function merge(b, p) {
+      p.shape.forEach((row, r) => {
+        row.forEach((value, c) => {
+          if (value) b[p.y + r][p.x + c] = p.color;
         });
       });
-    }, 250);
-  }
+    }
 
-  // --- 3. PAC-MAN ---
-  function playPacman() {
-    let pac = {x: 120, y: 120, dirX: 2, dirY: 0};
-    let ghost = {x: 30, y: 30};
+    function rotate(p) {
+      const rotated = p.shape[0].map((_, i) => p.shape.map(row => row[i]).reverse());
+      const oldShape = p.shape;
+      p.shape = rotated;
+      if (collide(board, p)) p.shape = oldShape;
+    }
 
-    currentMoveHandler = (type) => {
-      if (type === 'UP') { pac.dirX = 0; pac.dirY = -2; }
-      if (type === 'DOWN') { pac.dirX = 0; pac.dirY = 2; }
-      if (type === 'LEFT') { pac.dirX = -2; pac.dirY = 0; }
-      if (type === 'RIGHT') { pac.dirX = 2; pac.dirY = 0; }
-    };
-
-    gameInterval = setInterval(() => {
-      pac.x += pac.dirX; pac.y += pac.dirY;
-      if (pac.x < 10) pac.x = 230; if (pac.x > 230) pac.x = 10;
-      if (pac.y < 10) pac.y = 230; if (pac.y > 230) pac.y = 10;
-
-      ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,240,240);
-      // Pacman
-      ctx.fillStyle = "#eab308";
-      ctx.beginPath(); ctx.arc(pac.x, pac.y, 10, 0.2 * Math.PI, 1.8 * Math.PI); ctx.lineTo(pac.x, pac.y); ctx.fill();
-      // Fantôme
-      ctx.fillStyle = "#ef4444";
-      ctx.fillRect(ghost.x, ghost.y, 14, 14);
-    }, 50);
-  }
-
-  // --- 4. SUDOKU INTERACTIF 4x4 ---
-  function playSudoku() {
-    gameCanvas.classList.add('hidden');
-    sudokuGrid.classList.remove('hidden');
-    sudokuGrid.innerHTML = '';
-
-    const board = [
-      [1, 0, 3, 4],
-      [3, 4, 0, 2],
-      [0, 1, 4, 3],
-      [4, 3, 2, 0]
-    ];
-
-    board.forEach((row, r) => {
-      row.forEach((val, c) => {
-        const cell = document.createElement('div');
-        cell.className = 'sudoku-cell' + (val !== 0 ? ' fixed' : '');
-        cell.textContent = val !== 0 ? val : '';
-        
-        if (val === 0) {
-          cell.addEventListener('click', () => {
-            let currentVal = parseInt(cell.textContent) || 0;
-            currentVal = (currentVal % 4) + 1;
-            cell.textContent = currentVal;
-          });
+    function clearLines() {
+      let linesCleared = 0;
+      board = board.filter(row => {
+        if (row.every(cell => cell !== 0)) {
+          linesCleared++;
+          return false;
         }
-        sudokuGrid.appendChild(cell);
+        return true;
       });
+      while (board.length < ROWS) {
+        board.unshift(Array(COLS).fill(0));
+      }
+      if (linesCleared > 0) updateScore(score + linesCleared * 100);
+    }
+
+    function drop() {
+      currentPiece.y++;
+      if (collide(board, currentPiece)) {
+        currentPiece.y--;
+        merge(board, currentPiece);
+        clearLines();
+        currentPiece = getRandomPiece();
+        if (collide(board, currentPiece)) {
+          alert("Game Over ! Score: " + score);
+          initGame();
+        }
+      }
+      dropCounter = 0;
+    }
+
+    // COMMANDES TACTILES ET D-PAD
+    bindDpad((action) => {
+      if (action === 'LEFT') { currentPiece.x--; if (collide(board, currentPiece)) currentPiece.x++; }
+      if (action === 'RIGHT') { currentPiece.x++; if (collide(board, currentPiece)) currentPiece.x--; }
+      if (action === 'DOWN') drop();
+      if (action === 'ROTATE' || action === 'UP') rotate(currentPiece);
     });
+
+    function update(time = 0) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+
+      if (dropCounter > 600) drop();
+
+      // DESSIN
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+      // Plateau
+      board.forEach((row, r) => {
+        row.forEach((color, c) => {
+          if (color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+          }
+        });
+      });
+
+      // Pièce courante
+      currentPiece.shape.forEach((row, r) => {
+        row.forEach((val, c) => {
+          if (val) {
+            ctx.fillStyle = currentPiece.color;
+            ctx.fillRect((currentPiece.x + c) * BLOCK_SIZE, (currentPiece.y + r) * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+          }
+        });
+      });
+
+      gameLoop = requestAnimationFrame(update);
+    }
+
+    update();
+  }
+
+  // --- SNAKE PRO ENGINE ---
+  function startSnake() {
+    const GRID_SIZE = 16, TILE = 15;
+    let snake = [{x: 8, y: 8}];
+    let dir = {x: 1, y: 0}, nextDir = {x: 1, y: 0};
+    let food = {x: 3, y: 3};
+    let lastTime = 0;
+
+    bindDpad((action) => {
+      if (action === 'UP' && dir.y === 0) nextDir = {x: 0, y: -1};
+      if (action === 'DOWN' && dir.y === 0) nextDir = {x: 0, y: 1};
+      if (action === 'LEFT' && dir.x === 0) nextDir = {x: -1, y: 0};
+      if (action === 'RIGHT' && dir.x === 0) nextDir = {x: 1, y: 0};
+    });
+
+    function update(time = 0) {
+      if (time - lastTime > 120) {
+        lastTime = time;
+        dir = nextDir;
+        let head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+
+        // Collision murs
+        if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= 21) {
+          alert("Game Over ! Score: " + score);
+          return initGame();
+        }
+
+        snake.unshift(head);
+        if (head.x === food.x && head.y === food.y) {
+          updateScore(score + 10);
+          food = {x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * 20)};
+        } else {
+          snake.pop();
+        }
+      }
+
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+      // Pomme
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(food.x * TILE, food.y * TILE, TILE - 1, TILE - 1);
+
+      // Serpent
+      ctx.fillStyle = '#10a37f';
+      snake.forEach(part => ctx.fillRect(part.x * TILE, part.y * TILE, TILE - 1, TILE - 1));
+
+      gameLoop = requestAnimationFrame(update);
+    }
+
+    update();
+  }
+
+  function bindDpad(callback) {
+    document.getElementById('btnUp').onclick = () => callback('UP');
+    document.getElementById('btnDown').onclick = () => callback('DOWN');
+    document.getElementById('btnLeft').onclick = () => callback('LEFT');
+    document.getElementById('btnRight').onclick = () => callback('RIGHT');
+    document.getElementById('btnRotate').onclick = () => callback('ROTATE');
   }
 
   function escapeHtml(text) {

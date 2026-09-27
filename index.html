@@ -19,24 +19,74 @@
 </head>
 <body>
 
-  <!-- Écran d'accueil avec détection de l'icône -->
+  <!-- Écran d'accueil (Splash Screen avec Émoji Cœur) -->
   <div id="splashScreen" class="splash-screen">
     <div class="splash-logo-box">
-      <img id="splashImg" src="icon.png" alt="LaugraStok" class="splash-img" onerror="handleImageError(this)">
-      <span id="splashFallback" class="splash-fallback" style="display: none;">🫶</span>
+      <span class="splash-icon">🫶</span>
     </div>
     <h1 class="splash-title">LAUGRASTOK</h1>
   </div>
 
-  <!-- Fond d'écran avec flou -->
-  <div class="bg-overlay" id="bgOverlay"></div>
+  <!-- Formulaire Profil (Au tout premier lancement) -->
+  <div id="profileModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h2>Bienvenue ! 🚀</h2>
+      <p>Configure ton profil pour commencer :</p>
+      
+      <div class="form-group">
+        <label>Comment tu t'appelles ? *</label>
+        <input type="text" id="userNameInput" placeholder="Ton prénom ou pseudo">
+      </div>
+
+      <div class="form-group">
+        <label>Ton âge *</label>
+        <input type="number" id="userAgeInput" placeholder="Ex: 17">
+      </div>
+
+      <div class="form-group">
+        <label>Genre / Pronoms *</label>
+        <select id="userGenderInput">
+          <option value="il">Homme (Il)</option>
+          <option value="elle">Femme (Elle)</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Nom de ton âme sœur ou crush (Optionnel)</label>
+        <input type="text" id="userCrushInput" placeholder="Prénom de ton crush...">
+      </div>
+
+      <button id="saveProfileBtn" class="primary-btn">Valider et Entrer</button>
+    </div>
+  </div>
 
   <div class="app-container">
     <header>
-      <h1>LAUGRASTOK <span>// v1.0</span></h1>
+      <div>
+        <h1>LAUGRASTOK <span>// v1.0</span></h1>
+        <p id="userGreeting" class="user-greeting"></p>
+      </div>
       <button id="themeToggle" class="icon-btn" title="Changer le thème">🌙</button>
     </header>
 
+    <!-- SECTION MINI-JEU GEOMETRY DASH -->
+    <section class="game-section">
+      <div class="game-header">
+        <h3>🎮 Mini Geometry Dash</h3>
+        <span id="gameScore">Score: 0</span>
+      </div>
+      <div id="gameContainer" class="game-container">
+        <div id="player" class="player"></div>
+        <div id="obstacle" class="obstacle"></div>
+        <div id="startScreen" class="game-start-overlay">
+          <button id="startGameBtn" class="primary-btn">Sauter / Jouer</button>
+        </div>
+      </div>
+      <p class="game-hint">Touche l'écran ou appuie sur ESPACE pour sauter !</p>
+    </section>
+
+    <!-- SECTION AJOUT D'IDÉES -->
     <section class="add-idea-section">
       <div class="input-group">
         <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">

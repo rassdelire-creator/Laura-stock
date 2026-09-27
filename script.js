@@ -1,107 +1,130 @@
-// ==========================================================================
-// 1. DONNÉES DES APPLICATIONS & SUGGESTIONS
-// ==========================================================================
-const apps = [
-{ name: "Rasstube", desc: "Plateforme vidéo personnalisée pour gérer mes projets YouTube.", icon: "🎬", link: "#" },
-{ name: "Mood Recommender", desc: "Recommande de la musique et des animés selon mon humeur.", icon: "🎭", link: "#" },
-{ name: "Space Explorer 2D", desc: "Jeu mobile pixel art d'exploration spatiale.", icon: "🚀", link: "#" },
-{ name: "Générateur de Flemme", desc: "Application drôle pour générer des excuses convaincantes.", icon: "🛋️", link: "#" },
-{ name: "Wattpad Story Planner", desc: "Outil de structuration de chapitres pour mes romans Web.", icon: "✍️", link: "#" },
-{ name: "Shorts & TikTok Ideas", desc: "Carnet d'idées de concepts vidéo viraux et scripts.", icon: "📱", link: "#" }
-];
+// --- STOCKAGE ET INITIALISATION ---
+let ideas = JSON.parse(localStorage.getItem('my_ideas')) || [];
+let currentFilter = 'all';
 
-const suggestions = [
-"Une appli qui simule un faux appel de ton chat pour annuler un rendez-vous ennuyeux.",
-"Un bouton 'Anti-Procrastination' qui t'ouvre un onglet d'exercices d'étirement obligatoires.",
-"Une app de météo qui te donne les prévisions uniquement sous forme de citations dramatiques d'animés.",
-"Un traducteur d'aboiements de chien vers du langage juridique très soutenu.",
-"Une application qui transforme tes to-do lists en combats de boss style RPG.",
-"Un générateur d'idées d'histoires Wattpad utilisant uniquement des objets de ta chambre."
-];
+// --- RÉCUPÉRATION DES ÉLÉMENTS DOM ---
+const ideaTitleInput = document.getElementById('ideaTitle');
+const ideaCategorySelect = document.getElementById('ideaCategory');
+const ideaTextInput = document.getElementById('ideaText');
+const addBtn = document.getElementById('addBtn');
+const ideasList = document.getElementById('ideasList');
+const searchInput = document.getElementById('searchInput');
+const tagBtns = document.querySelectorAll('.tag-btn');
+const themeToggle = document.getElementById('themeToggle');
 
-// ==========================================================================
-// 2. GESTION DU THÈME (DARK / LIGHT MODE)
-// ==========================================================================
-const themeToggleBtn = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
-
-// Charger le thème sauvegardé
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
+// --- THÈME (DARK / LIGHT) ---
+const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
-themeIcon.textContent = savedTheme === 'light' ? '☀️' : '🌙';
-}
+themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
 
-themeToggleBtn.addEventListener('click', () => {
-const currentTheme = document.documentElement.getAttribute('data-theme');
-let newTheme = 'light';
-
-if (currentTheme === 'light') {
-newTheme = 'dark';
-themeIcon.textContent = '🌙';
-} else {
-themeIcon.textContent = '☀️';
-}
-
-document.documentElement.setAttribute('data-theme', newTheme);
-localStorage.setItem('theme', newTheme);
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const newTheme = isLight ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  themeToggle.textContent = newTheme === 'light' ? '☀️' : '🌙';
+  localStorage.setItem('theme', newTheme);
 });
 
-// ==========================================================================
-// 3. AFFICHAGE DYNAMIQUE DES CARTES D'APPS
-// ==========================================================================
-function renderAppsList(items) {
-const container = document.getElementById("appsDrawer");
-container.innerHTML = "";
+// --- AJOUTER UNE IDÉE ---
+addBtn.addEventListener('click', () => {
+  const title = ideaTitleInput.value.trim();
+  const text = ideaTextInput.value.trim();
+  const category = ideaCategorySelect.value;
 
-if (items.length === 0) {
-container.innerHTML = <p style="grid-column: 1/-1; text-align: center; opacity: 0.7;">Aucune application ne correspond à ta recherche 🔍</p>;
-return;
+  if (!title) {
+    alert("Veuillez donner un titre à votre idée !");
+    return;
+  }
+
+  const newIdea = {
+    id: Date.now(),
+    title: title,
+    text: text,
+    category: category,
+    date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+  };
+
+  ideas.unshift(newIdea); // Ajoute au début de la liste
+  saveAndRender();
+
+  // Réinitialiser les champs
+  ideaTitleInput.value = '';
+  ideaTextInput.value = '';
+});
+
+// --- SUPPRIMER UNE IDÉE ---
+function deleteIdea(id) {
+  ideas = ideas.filter(idea => idea.id !== id);
+  saveAndRender();
 }
 
-items.forEach((app, index) => {
-const card = document.createElement("div");
-card.className = "app-card";
-card.style.animationDelay = ${index * 0.07}s; // Animation en cascade (Staggered)
+// --- SAUVEGARDER ET AFFICHER ---
+function saveAndRender() {
+  localStorage.setItem('my_ideas', JSON.stringify(ideas));
+  renderIdeas();
+}
 
-card.innerHTML = `
-  <div class="icon">${app.icon}</div>
-  <h3>${app.name}</h3>
-  <p>${app.desc}</p>
-`;
-
-card.onclick = () => {
-  if (app.link && app.link !== "#") {
-    window.open(app.link, "_blank");
-  } else {
-    alert(`Ouverture de ${app.name} ! (Lien de démonstration)`);
-  }
+const categoryLabels = {
+  app: '💻 App / Dev',
+  story: '✍️ Histoire',
+  video: '🎥 Vidéo',
+  other: '💡 Autre'
 };
 
-container.appendChild(card);
-});
+function renderIdeas() {
+  const search = searchInput.value.toLowerCase().trim();
+  ideasList.innerHTML = '';
+
+  const filtered = ideas.filter(idea => {
+    const matchesFilter = currentFilter === 'all' || idea.category === currentFilter;
+    const matchesSearch = idea.title.toLowerCase().includes(search) || idea.text.toLowerCase().includes(search);
+    return matchesFilter && matchesSearch;
+  });
+
+  if (filtered.length === 0) {
+    ideasList.innerHTML = `
+      <div class="empty-state">
+        <p>Aucune idée enregistrée pour le moment.</p>
+      </div>
+    `;
+    return;
+  }
+
+  filtered.forEach(idea => {
+    const card = document.createElement('div');
+    card.className = 'idea-card';
+    card.innerHTML = `
+      <div class="idea-header">
+        <span class="idea-title">${escapeHtml(idea.title)}</span>
+        <span class="badge">${categoryLabels[idea.category] || '💡 Autre'}</span>
+      </div>
+      ${idea.text ? `<div class="idea-content">${escapeHtml(idea.text)}</div>` : ''}
+      <div class="idea-footer">
+        <span>Enregistré le ${idea.date}</span>
+        <button class="delete-btn" onclick="deleteIdea(${idea.id})">Supprimer</button>
+      </div>
+    `;
+    ideasList.appendChild(card);
+  });
 }
 
-// ==========================================================================
-// 4. RECHERCHE EN TEMPS RÉEL
-// ==========================================================================
-document.getElementById("searchInput").addEventListener("input", (e) => {
-const search = e.target.value.toLowerCase().trim();
-const filtered = apps.filter(a =>
-a.name.toLowerCase().includes(search) ||
-a.desc.toLowerCase().includes(search)
-);
-renderAppsList(filtered);
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, function(m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+  });
+}
+
+// --- FILTRES ET RECHERCHE ---
+searchInput.addEventListener('input', renderIdeas);
+
+tagBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tagBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderIdeas();
+  });
 });
 
-// ==========================================================================
-// 5. BOUTON SUGGESTION DRÔLE
-// ==========================================================================
-document.getElementById("suggestBtn").addEventListener("click", () => {
-const randomIndex = Math.floor(Math.random() * suggestions.length);
-const textElement = document.getElementById("suggestionText");
-textElement.innerText = suggestions[randomIndex];
-});
-
-// Initialisation au chargement de la page
-renderAppsList(apps);
+// Initialisation
+renderIdeas();

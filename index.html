@@ -20,7 +20,7 @@
 <body>
 
   <!-- ============================================
-       SPRITE SVG : toutes les icônes de l'app
+       SPRITE SVG : toutes les icônes
        ============================================ -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -37,9 +37,9 @@
       <rect x="4" y="10.5" width="16" height="10" rx="2.5"/>
       <path d="M8 10.5V7a4 4 0 1 1 8 0v3.5"/>
     </symbol>
-    <symbol id="i-gamepad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 8h12a5 5 0 0 1 5 5l-.7 3.8A2.5 2.5 0 0 1 19.9 19l-2-1.5h-11.8l-2 1.5a2.5 2.5 0 0 1-2.4-2.2L1 13a5 5 0 0 1 5-5z"/>
-      <path d="M8 12h.01M16 12h.01M7 14h2M15 14h2"/>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
     </symbol>
     <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3"/>
@@ -98,6 +98,10 @@
       <circle cx="12" cy="8" r="4"/>
       <path d="M4 21a8 8 0 0 1 16 0"/>
     </symbol>
+    <symbol id="i-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V6"/>
+      <path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>
+    </symbol>
   </svg>
 
   <!-- ARRIÈRE-PLAN : bulles + gouttes -->
@@ -139,7 +143,7 @@
 
     <header>
       <div>
-        <h1>LAUGRASTOK <span class="version-tag">v2.0</span></h1>
+        <h1>LAUGRASTOK <span class="version-tag">v2.1</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       <div class="header-actions">
@@ -261,38 +265,25 @@
         </div>
       </section>
 
-      <!-- ============ ONGLET JEUX ============ -->
-      <section id="tab-games" class="tab-page">
+      <!-- ============ ONGLET ACTUS ============ -->
+      <section id="tab-news" class="tab-page">
         <h2 class="tab-title">
-          <svg class="ic"><use href="#i-gamepad"/></svg>
-          Zone Arcade
+          <svg class="ic"><use href="#i-globe"/></svg>
+          Actus & Infos
         </h2>
 
-        <div class="games-tabs">
-          <button class="game-tab-btn active" data-game="tetris">Tetris</button>
-          <button class="game-tab-btn" data-game="snake">Snake</button>
-          <button class="game-tab-btn" data-game="dash">Miami</button>
+        <div class="news-filters">
+          <button class="news-filter-btn active" data-news="all">Tout</button>
+          <button class="news-filter-btn" data-news="general">Infos</button>
+          <button class="news-filter-btn" data-news="weather">Météo</button>
+          <button class="news-filter-btn" data-news="foot">Foot</button>
+          <button class="news-filter-btn" data-news="holidays">Fériés</button>
         </div>
 
-        <div class="game-score-bar">
-          <span>Score : <strong id="gameScore">0</strong></span>
-          <span>Meilleur : <strong id="gameHighScore">0</strong></span>
-        </div>
-
-        <div class="game-display-area">
-          <canvas id="gameCanvas" width="300" height="400"></canvas>
-        </div>
-
-        <div class="game-controls">
-          <button id="startGameBtn" class="primary-btn">Lancer / Recommencer</button>
-          <div id="mobileDpad" class="d-pad">
-            <button id="btnUp" class="dpad-btn">▲</button>
-            <div class="d-pad-row">
-              <button id="btnLeft" class="dpad-btn">◄</button>
-              <button id="btnRotate" class="dpad-btn btn-action">↻</button>
-              <button id="btnRight" class="dpad-btn">►</button>
-            </div>
-            <button id="btnDown" class="dpad-btn">▼</button>
+        <div id="newsContent" class="news-content">
+          <div class="empty-state">
+            <svg class="ic"><use href="#i-globe"/></svg>
+            <p>Choisis une catégorie</p>
           </div>
         </div>
       </section>
@@ -354,7 +345,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-label">Version</div>
-              <div class="muted">LaugraStok v2.0 · 2025</div>
+              <div class="muted">LaugraStok v2.1 · 2025</div>
             </div>
           </div>
         </div>
@@ -376,9 +367,9 @@
         <svg class="ic"><use href="#i-lock"/></svg>
         <span>Coffre</span>
       </button>
-      <button class="tab-btn" data-tab="games">
-        <svg class="ic"><use href="#i-gamepad"/></svg>
-        <span>Jeux</span>
+      <button class="tab-btn" data-tab="news">
+        <svg class="ic"><use href="#i-globe"/></svg>
+        <span>Actus</span>
       </button>
       <button class="tab-btn" data-tab="settings">
         <svg class="ic"><use href="#i-settings"/></svg>
@@ -473,7 +464,7 @@
   </div>
 
   <script src="script.js"></script>
-  <script src="games.js"></script>
+  <script src="actus.js"></script>
   <script src="sw-register.js"></script>
 </body>
 </html>

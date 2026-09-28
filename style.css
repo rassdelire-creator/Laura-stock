@@ -1,6 +1,5 @@
 /* ============================================================
    LAUGRASTOK v2.0 — Design System
-   Glass morphism + Apple polish + vagues + gouttes de pluie
    ============================================================ */
 
 :root {
@@ -62,7 +61,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body { height: 100%; }
+/* ✅ FIX SCROLL : empêche le rebond */
+html {
+  height: 100%;
+  overscroll-behavior: none;
+}
 
 body {
   font-family: var(--font);
@@ -73,8 +76,10 @@ body {
   justify-content: center;
   position: relative;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
   transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
-  padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)) 16px;
+  /* ✅ Padding bottom généreux pour laisser la place au D-pad + tab bar */
+  padding: 16px 16px calc(180px + env(safe-area-inset-bottom, 0px)) 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -821,21 +826,31 @@ audio {
   padding: 0 4px;
 }
 
-/* ---------- JEUX ---------- */
-.games-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+/* ============================================================
+   JEUX — CONFIG COMPACTE
+   ============================================================ */
+
+.games-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
 
 .game-tab-btn {
   background: var(--card-bg);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  padding: 9px 12px;
+  padding: 9px 8px;
   border-radius: var(--radius-md);
   font-family: var(--font);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   flex: 1;
   transition: all 0.2s var(--ease);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .game-tab-btn.active {
@@ -843,6 +858,10 @@ audio {
   color: #fff;
   border-color: var(--accent);
   box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+}
+
+.game-tab-btn:active {
+  transform: scale(0.96);
 }
 
 .game-score-bar {
@@ -864,12 +883,12 @@ audio {
   background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 10px;
-  margin-bottom: 12px;
+  padding: 8px;
+  margin-bottom: 10px;
   overflow: hidden;
 }
 
-/* ⚡ CORRIGÉ : touch-action manipulation (au lieu de none) */
+/* ✅ CANVAS PLUS PETIT — laisse la place au D-pad */
 canvas {
   background: #0a0b10;
   border-radius: var(--radius-md);
@@ -877,7 +896,8 @@ canvas {
   display: block;
   width: 100%;
   height: auto;
-  max-width: 340px;
+  max-width: 280px;
+  max-height: 280px;
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -885,19 +905,21 @@ canvas {
 
 [data-theme="light"] canvas { background: #0a0b10; }
 
+/* ✅ D-pad compact et bien positionné */
 .d-pad {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .d-pad-row { display: flex; gap: 8px; }
 
 .dpad-btn {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-md);
   background: var(--card-bg);
   backdrop-filter: blur(10px);
@@ -912,6 +934,7 @@ canvas {
   align-items: center;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: manipulation;
   transition: transform 0.1s var(--ease), background 0.15s var(--ease);
   box-shadow: var(--shadow-soft);
 }
@@ -920,7 +943,7 @@ canvas {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
 
 .dpad-btn.btn-action {
@@ -1076,10 +1099,12 @@ canvas {
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 380px) {
-  body { padding: 12px 12px calc(94px + env(safe-area-inset-bottom, 0px)) 12px; }
+  body { padding: 12px 12px calc(175px + env(safe-area-inset-bottom, 0px)) 12px; }
   h1 { font-size: 1.1rem; }
   .tab-btn span { font-size: 0.6rem; }
   .tab-btn .ic { width: 20px; height: 20px; }
+  canvas { max-width: 240px; max-height: 240px; }
+  .dpad-btn { width: 44px; height: 44px; }
 }
 
 button, .icon-btn, .tag-btn, .tab-btn { touch-action: manipulation; }

@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>LaugraStok</title>
-
   <meta name="apple-mobile-web-app-title" content="LaugraStok">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="application-name" content="LaugraStok">
   <meta name="theme-color" content="#0d0d11">
   <meta name="description" content="Capture tes idées, organise-les et partage-les.">
-
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,92 +17,31 @@
 </head>
 <body>
 
-  <!-- ============================================
-       SPRITE SVG : toutes les icônes
-       ============================================ -->
+  <!-- SPRITE SVG -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 10.5 12 3l9 7.5"/>
-      <path d="M5 9.5V21h5v-6h4v6h5V9.5"/>
-    </symbol>
-    <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/>
-    </symbol>
-    <symbol id="i-star-fill" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/>
-    </symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4" y="10.5" width="16" height="10" rx="2.5"/>
-      <path d="M8 10.5V7a4 4 0 1 1 8 0v3.5"/>
-    </symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
-    </symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
-    </symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
-    </symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="4"/>
-      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
-    </symbol>
-    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="3" width="6" height="12" rx="3"/>
-      <path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>
-    </symbol>
-    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 8h3l1.5-2h7L17 8h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/>
-      <circle cx="12" cy="13.5" r="4"/>
-    </symbol>
-    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="7"/>
-      <path d="m20 20-3.5-3.5"/>
-    </symbol>
-    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>
-      <path d="M16 6l-4-4-4 4M12 2v14"/>
-    </symbol>
-    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 20h9"/>
-      <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/>
-    </symbol>
-    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-    </symbol>
-    <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.9 1 1.6 1 2.5h6c0-.9.2-1.6 1-2.5A6 6 0 0 0 12 3z"/>
-    </symbol>
-    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M18 6 6 18M6 6l12 12"/>
-    </symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 5v14M5 12h14"/>
-    </symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
-    </symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="9" width="12" height="12" rx="2"/>
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-    </symbol>
-    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>
-    </symbol>
-    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="8" r="4"/>
-      <path d="M4 21a8 8 0 0 1 16 0"/>
-    </symbol>
-    <symbol id="i-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V6"/>
-      <path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>
-    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/></symbol>
+    <symbol id="i-star-fill" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 1 1 8 0v3.5"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13.5" r="4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.9 1 1.6 1 2.5h6c0-.9.2-1.6 1-2.5A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
   </svg>
 
-  <!-- ARRIÈRE-PLAN : bulles + gouttes -->
+  <!-- FOND -->
   <div class="glass-bg" aria-hidden="true">
     <div class="bubble bubble-1"></div>
     <div class="bubble bubble-2"></div>
@@ -143,7 +80,7 @@
 
     <header>
       <div>
-        <h1>LAUGRASTOK <span class="version-tag">v2.1</span></h1>
+        <h1>LAUGRASTOK <span class="version-tag">v2.2</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       <div class="header-actions">
@@ -155,7 +92,7 @@
 
     <main class="tab-content">
 
-      <!-- ============ ONGLET ACCUEIL ============ -->
+      <!-- ACCUEIL -->
       <section id="tab-home" class="tab-page active">
         <div class="glass-card dashboard-widget">
           <div class="dash-item">
@@ -186,24 +123,20 @@
               <option value="other">Autre</option>
             </select>
           </div>
-
           <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
-
           <div class="media-bar">
             <div class="media-actions-row">
               <button id="recordVoiceBtn" class="media-square-btn" title="Enregistrer un vocal">
                 <svg class="ic"><use href="#i-mic"/></svg>
                 <span id="recordTimer" class="record-timer hidden">00:00</span>
               </button>
-
-              <label for="cameraInput" class="media-square-btn" title="Ajouter une photo ou vidéo">
+              <label for="cameraInput" class="media-square-btn" title="Ajouter un média">
                 <svg class="ic"><use href="#i-camera"/></svg>
                 <input type="file" id="cameraInput" accept="image/*,video/*" hidden>
               </label>
             </div>
             <div id="mediaStatus" class="media-status-tag">Aucun média</div>
           </div>
-
           <button id="addBtn" class="primary-btn mt-12">
             <svg class="ic ic-sm"><use href="#i-plus"/></svg>
             Sauvegarder l'idée
@@ -227,7 +160,7 @@
         <div id="ideasList" class="ideas-grid"></div>
       </section>
 
-      <!-- ============ ONGLET FAVORIS ============ -->
+      <!-- FAVORIS -->
       <section id="tab-fav" class="tab-page">
         <h2 class="tab-title">
           <svg class="ic"><use href="#i-star-fill"/></svg>
@@ -236,13 +169,12 @@
         <div id="favList" class="ideas-grid"></div>
       </section>
 
-      <!-- ============ ONGLET COFFRE ============ -->
+      <!-- COFFRE -->
       <section id="tab-vault" class="tab-page">
         <h2 class="tab-title">
           <svg class="ic"><use href="#i-lock"/></svg>
           Coffre secret
         </h2>
-
         <div id="pinArea" class="glass-card">
           <p id="pinInstruction" class="muted">Entre ton code PIN à 6 chiffres :</p>
           <div class="pin-inputs">
@@ -250,7 +182,6 @@
           </div>
           <button id="unlockSecretBtn" class="primary-btn mt-12">Déverrouiller</button>
         </div>
-
         <div id="secretContent" class="hidden">
           <p class="secret-desc">Ces idées ne sont visibles qu'avec ton code PIN.</p>
           <div class="glass-card add-idea-section compact">
@@ -265,13 +196,12 @@
         </div>
       </section>
 
-      <!-- ============ ONGLET ACTUS ============ -->
+      <!-- ACTUS -->
       <section id="tab-news" class="tab-page">
         <h2 class="tab-title">
           <svg class="ic"><use href="#i-globe"/></svg>
           Actus & Infos
         </h2>
-
         <div class="news-filters">
           <button class="news-filter-btn active" data-news="all">Tout</button>
           <button class="news-filter-btn" data-news="general">Infos</button>
@@ -279,7 +209,6 @@
           <button class="news-filter-btn" data-news="foot">Foot</button>
           <button class="news-filter-btn" data-news="holidays">Fériés</button>
         </div>
-
         <div id="newsContent" class="news-content">
           <div class="empty-state">
             <svg class="ic"><use href="#i-globe"/></svg>
@@ -288,7 +217,7 @@
         </div>
       </section>
 
-      <!-- ============ ONGLET PARAMÈTRES ============ -->
+      <!-- RÉGLAGES -->
       <section id="tab-settings" class="tab-page">
         <h2 class="tab-title">
           <svg class="ic"><use href="#i-settings"/></svg>
@@ -345,7 +274,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-label">Version</div>
-              <div class="muted">LaugraStok v2.1 · 2025</div>
+              <div class="muted">LaugraStok v2.2 · 2025</div>
             </div>
           </div>
         </div>
@@ -353,7 +282,7 @@
 
     </main>
 
-    <!-- ============ TAB BAR (bas) ============ -->
+    <!-- TAB BAR -->
     <nav class="tab-bar" id="tabBar">
       <button class="tab-btn active" data-tab="home">
         <svg class="ic"><use href="#i-home"/></svg>
@@ -379,19 +308,13 @@
     </nav>
   </div>
 
-  <!-- ============ MODAL CRUSH ============ -->
+  <!-- MODAL CRUSH -->
   <div id="crushModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
       <div class="modal-header">
-        <h2>
-          <svg class="ic"><use href="#i-heart"/></svg>
-          Espace Crush
-        </h2>
-        <button class="close-btn" data-close="crushModal">
-          <svg class="ic"><use href="#i-close"/></svg>
-        </button>
+        <h2><svg class="ic"><use href="#i-heart"/></svg> Espace Crush</h2>
+        <button class="close-btn" data-close="crushModal"><svg class="ic"><use href="#i-close"/></svg></button>
       </div>
-
       <div class="form-group">
         <label>Son prénom / pseudo</label>
         <input type="text" id="crushName" placeholder="Ex: ..." autocomplete="off">
@@ -409,25 +332,17 @@
         <textarea id="crushNotes" rows="4" placeholder="Ce que tu veux retenir..."></textarea>
       </div>
       <button id="saveCrushBtn" class="primary-btn mt-12">Enregistrer</button>
-      <p class="muted mt-12 small">🔒 Stocké uniquement sur ton téléphone.</p>
     </div>
   </div>
 
-  <!-- ============ MODAL PARTAGE ============ -->
+  <!-- MODAL PARTAGE -->
   <div id="shareModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
       <div class="modal-header">
-        <h2>
-          <svg class="ic"><use href="#i-share"/></svg>
-          Partager
-        </h2>
-        <button class="close-btn" data-close="shareModal">
-          <svg class="ic"><use href="#i-close"/></svg>
-        </button>
+        <h2><svg class="ic"><use href="#i-share"/></svg> Partager</h2>
+        <button class="close-btn" data-close="shareModal"><svg class="ic"><use href="#i-close"/></svg></button>
       </div>
-
       <p class="muted small">Choisis comment envoyer ton idée :</p>
-
       <div class="share-grid">
         <button class="share-option" data-share="native">
           <svg class="ic"><use href="#i-share"/></svg>
@@ -442,21 +357,17 @@
           <span>Télécharger</span>
         </button>
       </div>
-
       <div id="sharePreview" class="share-preview hidden"></div>
     </div>
   </div>
 
-  <!-- ============ MODAL RECEVOIR ============ -->
+  <!-- MODAL RECEVOIR -->
   <div id="receiveModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
       <div class="modal-header">
         <h2>Recevoir une idée</h2>
-        <button class="close-btn" data-close="receiveModal">
-          <svg class="ic"><use href="#i-close"/></svg>
-        </button>
+        <button class="close-btn" data-close="receiveModal"><svg class="ic"><use href="#i-close"/></svg></button>
       </div>
-
       <p class="muted small">Colle le code que tu as reçu :</p>
       <textarea id="receiveCode" rows="5" placeholder="Colle ici le code partagé..."></textarea>
       <button id="importIdeaBtn" class="primary-btn mt-12">Importer</button>

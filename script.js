@@ -1,5 +1,5 @@
 /* ============================================================
-   LAUGRASTOK v2.0 — Logique principale
+   LAUGRASTOK v2.1 — Logique principale (sans jeux)
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     TOAST — placé en HAUT, jamais caché
+     TOAST EN HAUT
      ============================================================ */
   const toast = (msg, type = 'info') => {
     const old = document.getElementById('lsToast');
@@ -42,27 +42,29 @@ document.addEventListener('DOMContentLoaded', () => {
       position: fixed;
       top: calc(16px + env(safe-area-inset-top, 0px));
       left: 50%;
-      transform: translateX(-50%) translateY(-20px);
+      transform: translateX(-50%) translateY(-30px);
       background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10a37f' : 'rgba(26,27,35,0.96)'};
       color: #fff;
-      padding: 12px 18px;
-      border-radius: 14px;
+      padding: 14px 20px;
+      border-radius: 16px;
       font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      box-shadow: 0 10px 40px rgba(0,0,0,.55);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 12px 40px rgba(0,0,0,.6);
       z-index: 2147483647;
       opacity: 0;
-      transition: opacity .25s, transform .25s;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,.14);
-      max-width: 88vw;
+      transition: opacity .3s, transform .3s;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.18);
+      max-width: 90vw;
       text-align: center;
       pointer-events: none;
       line-height: 1.35;
     `;
     document.body.appendChild(t);
+
+    void t.offsetHeight;
 
     requestAnimationFrame(() => {
       t.style.opacity = '1';
@@ -71,8 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       t.style.opacity = '0';
-      t.style.transform = 'translateX(-50%) translateY(-20px)';
-      setTimeout(() => t.remove(), 300);
+      t.style.transform = 'translateX(-50%) translateY(-30px)';
+      setTimeout(() => t.remove(), 350);
     }, 2400);
   };
 
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
   (function createRain() {
     const layer = $('#rainLayer');
     if (!layer) return;
-    const DROP_COUNT = window.innerWidth < 480 ? 14 : 22;
+    const DROP_COUNT = window.innerWidth < 480 ? 12 : 20;
     for (let i = 0; i < DROP_COUNT; i++) {
       const d = document.createElement('div');
       d.className = 'drop';
@@ -196,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isActive) moveIndicator(btn);
     });
 
+    // Scroll en haut UNIQUEMENT si changement réel
     if (!alreadyActive) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -563,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     COFFRE SECRET
+     COFFRE
      ============================================================ */
   const pinInput = $('#pinInput');
   const pinInstruction = $('#pinInstruction');
@@ -834,5 +837,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renderFavList();
   updateDashboard();
 
-  console.log('%c🚀 LaugraStok v2.0 chargé', 'color:#10a37f;font-weight:bold;font-size:14px');
+  console.log('%c🚀 LaugraStok v2.1 chargé', 'color:#10a37f;font-weight:bold;font-size:14px');
 });

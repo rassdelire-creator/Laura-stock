@@ -32,32 +32,48 @@ document.addEventListener('DOMContentLoaded', () => {
     day: '2-digit', month: '2-digit', year: 'numeric'
   });
 
-  // Toast léger (remplace les alert() brutaux)
+  // Toast en HAUT de l'écran (jamais caché par la tab bar)
   const toast = (msg, type = 'info') => {
     const old = document.getElementById('lsToast');
     if (old) old.remove();
+
     const t = document.createElement('div');
     t.id = 'lsToast';
     t.textContent = msg;
     t.style.cssText = `
-      position:fixed; bottom:calc(110px + env(safe-area-inset-bottom,0px));
-      left:50%; transform:translateX(-50%) translateY(20px);
-      background:${type === 'error' ? '#ef4444' : type === 'success' ? '#10a37f' : 'rgba(26,27,35,0.95)'};
-      color:#fff; padding:11px 18px; border-radius:14px;
-      font-family:'Inter',sans-serif; font-size:.85rem; font-weight:500;
-      box-shadow:0 8px 30px rgba(0,0,0,.35); z-index:99999;
-      opacity:0; transition:opacity .25s, transform .25s;
-      backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.1);
-      max-width:90vw; text-align:center;
+      position: fixed;
+      top: calc(70px + env(safe-area-inset-top, 0px));
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10a37f' : 'rgba(26,27,35,0.96)'};
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 10px 40px rgba(0,0,0,.45);
+      z-index: 2147483647;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.12);
+      max-width: 88vw;
+      text-align: center;
+      pointer-events: none;
+      line-height: 1.35;
     `;
     document.body.appendChild(t);
+
     requestAnimationFrame(() => {
       t.style.opacity = '1';
       t.style.transform = 'translateX(-50%) translateY(0)';
     });
+
     setTimeout(() => {
       t.style.opacity = '0';
-      t.style.transform = 'translateX(-50%) translateY(20px)';
+      t.style.transform = 'translateX(-50%) translateY(-20px)';
       setTimeout(() => t.remove(), 300);
     }, 2400);
   };
@@ -71,11 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 700);
   });
 
-  // Sécurité : retirer le splash même si load tarde
   setTimeout(() => $('#splashScreen')?.classList.add('hidden'), 2000);
 
   /* ============================================================
-     3. EFFET PLUIE (généré en JS pour être léger)
+     3. EFFET PLUIE
      ============================================================ */
   (function createRain() {
     const layer = $('#rainLayer');
@@ -167,13 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = $$('.tab-btn');
 
   function switchTab(tabName) {
-    // Pages
+    const alreadyActive = document.querySelector('.tab-btn.active')?.dataset.tab === tabName;
+
     $$('.tab-page').forEach(p => p.classList.remove('active'));
     const page = document.getElementById(`tab-${tabName}`);
     if (page) page.classList.add('active');
 
-    // Boutons
-    tabButtons.forEach((btn, i) => {
+    tabButtons.forEach((btn) => {
       const isActive = btn.dataset.tab === tabName;
       btn.classList.toggle('active', isActive);
       if (isActive && tabIndicator) {
@@ -184,10 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Scroll en haut
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll en haut UNIQUEMENT si on change vraiment d'onglet
+    if (!alreadyActive) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    // Actions spéciales selon l'onglet
     if (tabName === 'fav') renderFavList();
     if (tabName === 'vault') resetVaultView();
   }
@@ -196,11 +212,17 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // Positionner l'indicateur au démarrage (après le rendu)
   setTimeout(() => switchTab('home'), 50);
   window.addEventListener('resize', () => {
     const active = $('.tab-btn.active');
-    if (active) switchTab(active.dataset.tab);
+    if (active) {
+      const btnWidth = active.offsetWidth;
+      const offset = active.offsetLeft;
+      if (tabIndicator) {
+        tabIndicator.style.transform = `translateX(${offset - 8}px)`;
+        tabIndicator.style.width = btnWidth + 'px';
+      }
+    }
   });
 
   /* ============================================================
@@ -222,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentMediaType = null;
 
   async function startRecording() {
-    // Vérifier le support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return toast('Ton navigateur ne supporte pas le micro.', 'error');
     }
@@ -235,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
         audio: { echoCancellation: true, noiseSuppression: true }
       });
 
-      // Choisir un format supporté
       const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
       const mimeType = candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
       mediaRecorder = mimeType
@@ -255,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
           toast('Vocal enregistré 🎙️', 'success');
         };
         reader.readAsDataURL(blob);
-        // Libère le micro
         if (audioStream) {
           audioStream.getTracks().forEach(t => t.stop());
           audioStream = null;
@@ -274,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const m = String(Math.floor(secondsRecorded / 60)).padStart(2, '0');
         const s = String(secondsRecorded % 60).padStart(2, '0');
         recordTimer.textContent = `${m}:${s}`;
-        // Limite auto à 3 minutes pour éviter les gros fichiers
         if (secondsRecorded >= 180) stopRecording();
       }, 1000);
 
@@ -309,7 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Limite 5 Mo pour éviter de saturer localStorage
     if (file.size > 5 * 1024 * 1024) {
       toast('Fichier trop gros (max 5 Mo).', 'error');
       e.target.value = '';
@@ -448,7 +465,6 @@ document.addEventListener('DOMContentLoaded', () => {
     favs.forEach(i => favList.appendChild(buildIdeaCard(i)));
   }
 
-  /* -------- Ajouter une idée -------- */
   addBtn?.addEventListener('click', () => {
     const title = $('#ideaTitle').value.trim();
     const text = $('#ideaText').value.trim();
@@ -473,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
     saveIdeas();
     renderIdeas();
 
-    // Reset form
     $('#ideaTitle').value = '';
     $('#ideaText').value = '';
     if (cameraInput) cameraInput.value = '';
@@ -485,9 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     toast('Idée sauvegardée ✅', 'success');
   });
 
-  /* -------- Délégation d'événements sur les cartes -------- */
   document.addEventListener('click', (e) => {
-    // Favori
     const favBtn = e.target.closest('[data-fav]');
     if (favBtn) {
       const id = Number(favBtn.dataset.fav);
@@ -501,15 +514,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Partager
     const shareBtn = e.target.closest('[data-share]');
-    if (shareBtn) {
+    if (shareBtn && !shareBtn.closest('#shareModal')) {
       const id = Number(shareBtn.dataset.share);
       openShareModal(id);
       return;
     }
 
-    // Éditer
     const editBtn = e.target.closest('[data-edit]');
     if (editBtn) {
       const id = Number(editBtn.dataset.edit);
@@ -517,7 +528,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Supprimer
     const delBtn = e.target.closest('[data-del]');
     if (delBtn) {
       const id = Number(delBtn.dataset.del);
@@ -549,7 +559,6 @@ document.addEventListener('DOMContentLoaded', () => {
     toast('Idée modifiée ✏️', 'success');
   }
 
-  /* -------- Filtres -------- */
   $$('.tag-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       $$('.tag-btn').forEach(b => b.classList.remove('active'));
@@ -561,7 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('#searchInput')?.addEventListener('input', renderIdeas);
 
-  /* -------- Inspiration aléatoire -------- */
   const prompts = [
     "Une appli mobile qui prédit la météo selon l'humeur 🌤️",
     "Un script de vidéo Short sur un mystère du Tokuverse 🎬",
@@ -578,7 +586,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const p = prompts[Math.floor(Math.random() * prompts.length)];
     $('#ideaTitle').value = 'Idée Flash ⚡';
     $('#ideaText').value = p;
-    // Scroll vers le formulaire
     document.querySelector('.add-idea-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
@@ -733,8 +740,6 @@ document.addEventListener('DOMContentLoaded', () => {
       x: idea.text,
       c: idea.category,
       d: idea.date,
-      // On n'inclut PAS les médias lourds dans le code partagé
-      // pour éviter d'exploser la taille du code.
       a: !!idea.audio,
       m: !!idea.media
     };
@@ -768,9 +773,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('click', (e) => {
-    const opt = e.target.closest('[data-share]');
+    const opt = e.target.closest('#shareModal [data-share]');
     if (!opt) return;
-    if (!opt.closest('#shareModal')) return; // Ignore les boutons des cartes
 
     const mode = opt.dataset.share;
     const idea = ideas.find(i => i.id === shareIdeaId);
@@ -849,7 +853,6 @@ document.addEventListener('DOMContentLoaded', () => {
      13. FERMETURE DES MODALES
      ============================================================ */
   document.addEventListener('click', (e) => {
-    // Bouton data-close
     const closeBtn = e.target.closest('[data-close]');
     if (closeBtn) {
       const id = closeBtn.dataset.close;
@@ -857,13 +860,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Clic sur l'overlay
     if (e.target.classList.contains('modal-overlay')) {
       e.target.classList.add('hidden');
     }
   });
 
-  // Touche Échap
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       $$('.modal-overlay:not(.hidden)').forEach(m => m.classList.add('hidden'));

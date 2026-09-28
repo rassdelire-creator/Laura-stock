@@ -1,13 +1,9 @@
 /* ============================================================
    LAUGRASTOK v2.0 — Logique principale
-   Bugs corrigés + navigation + crush + partage
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ============================================================
-     1. UTILITAIRES
-     ============================================================ */
   const $  = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -32,7 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     day: '2-digit', month: '2-digit', year: 'numeric'
   });
 
-  // Toast en HAUT de l'écran (jamais caché par la tab bar)
+  /* ============================================================
+     TOAST — placé en HAUT, jamais caché
+     ============================================================ */
   const toast = (msg, type = 'info') => {
     const old = document.getElementById('lsToast');
     if (old) old.remove();
@@ -42,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     t.textContent = msg;
     t.style.cssText = `
       position: fixed;
-      top: calc(70px + env(safe-area-inset-top, 0px));
+      top: calc(16px + env(safe-area-inset-top, 0px));
       left: 50%;
       transform: translateX(-50%) translateY(-20px);
       background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10a37f' : 'rgba(26,27,35,0.96)'};
@@ -52,13 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
       font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
       font-weight: 500;
-      box-shadow: 0 10px 40px rgba(0,0,0,.45);
+      box-shadow: 0 10px 40px rgba(0,0,0,.55);
       z-index: 2147483647;
       opacity: 0;
       transition: opacity .25s, transform .25s;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
       max-width: 88vw;
       text-align: center;
       pointer-events: none;
@@ -79,18 +77,17 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /* ============================================================
-     2. SPLASH SCREEN
+     SPLASH
      ============================================================ */
   window.addEventListener('load', () => {
     setTimeout(() => {
       $('#splashScreen')?.classList.add('hidden');
     }, 700);
   });
-
   setTimeout(() => $('#splashScreen')?.classList.add('hidden'), 2000);
 
   /* ============================================================
-     3. EFFET PLUIE
+     PLUIE
      ============================================================ */
   (function createRain() {
     const layer = $('#rainLayer');
@@ -108,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   /* ============================================================
-     4. PROFIL UTILISATEUR
+     PROFIL
      ============================================================ */
   const profileModal = $('#profileModal');
   const saveProfileBtn = $('#saveProfileBtn');
@@ -122,10 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (profileSummary) profileSummary.textContent = '—';
     } else {
       profileModal.classList.add('hidden');
-      if (userGreeting)
-        userGreeting.textContent = `Bienvenue, ${userProfile.name} ! ✨`;
-      if (profileSummary)
-        profileSummary.textContent = `${userProfile.name} · ${userProfile.age} ans`;
+      if (userGreeting) userGreeting.textContent = `Bienvenue, ${userProfile.name} ! ✨`;
+      if (profileSummary) profileSummary.textContent = `${userProfile.name} · ${userProfile.age} ans`;
     }
   }
 
@@ -148,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProfile();
 
   /* ============================================================
-     5. THÈME SOMBRE / CLAIR
+     THÈME
      ============================================================ */
   const themeToggle = $('#themeToggle');
   const themeToggle2 = $('#themeToggle2');
@@ -175,11 +170,18 @@ document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
 
   /* ============================================================
-     6. NAVIGATION PAR ONGLETS
+     NAVIGATION PAR ONGLETS
      ============================================================ */
-  const tabBar = $('#tabBar');
   const tabIndicator = $('#tabIndicator');
   const tabButtons = $$('.tab-btn');
+
+  function moveIndicator(btn) {
+    if (!tabIndicator || !btn) return;
+    const btnWidth = btn.offsetWidth;
+    const offset = btn.offsetLeft;
+    tabIndicator.style.transform = `translateX(${offset - 8}px)`;
+    tabIndicator.style.width = btnWidth + 'px';
+  }
 
   function switchTab(tabName) {
     const alreadyActive = document.querySelector('.tab-btn.active')?.dataset.tab === tabName;
@@ -191,15 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
     tabButtons.forEach((btn) => {
       const isActive = btn.dataset.tab === tabName;
       btn.classList.toggle('active', isActive);
-      if (isActive && tabIndicator) {
-        const btnWidth = btn.offsetWidth;
-        const offset = btn.offsetLeft;
-        tabIndicator.style.transform = `translateX(${offset - 8}px)`;
-        tabIndicator.style.width = btnWidth + 'px';
-      }
+      if (isActive) moveIndicator(btn);
     });
 
-    // Scroll en haut UNIQUEMENT si on change vraiment d'onglet
     if (!alreadyActive) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -215,18 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => switchTab('home'), 50);
   window.addEventListener('resize', () => {
     const active = $('.tab-btn.active');
-    if (active) {
-      const btnWidth = active.offsetWidth;
-      const offset = active.offsetLeft;
-      if (tabIndicator) {
-        tabIndicator.style.transform = `translateX(${offset - 8}px)`;
-        tabIndicator.style.width = btnWidth + 'px';
-      }
-    }
+    if (active) moveIndicator(active);
   });
 
   /* ============================================================
-     7. VOCAL & CAMÉRA
+     VOCAL & CAMÉRA
      ============================================================ */
   const recordVoiceBtn = $('#recordVoiceBtn');
   const recordTimer = $('#recordTimer');
@@ -298,12 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       console.error('Erreur micro:', err);
-      if (err.name === 'NotAllowedError')
-        toast('Autorise le micro dans les réglages.', 'error');
-      else if (err.name === 'NotFoundError')
-        toast('Aucun micro détecté.', 'error');
-      else
-        toast('Impossible d\'accéder au micro.', 'error');
+      if (err.name === 'NotAllowedError') toast('Autorise le micro dans les réglages.', 'error');
+      else if (err.name === 'NotFoundError') toast('Aucun micro détecté.', 'error');
+      else toast('Impossible d\'accéder au micro.', 'error');
     }
   }
 
@@ -344,19 +330,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     8. GESTION DES IDÉES
+     IDÉES
      ============================================================ */
   const addBtn = $('#addBtn');
   const ideasList = $('#ideasList');
   let ideas = safeParse('laugra_ideas', []);
   let currentFilter = 'all';
 
-  const CATEGORY_LABELS = {
-    app: 'Dev',
-    story: 'Histoire',
-    video: 'Vidéo',
-    other: 'Autre'
-  };
+  const CATEGORY_LABELS = { app: 'Dev', story: 'Histoire', video: 'Vidéo', other: 'Autre' };
 
   function updateDashboard() {
     const totalEl = $('#totalIdeasCount');
@@ -379,9 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.className = 'idea-card glass-card';
 
     let mediaHTML = '';
-    if (idea.audio) {
-      mediaHTML += `<audio controls preload="metadata" src="${idea.audio}"></audio>`;
-    }
+    if (idea.audio) mediaHTML += `<audio controls preload="metadata" src="${idea.audio}"></audio>`;
     if (idea.media) {
       mediaHTML += idea.mediaType === 'video'
         ? `<div class="media-preview"><video controls preload="metadata" src="${idea.media}"></video></div>`
@@ -428,11 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
       (i.text || '').toLowerCase().includes(search)
     );
 
-    if (currentFilter === 'fav') {
-      filtered = filtered.filter(i => i.fav);
-    } else if (currentFilter !== 'all') {
-      filtered = filtered.filter(i => i.category === currentFilter);
-    }
+    if (currentFilter === 'fav') filtered = filtered.filter(i => i.fav);
+    else if (currentFilter !== 'all') filtered = filtered.filter(i => i.category === currentFilter);
 
     if (filtered.length === 0) {
       ideasList.innerHTML = `
@@ -452,7 +428,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const favList = $('#favList');
     if (!favList) return;
     favList.innerHTML = '';
-
     const favs = ideas.filter(i => i.fav);
     if (favs.length === 0) {
       favList.innerHTML = `
@@ -545,12 +520,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function editIdea(id) {
     const idea = ideas.find(i => i.id === id);
     if (!idea) return;
-
     const newTitle = prompt('Modifier le titre :', idea.title);
     if (newTitle === null) return;
     const newText = prompt('Modifier le contenu :', idea.text || '');
     if (newText === null) return;
-
     idea.title = newTitle.trim() || 'Sans titre';
     idea.text = newText.trim();
     saveIdeas();
@@ -590,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     9. COFFRE SECRET (PIN)
+     COFFRE SECRET
      ============================================================ */
   const pinInput = $('#pinInput');
   const pinInstruction = $('#pinInstruction');
@@ -640,12 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = $('#secretText').value.trim();
     if (!title && !text) return toast('Rien à sauvegarder', 'error');
 
-    secretIdeas.unshift({
-      id: Date.now(),
-      title: title || 'Secret',
-      text,
-      date: nowFR()
-    });
+    secretIdeas.unshift({ id: Date.now(), title: title || 'Secret', text, date: nowFR() });
     localStorage.setItem('laugra_secret_ideas', JSON.stringify(secretIdeas));
     renderSecretIdeas();
     $('#secretTitle').value = '';
@@ -700,12 +668,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     10. ESPACE CRUSH
+     CRUSH
      ============================================================ */
   const crushModal = $('#crushModal');
-  let crushData = safeParse('laugra_crush', {
-    name: '', meet: '', birthday: '', notes: ''
-  });
+  let crushData = safeParse('laugra_crush', { name: '', meet: '', birthday: '', notes: '' });
 
   $('#openCrushBtn')?.addEventListener('click', () => {
     $('#crushName').value = crushData.name || '';
@@ -728,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     11. PARTAGE
+     PARTAGE
      ============================================================ */
   const shareModal = $('#shareModal');
   const sharePreview = $('#sharePreview');
@@ -736,12 +702,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function encodeIdea(idea) {
     const payload = {
-      t: idea.title,
-      x: idea.text,
-      c: idea.category,
-      d: idea.date,
-      a: !!idea.audio,
-      m: !!idea.media
+      t: idea.title, x: idea.text, c: idea.category, d: idea.date,
+      a: !!idea.audio, m: !!idea.media
     };
     try {
       return 'LS:' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
@@ -815,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     12. RECEVOIR UNE IDÉE
+     RECEVOIR
      ============================================================ */
   const receiveModal = $('#receiveModal');
 
@@ -827,7 +789,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#importIdeaBtn')?.addEventListener('click', () => {
     const raw = $('#receiveCode').value.trim();
     if (!raw) return toast('Colle un code d\'abord', 'error');
-
     const parsed = decodeIdea(raw);
     if (!parsed) return toast('Code invalide', 'error');
 
@@ -836,11 +797,8 @@ document.addEventListener('DOMContentLoaded', () => {
       title: parsed.title,
       text: parsed.text,
       category: parsed.category,
-      audio: null,
-      media: null,
-      mediaType: null,
-      fav: false,
-      date: parsed.date
+      audio: null, media: null, mediaType: null,
+      fav: false, date: parsed.date
     });
     saveIdeas();
     renderIdeas();
@@ -850,16 +808,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     13. FERMETURE DES MODALES
+     FERMETURE MODALES
      ============================================================ */
   document.addEventListener('click', (e) => {
     const closeBtn = e.target.closest('[data-close]');
     if (closeBtn) {
-      const id = closeBtn.dataset.close;
-      document.getElementById(id)?.classList.add('hidden');
+      document.getElementById(closeBtn.dataset.close)?.classList.add('hidden');
       return;
     }
-
     if (e.target.classList.contains('modal-overlay')) {
       e.target.classList.add('hidden');
     }
@@ -872,12 +828,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     14. INITIALISATION
+     INIT
      ============================================================ */
   renderIdeas();
   renderFavList();
   updateDashboard();
 
   console.log('%c🚀 LaugraStok v2.0 chargé', 'color:#10a37f;font-weight:bold;font-size:14px');
-
 });

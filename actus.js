@@ -1,6 +1,10 @@
 /* ============================================================
    LAUGRASTOK v2.1 — Section Actus & Infos
-   Sources : freenewsapi.ai, Open-Meteo, calendrier.api.gouv.fr, worldcup26.ir
+   Sources vérifiées qui fonctionnent :
+   - Infos    : RSS France Info via rss2json.com
+   - Météo    : Open-Meteo
+   - Foot     : openfootball JSON (GitHub)
+   - Fériés   : calendrier.api.gouv.fr
    ============================================================ */
 
 (function () {
@@ -31,7 +35,7 @@
 
   async function safeFetch(url, timeoutMs) {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 10000);
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 12000);
     try {
       const res = await fetch(url, { signal: ctrl.signal });
       clearTimeout(timer);
@@ -65,28 +69,38 @@
   }
 
   /* ============================================================
-     1. INFOS GÉNÉRALES
+     1. INFOS — RSS France Info via rss2json
      ============================================================ */
   async function loadGeneralNews() {
     const container = $('#newsContent');
     if (!container) return;
 
-    const data = await safeFetch('https://freenewsapi.ai/v1/search?host=www.france24.com&size=6');
+    // Flux RSS de France Info (monde)
+    const rssUrl = 'https://www.francetvinfo.fr/monde.rss';
+    const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl);
 
-    if (!data || !data.articles || data.articles.length === 0) {
-      showError('Aucune info pour le moment');
+    const data = await safeFetch(apiUrl);
+
+    if (!data || data.status !== 'ok' || !data.items || data.items.length === 0) {
+      showError('Infos indisponibles pour le moment');
       return;
     }
 
-    container.innerHTML = data.articles.map(function (a) {
-      const date = a.published_at
-        ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+    const items = data.items.slice(0, 6);
+
+    container.innerHTML = items.map(function (item) {
+      const title = item.title || 'Sans titre';
+      const link = item.link || '#';
+      const date = item.pubDate
+        ? new Date(item.pubDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
         : '';
+      const source = data.feed?.title || 'France Info';
+
       return `
-        <a href="${a.url}" target="_blank" rel="noopener" class="news-card glass-card">
-          <div class="news-card-title">${a.title || 'Sans titre'}</div>
+        <a href="${link}" target="_blank" rel="noopener" class="news-card glass-card">
+          <div class="news-card-title">${title}</div>
           <div class="news-card-meta">
-            <span>${a.publisher || 'France 24'}</span>
+            <span>${source}</span>
             <span>${date}</span>
           </div>
         </a>`;
@@ -94,7 +108,7 @@
   }
 
   /* ============================================================
-     2. MÉTÉO
+     2. MÉTÉO — Open-Meteo
      ============================================================ */
   async function loadWeather() {
     const container = $('#newsContent');
@@ -151,7 +165,7 @@
   }
 
   /* ============================================================
-     3. JOURS FÉRIÉS
+     3. JOURS FÉRIÉS — calendrier.api.gouv.fr
      ============================================================ */
   async function loadHolidays() {
     const container = $('#newsContent');
@@ -199,41 +213,78 @@
   }
 
   /* ============================================================
-     4. FOOT
+     4. FOOT — openfootball JSON (GitHub, open source)
      ============================================================ */
   async function loadFootball() {
     const container = $('#newsContent');
     if (!container) return;
 
-    const data = await safeFetch('https://worldcup26.ir/get/games');
+    // Championnat anglais Premier League (saison en cours)
+    // Source : https://github.com/openfootball/football.json
+    const urls = [
+      'https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/en.1.json',
+      'https://raw.githubusercontent.com/openfootball/football.json/master/2023-24/en.1.json'
+    ];
 
-    if (!data || !Array.isArray(data) || data.length === 0) {
+    let data = null;
+    for (const u of urls) {
+      data = await safeFetch(u);
+      if (data && data.matchdays) break;
+    }
+
+    if (!data || !data.matchdays) {
       showError('Scores de foot indisponibles');
       return;
     }
 
-    const games = data.slice(0, 8);
+    // Aplatir tous les matchs
+    const allMatches = [];
+    data.matchdays.forEach(function (md) {
+      if (md.matches) {
+        md.matches.forEach(function (m) {
+          allMatches.push({
+            date: m.date,
+            home: m.team1,
+            away: m.team2,
+            scoreHome: m.score ? m.score.ft[0] : null,
+            scoreAway: m.score ? m.score.ft[1] : null,
+            round: md.name
+          });
+        });
+      }
+    });
 
-    container.innerHTML = games.map(function (g) {
-      const home = g.home_team_name || g.home || '?';
-      const away = g.away_team_name || g.away || '?';
-      const hs = g.home_score != null ? g.home_score : '-';
-      const as = g.away_score != null ? g.away_score : '-';
-      const status = g.status || 'À venir';
-      const date = g.date ? new Date(g.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '';
+    if (allMatches.length === 0) {
+      showError('Aucun match trouvé');
+      return;
+    }
+
+    // Trie : les matchs récents en haut
+    allMatches.sort(function (a, b) {
+      return new Date(b.date) - new Date(a.date);
+    });
+
+    const recent = allMatches.slice(0, 10);
+
+    container.innerHTML = recent.map(function (m) {
+      const date = new Date(m.date).toLocaleDateString('fr-FR', {
+        day: '2-digit', month: 'short'
+      });
+      const hs = m.scoreHome != null ? m.scoreHome : '-';
+      const as = m.scoreAway != null ? m.scoreAway : '-';
+      const hasScore = m.scoreHome != null;
 
       return `
         <div class="foot-card glass-card">
           <div class="foot-meta">
-            <span>${g.competition_name || 'Coupe du Monde'}</span>
+            <span>${m.round || 'Premier League'}</span>
             <span>${date}</span>
           </div>
           <div class="foot-score">
-            <div class="foot-team">${home}</div>
-            <div class="foot-nums">${hs} - ${as}</div>
-            <div class="foot-team">${away}</div>
+            <div class="foot-team">${m.home}</div>
+            <div class="foot-nums">${hasScore ? hs + ' - ' + as : 'vs'}</div>
+            <div class="foot-team">${m.away}</div>
           </div>
-          <div class="foot-status">${status}</div>
         </div>`;
     }).join('');
   }
@@ -253,25 +304,26 @@
     else if (filter === 'foot')      promise = loadFootball();
     else if (filter === 'holidays')  promise = loadHolidays();
 
-    Promise.resolve(promise).finally(() => { isLoading = false; });
+    Promise.resolve(promise).finally(function () { isLoading = false; });
   }
 
   /* ============================================================
-     TOUT
+     VUE "TOUT"
      ============================================================ */
   async function loadAll() {
     const container = $('#newsContent');
     if (!container) return;
 
     const [news, weather, foot, holidays] = await Promise.all([
-      safeFetch('https://freenewsapi.ai/v1/search?host=www.france24.com&size=3'),
+      safeFetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://www.francetvinfo.fr/monde.rss')),
       safeFetch('https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current_weather=true&timezone=Europe/Paris'),
-      safeFetch('https://worldcup26.ir/get/games'),
+      safeFetch('https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/en.1.json'),
       safeFetch(`https://calendrier.api.gouv.fr/jours-feries/metropole/${new Date().getFullYear()}.json`)
     ]);
 
     let html = '';
 
+    // --- Météo ---
     if (weather && weather.current_weather) {
       const cw = weather.current_weather;
       const code = cw.weathercode;
@@ -288,46 +340,67 @@
         </div>`;
     }
 
-    if (news && news.articles && news.articles.length > 0) {
+    // --- Infos ---
+    if (news && news.status === 'ok' && news.items && news.items.length > 0) {
       html += `<div class="news-section-title">📰 Infos</div>`;
-      html += news.articles.map(function (a) {
-        const date = a.published_at
-          ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+      html += news.items.slice(0, 3).map(function (item) {
+        const date = item.pubDate
+          ? new Date(item.pubDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
           : '';
         return `
-          <a href="${a.url}" target="_blank" rel="noopener" class="news-card glass-card">
-            <div class="news-card-title">${a.title || 'Sans titre'}</div>
+          <a href="${item.link}" target="_blank" rel="noopener" class="news-card glass-card">
+            <div class="news-card-title">${item.title || ''}</div>
             <div class="news-card-meta">
-              <span>${a.publisher || 'France 24'}</span>
+              <span>France Info</span>
               <span>${date}</span>
             </div>
           </a>`;
       }).join('');
     }
 
-    if (foot && Array.isArray(foot) && foot.length > 0) {
-      html += `<div class="news-section-title">⚽ Foot</div>`;
-      html += foot.slice(0, 3).map(function (g) {
-        const home = g.home_team_name || g.home || '?';
-        const away = g.away_team_name || g.away || '?';
-        const hs = g.home_score != null ? g.home_score : '-';
-        const as = g.away_score != null ? g.away_score : '-';
-        return `
-          <div class="foot-card glass-card">
-            <div class="foot-score">
-              <div class="foot-team">${home}</div>
-              <div class="foot-nums">${hs} - ${as}</div>
-              <div class="foot-team">${away}</div>
-            </div>
-          </div>`;
-      }).join('');
+    // --- Foot ---
+    if (foot && foot.matchdays) {
+      const allMatches = [];
+      foot.matchdays.forEach(function (md) {
+        if (md.matches) {
+          md.matches.forEach(function (m) {
+            allMatches.push({
+              date: m.date,
+              home: m.team1,
+              away: m.team2,
+              hs: m.score ? m.score.ft[0] : null,
+              as: m.score ? m.score.ft[1] : null
+            });
+          });
+        }
+      });
+      allMatches.sort(function (a, b) {
+        return new Date(b.date) - new Date(a.date);
+      });
+
+      if (allMatches.length > 0) {
+        html += `<div class="news-section-title">⚽ Foot</div>`;
+        html += allMatches.slice(0, 3).map(function (m) {
+          const hs = m.hs != null ? m.hs : '-';
+          const as = m.as != null ? m.as : '-';
+          const hasScore = m.hs != null;
+          return `
+            <div class="foot-card glass-card">
+              <div class="foot-score">
+                <div class="foot-team">${m.home}</div>
+                <div class="foot-nums">${hasScore ? hs + ' - ' + as : 'vs'}</div>
+                <div class="foot-team">${m.away}</div>
+              </div>
+            </div>`;
+        }).join('');
+      }
     }
 
+    // --- Fériés ---
     if (holidays) {
-      const entries = Object.entries(holidays);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const upcoming = entries
+      const upcoming = Object.entries(holidays)
         .map(function (e) { return { date: new Date(e[0]), name: e[1] }; })
         .filter(function (e) { return e.date >= today; })
         .slice(0, 2);
@@ -345,7 +418,7 @@
       }
     }
 
-    if (!html) html = `<div class="empty-state"><p>Aucune info disponible</p></div>`;
+    if (!html) html = `<div class="empty-state"><p>Aucune info disponible. Vérifie ta connexion.</p></div>`;
     container.innerHTML = html;
   }
 
@@ -363,7 +436,7 @@
       });
     });
 
-    // Charge "Tout" automatiquement quand on ouvre l'onglet
+    // Auto-charge "Tout" quand on ouvre l'onglet
     const newsTab = document.getElementById('tab-news');
     if (newsTab) {
       let loaded = false;
@@ -375,6 +448,8 @@
       });
       obs.observe(newsTab, { attributes: true, attributeFilter: ['class'] });
     }
+
+    console.log('📰 Actus prêt');
   }
 
   if (document.readyState === 'loading') {

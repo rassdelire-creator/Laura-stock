@@ -1,7 +1,7 @@
 {
   "name": "LaugraStok",
   "short_name": "LaugraStok",
-  "description": "Capture tes idées, organise-les et partage-les. Avec coffre secret, jeux et vocal.",
+  "description": "Capture tes idées, organise-les et partage-les. Avec coffre secret et actus.",
   "id": "laugrastok-app",
   "lang": "fr",
   "dir": "ltr",
@@ -33,9 +33,9 @@
       "url": "./index.html?action=new"
     },
     {
-      "name": "Zone Arcade",
-      "short_name": "Jeux",
-      "url": "./index.html?action=games"
+      "name": "Actus",
+      "short_name": "Actus",
+      "url": "./index.html?action=news"
     }
   ]
 }

@@ -28,17 +28,32 @@ document.addEventListener('DOMContentLoaded', () => {
     || { tetris: 0, snake: 0 };
 
   /* ============================================================
-     CANVAS HD (rendu net sur mobile Retina)
+     CANVAS HD — dimensions recalculées à chaque lancement
      ============================================================ */
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  const CSS_W = canvas.clientWidth || 300;
-  const CSS_H = canvas.clientHeight || 400;
+  let CSS_W = 300;
+  let CSS_H = 400;
 
-  canvas.width = CSS_W * DPR;
-  canvas.height = CSS_H * DPR;
-  canvas.style.width = CSS_W + 'px';
-  canvas.style.height = CSS_H + 'px';
-  ctx.scale(DPR, DPR);
+  function resizeCanvas() {
+    // Force le navigateur à recalculer le layout avant de lire
+    void canvas.offsetWidth;
+
+    const parentWidth = canvas.parentElement.clientWidth || 300;
+    const targetWidth  = Math.min(parentWidth - 20, 340);
+    const targetHeight = Math.round(targetWidth * 1.35);
+
+    CSS_W = targetWidth;
+    CSS_H = targetHeight;
+
+    canvas.width  = CSS_W * DPR;
+    canvas.height = CSS_H * DPR;
+    canvas.style.width  = CSS_W + 'px';
+    canvas.style.height = CSS_H + 'px';
+
+    // Reset le transform puis applique le DPR
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(DPR, DPR);
+  }
 
   /* ============================================================
      SCORE
@@ -75,8 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
     isPaused = false;
     updateScore(0);
     showHighScore();
+    resizeCanvas();
     if (currentGame === 'tetris') startTetris();
-    else startSnake();
+    else if (currentGame === 'snake') startSnake();
   }
 
   /* ============================================================
@@ -92,29 +108,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const OFF_Y = (CSS_H - BOARD_H) / 2;
 
     const SHAPES = [
-      // I
       [[1,1,1,1]],
-      // O
       [[1,1],[1,1]],
-      // T
       [[0,1,0],[1,1,1]],
-      // S
       [[0,1,1],[1,1,0]],
-      // Z
       [[1,1,0],[0,1,1]],
-      // J
       [[1,0,0],[1,1,1]],
-      // L
       [[0,0,1],[1,1,1]]
     ];
     const COLORS = [
-      '#22d3ee', // I cyan
-      '#fbbf24', // O jaune
-      '#a855f7', // T violet
-      '#10a37f', // S vert
-      '#ef4444', // Z rouge
-      '#3b82f6', // J bleu
-      '#f97316'  // L orange
+      '#22d3ee', '#fbbf24', '#a855f7', '#10a37f', '#ef4444', '#3b82f6', '#f97316'
     ];
 
     let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -166,14 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const rotated = old[0].map((_, i) => old.map(row => row[i]).reverse());
       p.shape = rotated;
 
-      // Wall kicks simples
       const kicks = [0, 1, -1, 2, -2];
       for (const k of kicks) {
         p.x += k;
         if (!collide(board, p)) return;
         p.x -= k;
       }
-      // Restaure
       p.shape = old;
     }
 
@@ -195,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const basePoints = [0, 100, 300, 500, 800][full.length] || 800;
         updateScore(parseInt(scoreEl.textContent) + basePoints * level);
 
-        // Niveau = plus vite
         level = 1 + Math.floor(linesClearedTotal / 10);
         dropInterval = Math.max(120, 550 - (level - 1) * 45);
 
@@ -227,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
       gameOver = true;
       stopGame();
 
-      // Message élégant sur le canvas
       ctx.fillStyle = 'rgba(0,0,0,0.75)';
       ctx.fillRect(0, 0, CSS_W, CSS_H);
 
@@ -253,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
       dropCounter = 0;
     }
 
-    /* ------- CONTRÔLES ------- */
     function handleAction(action) {
       if (gameOver || isPaused) return;
       if (!current) return;
@@ -272,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     bindControls(handleAction, 'tetris');
 
-    /* ------- RENDU ------- */
     function drawBlock(x, y, color, alpha = 1, glow = false) {
       ctx.save();
       ctx.globalAlpha = alpha;
@@ -282,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.shadowBlur = 12;
       }
 
-      // Bloc principal avec léger dégradé
       const grad = ctx.createLinearGradient(x, y, x + BLOCK, y + BLOCK);
       grad.addColorStop(0, color);
       grad.addColorStop(1, shadeColor(color, -25));
@@ -291,7 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
       roundRect(ctx, x + 1, y + 1, BLOCK - 2, BLOCK - 2, 3);
       ctx.fill();
 
-      // Reflet supérieur
       ctx.fillStyle = 'rgba(255,255,255,0.18)';
       roundRect(ctx, x + 2, y + 2, BLOCK - 4, (BLOCK - 4) * 0.35, 2);
       ctx.fill();
@@ -342,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    /* ------- BOUCLE ------- */
     function loop(time = 0) {
       const dt = time - lastTime;
       lastTime = time;
@@ -355,13 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Fond
       ctx.fillStyle = '#0a0b10';
       ctx.fillRect(0, 0, CSS_W, CSS_H);
 
       drawGrid();
 
-      // Blocs posés
       board.forEach((row, r) => {
         row.forEach((color, c) => {
           if (color) {
@@ -379,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (flashTimer > 0) flashTimer -= dt;
 
-      // Ghost + pièce courante
       if (!gameOver && current) {
         drawGhost();
         current.shape.forEach((row, r) => {
@@ -396,13 +387,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Niveau en haut à droite
       ctx.fillStyle = 'rgba(255,255,255,0.45)';
       ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(`Niv. ${level}`, CSS_W - 8, 16);
 
-      // Pause
       if (isPaused && !gameOver) {
         ctx.fillStyle = 'rgba(0,0,0,0.65)';
         ctx.fillRect(0, 0, CSS_W, CSS_H);
@@ -415,7 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
       gameLoopId = requestAnimationFrame(loop);
     }
 
-    /* ------- INIT ------- */
     current = newPiece();
     next = newPiece();
     lastTime = 0;
@@ -452,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const free = [];
       for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
-          if (!snake?.some(s => s.x === x && s.y === y)) free.push({ x, y });
+          if (!snake.some(s => s.x === x && s.y === y)) free.push({ x, y });
         }
       }
       if (free.length === 0) return { x: 0, y: 0 };
@@ -493,11 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
       dir = nextDir;
       const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
-      // Mur
       if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
         return endGame();
       }
-      // Corps (sauf la queue qui va bouger)
       if (snake.slice(0, -1).some(s => s.x === head.x && s.y === head.y)) {
         return endGame();
       }
@@ -505,7 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
       snake.unshift(head);
 
       if (head.x === food.x && head.y === food.y) {
-        // Mange : particle burst
         for (let i = 0; i < 10; i++) {
           particleBurst.push({
             x: OFF_X + (food.x + 0.5) * TILE,
@@ -518,19 +503,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateScore(parseInt(scoreEl.textContent) + 10);
         food = spawnFood();
-        // Accélération progressive
         moveInterval = Math.max(70, 140 - Math.floor(parseInt(scoreEl.textContent) / 50) * 8);
       } else {
         snake.pop();
       }
     }
 
-    /* ------- RENDU ------- */
     function drawBackground() {
       ctx.fillStyle = '#0a0b10';
       ctx.fillRect(0, 0, CSS_W, CSS_H);
 
-      // Damier subtil
       for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
           if ((x + y) % 2 === 0) {
@@ -540,7 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Bordure
       ctx.strokeStyle = 'rgba(255,255,255,0.08)';
       ctx.lineWidth = 1;
       ctx.strokeRect(OFF_X - 0.5, OFF_Y - 0.5, BOARD_W + 1, BOARD_H + 1);
@@ -581,7 +562,6 @@ document.addEventListener('DOMContentLoaded', () => {
           ctx.shadowBlur = 12;
         }
 
-        // Dégradé du corps
         const t = i / Math.max(1, snake.length - 1);
         const c1 = isHead ? '#34d8a8' : mixColor('#10a37f', '#0b6d55', t);
         const c2 = isHead ? '#0d8a6c' : mixColor('#0b6d55', '#064e3b', t);
@@ -594,7 +574,6 @@ document.addEventListener('DOMContentLoaded', () => {
         roundRect(ctx, x + 1, y + 1, TILE - 2, TILE - 2, isHead ? 6 : 4);
         ctx.fill();
 
-        // Yeux
         if (isHead) {
           ctx.fillStyle = '#fff';
           const eyeR = Math.max(1.5, TILE * 0.09);
@@ -639,7 +618,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    /* ------- BOUCLE ------- */
     let lastFrameTime = 0;
 
     function loop(time = 0) {
@@ -659,7 +637,6 @@ document.addEventListener('DOMContentLoaded', () => {
       drawSnake();
       drawParticles(dt);
 
-      // Score en haut
       ctx.fillStyle = 'rgba(255,255,255,0.45)';
       ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'right';
@@ -729,7 +706,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (keyHandler) window.removeEventListener('keydown', keyHandler);
 
     keyHandler = (e) => {
-      // Ne fonctionne que si l'onglet Jeux est actif
       const gamesTab = document.getElementById('tab-games');
       if (!gamesTab || !gamesTab.classList.contains('active')) return;
 
@@ -775,27 +751,33 @@ document.addEventListener('DOMContentLoaded', () => {
       gameTabs.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentGame = btn.dataset.game;
-      // Reset des styles pour bien réadapter le canvas
-      startGame();
+      // Délai pour laisser le layout se stabiliser avant resize
+      setTimeout(startGame, 40);
     });
   });
 
   /* ============================================================
      BOUTON LANCER
      ============================================================ */
-  startBtn?.addEventListener('click', startGame);
+  startBtn?.addEventListener('click', () => {
+    setTimeout(startGame, 20);
+  });
 
   /* ============================================================
      PAUSE QUAND ON QUITTE L'ONGLET
      ============================================================ */
   const gamesTabEl = document.getElementById('tab-games');
-  const tabObserver = new MutationObserver(() => {
-    const isActive = gamesTabEl.classList.contains('active');
-    if (!isActive && gameLoopId) {
-      stopGame();
-    }
-  });
   if (gamesTabEl) {
+    const tabObserver = new MutationObserver(() => {
+      const isActive = gamesTabEl.classList.contains('active');
+      if (!isActive && gameLoopId) {
+        stopGame();
+      }
+      if (isActive && !gameLoopId) {
+        // Réaffiche l'écran d'attente quand on revient
+        setTimeout(drawIdleScreen, 50);
+      }
+    });
     tabObserver.observe(gamesTabEl, { attributes: true, attributeFilter: ['class'] });
   }
 
@@ -803,6 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
      INIT : premier rendu (écran d'attente)
      ============================================================ */
   function drawIdleScreen() {
+    resizeCanvas();
     ctx.fillStyle = '#0a0b10';
     ctx.fillRect(0, 0, CSS_W, CSS_H);
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
@@ -810,7 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.textAlign = 'center';
     ctx.fillText('Appuie sur "Lancer" pour jouer', CSS_W / 2, CSS_H / 2);
   }
-  drawIdleScreen();
+  setTimeout(drawIdleScreen, 100);
   showHighScore();
 
   console.log('%c🎮 Jeux Arcade chargés', 'color:#10a37f;font-weight:bold;font-size:13px');

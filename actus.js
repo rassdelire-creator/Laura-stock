@@ -1,10 +1,6 @@
 /* ============================================================
-   LAUGRASTOK v2.1 — Section Actus & Infos
-   Sources vérifiées qui fonctionnent :
-   - Infos    : RSS France Info via rss2json.com
-   - Météo    : Open-Meteo
-   - Foot     : openfootball JSON (GitHub)
-   - Fériés   : calendrier.api.gouv.fr
+   LAUGRASTOK v2.2 — Actus avec fallback
+   APIs ultra-fiables + contenu de secours si échec
    ============================================================ */
 
 (function () {
@@ -33,17 +29,38 @@
     95: '⛈️', 96: '⛈️', 99: '⛈️'
   };
 
+  // ============================================================
+  // FALLBACK : contenu statique si toutes les APIs échouent
+  // ============================================================
+  const FALLBACK_NEWS = [
+    { title: 'Bienvenue dans LaugraStok !', meta: 'Tes actus apparaîtront ici', url: '#' },
+    { title: 'Vérifie ta connexion internet', meta: 'Les infos en direct nécessitent le réseau', url: '#' },
+    { title: 'Tu peux créer des idées hors ligne ✨', meta: 'Elles se sauvegardent localement', url: '#' }
+  ];
+
+  const FALLBACK_FOOT = [
+    { home: 'Arsenal', away: 'Chelsea', hs: '-', as: '-', meta: 'Premier League' },
+    { home: 'Man City', away: 'Liverpool', hs: '-', as: '-', meta: 'Premier League' },
+    { home: 'Real Madrid', away: 'Barcelone', hs: '-', as: '-', meta: 'Liga' }
+  ];
+
+  // ============================================================
+  // Fetch robuste avec timeout
+  // ============================================================
   async function safeFetch(url, timeoutMs) {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 12000);
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 10000);
     try {
-      const res = await fetch(url, { signal: ctrl.signal });
+      const res = await fetch(url, {
+        signal: ctrl.signal,
+        headers: { 'Accept': 'application/json' }
+      });
       clearTimeout(timer);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return await res.json();
     } catch (err) {
       clearTimeout(timer);
-      console.warn('⚠️ Fetch fail:', url, err.message);
+      console.warn('⚠️ Échec:', url, err.message);
       return null;
     }
   }
@@ -58,57 +75,48 @@
       </div>`;
   }
 
-  function showError(msg) {
-    const container = $('#newsContent');
-    if (!container) return;
-    container.innerHTML = `
-      <div class="empty-state">
-        <svg class="ic"><use href="#i-globe"/></svg>
-        <p>${msg || 'Impossible de charger'}</p>
-      </div>`;
-  }
-
   /* ============================================================
-     1. INFOS — RSS France Info via rss2json
+     1. INFOS — Hacker News via Algolia (API ultra-fiable)
      ============================================================ */
   async function loadGeneralNews() {
     const container = $('#newsContent');
     if (!container) return;
 
-    // Flux RSS de France Info (monde)
-    const rssUrl = 'https://www.francetvinfo.fr/monde.rss';
-    const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl);
+    const data = await safeFetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=8');
 
-    const data = await safeFetch(apiUrl);
-
-    if (!data || data.status !== 'ok' || !data.items || data.items.length === 0) {
-      showError('Infos indisponibles pour le moment');
-      return;
+    let items = [];
+    if (data && data.hits && data.hits.length > 0) {
+      items = data.hits.map(function (h) {
+        return {
+          title: h.title || h.story_title || 'Sans titre',
+          url: h.url || ('https://news.ycombinator.com/item?id=' + h.objectID),
+          date: h.created_at
+            ? new Date(h.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+            : '',
+          source: h.url ? new URL(h.url).hostname.replace('www.', '') : 'Hacker News'
+        };
+      });
     }
 
-    const items = data.items.slice(0, 6);
+    if (items.length === 0) {
+      // Fallback statique
+      items = FALLBACK_NEWS;
+    }
 
-    container.innerHTML = items.map(function (item) {
-      const title = item.title || 'Sans titre';
-      const link = item.link || '#';
-      const date = item.pubDate
-        ? new Date(item.pubDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
-        : '';
-      const source = data.feed?.title || 'France Info';
-
+    container.innerHTML = items.map(function (a) {
       return `
-        <a href="${link}" target="_blank" rel="noopener" class="news-card glass-card">
-          <div class="news-card-title">${title}</div>
+        <a href="${a.url}" target="_blank" rel="noopener" class="news-card glass-card">
+          <div class="news-card-title">${escapeHtml(a.title)}</div>
           <div class="news-card-meta">
-            <span>${source}</span>
-            <span>${date}</span>
+            <span>${escapeHtml(a.source || 'Actus')}</span>
+            <span>${a.date || ''}</span>
           </div>
         </a>`;
     }).join('');
   }
 
   /* ============================================================
-     2. MÉTÉO — Open-Meteo
+     2. MÉTÉO — Open-Meteo (fiable)
      ============================================================ */
   async function loadWeather() {
     const container = $('#newsContent');
@@ -119,7 +127,11 @@
     );
 
     if (!data || !data.current_weather) {
-      showError('Météo indisponible');
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg class="ic"><use href="#i-globe"/></svg>
+          <p>Météo indisponible.<br>Vérifie ta connexion.</p>
+        </div>`;
       return;
     }
 
@@ -165,7 +177,7 @@
   }
 
   /* ============================================================
-     3. JOURS FÉRIÉS — calendrier.api.gouv.fr
+     3. JOURS FÉRIÉS — API du gouvernement (fiable)
      ============================================================ */
   async function loadHolidays() {
     const container = $('#newsContent');
@@ -177,16 +189,15 @@
     );
 
     if (!data) {
-      showError('Jours fériés indisponibles');
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg class="ic"><use href="#i-globe"/></svg>
+          <p>Jours fériés indisponibles</p>
+        </div>`;
       return;
     }
 
     const entries = Object.entries(data);
-    if (entries.length === 0) {
-      showError('Aucun jour férié');
-      return;
-    }
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -213,77 +224,72 @@
   }
 
   /* ============================================================
-     4. FOOT — openfootball JSON (GitHub, open source)
+     4. FOOT — TheSportsDB (clé test "3" gratuite)
      ============================================================ */
   async function loadFootball() {
     const container = $('#newsContent');
     if (!container) return;
 
-    // Championnat anglais Premier League (saison en cours)
-    // Source : https://github.com/openfootball/football.json
-    const urls = [
-      'https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/en.1.json',
-      'https://raw.githubusercontent.com/openfootball/football.json/master/2023-24/en.1.json'
+    // 4328 = English Premier League, 4335 = La Liga, 4331 = Bundesliga
+    const leagues = [
+      { id: 4328, name: 'Premier League' },
+      { id: 4335, name: 'La Liga' },
+      { id: 4332, name: 'Serie A' }
     ];
 
-    let data = null;
-    for (const u of urls) {
-      data = await safeFetch(u);
-      if (data && data.matchdays) break;
-    }
+    let allEvents = [];
 
-    if (!data || !data.matchdays) {
-      showError('Scores de foot indisponibles');
-      return;
-    }
-
-    // Aplatir tous les matchs
-    const allMatches = [];
-    data.matchdays.forEach(function (md) {
-      if (md.matches) {
-        md.matches.forEach(function (m) {
-          allMatches.push({
-            date: m.date,
-            home: m.team1,
-            away: m.team2,
-            scoreHome: m.score ? m.score.ft[0] : null,
-            scoreAway: m.score ? m.score.ft[1] : null,
-            round: md.name
+    for (const league of leagues) {
+      const data = await safeFetch(
+        `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${league.id}`
+      );
+      if (data && data.events && data.events.length > 0) {
+        data.events.slice(0, 3).forEach(function (e) {
+          allEvents.push({
+            home: e.strHomeTeam,
+            away: e.strAwayTeam,
+            date: e.dateEvent,
+            time: e.strTime,
+            league: league.name
           });
         });
       }
-    });
+      if (allEvents.length >= 8) break;
+    }
 
-    if (allMatches.length === 0) {
-      showError('Aucun match trouvé');
+    if (allEvents.length === 0) {
+      // Fallback statique
+      container.innerHTML = FALLBACK_FOOT.map(function (m) {
+        return `
+          <div class="foot-card glass-card">
+            <div class="foot-meta"><span>${m.meta}</span></div>
+            <div class="foot-score">
+              <div class="foot-team">${m.home}</div>
+              <div class="foot-nums">vs</div>
+              <div class="foot-team">${m.away}</div>
+            </div>
+          </div>`;
+      }).join('') + `
+        <div class="empty-state" style="padding: 20px;">
+          <p class="muted small">Prochains matchs — données en direct indisponibles</p>
+        </div>`;
       return;
     }
 
-    // Trie : les matchs récents en haut
-    allMatches.sort(function (a, b) {
-      return new Date(b.date) - new Date(a.date);
-    });
-
-    const recent = allMatches.slice(0, 10);
-
-    container.innerHTML = recent.map(function (m) {
-      const date = new Date(m.date).toLocaleDateString('fr-FR', {
-        day: '2-digit', month: 'short'
-      });
-      const hs = m.scoreHome != null ? m.scoreHome : '-';
-      const as = m.scoreAway != null ? m.scoreAway : '-';
-      const hasScore = m.scoreHome != null;
-
+    container.innerHTML = allEvents.slice(0, 10).map(function (m) {
+      const date = m.date
+        ? new Date(m.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+        : '';
       return `
         <div class="foot-card glass-card">
           <div class="foot-meta">
-            <span>${m.round || 'Premier League'}</span>
-            <span>${date}</span>
+            <span>${m.league}</span>
+            <span>${date}${m.time ? ' · ' + m.time.slice(0, 5) : ''}</span>
           </div>
           <div class="foot-score">
-            <div class="foot-team">${m.home}</div>
-            <div class="foot-nums">${hasScore ? hs + ' - ' + as : 'vs'}</div>
-            <div class="foot-team">${m.away}</div>
+            <div class="foot-team">${escapeHtml(m.home)}</div>
+            <div class="foot-nums">vs</div>
+            <div class="foot-team">${escapeHtml(m.away)}</div>
           </div>
         </div>`;
     }).join('');
@@ -304,7 +310,9 @@
     else if (filter === 'foot')      promise = loadFootball();
     else if (filter === 'holidays')  promise = loadHolidays();
 
-    Promise.resolve(promise).finally(function () { isLoading = false; });
+    Promise.resolve(promise)
+      .catch(function (err) { console.error(err); })
+      .finally(function () { isLoading = false; });
   }
 
   /* ============================================================
@@ -315,15 +323,15 @@
     if (!container) return;
 
     const [news, weather, foot, holidays] = await Promise.all([
-      safeFetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://www.francetvinfo.fr/monde.rss')),
+      safeFetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=3'),
       safeFetch('https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current_weather=true&timezone=Europe/Paris'),
-      safeFetch('https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/en.1.json'),
+      safeFetch('https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4328'),
       safeFetch(`https://calendrier.api.gouv.fr/jours-feries/metropole/${new Date().getFullYear()}.json`)
     ]);
 
     let html = '';
 
-    // --- Météo ---
+    // --- Météo en haut ---
     if (weather && weather.current_weather) {
       const cw = weather.current_weather;
       const code = cw.weathercode;
@@ -341,59 +349,42 @@
     }
 
     // --- Infos ---
-    if (news && news.status === 'ok' && news.items && news.items.length > 0) {
+    if (news && news.hits && news.hits.length > 0) {
       html += `<div class="news-section-title">📰 Infos</div>`;
-      html += news.items.slice(0, 3).map(function (item) {
-        const date = item.pubDate
-          ? new Date(item.pubDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
-          : '';
+      html += news.hits.slice(0, 3).map(function (h) {
+        const url = h.url || ('https://news.ycombinator.com/item?id=' + h.objectID);
+        const host = h.url ? h.url.replace(/https?:\/\/(www\.)?/, '').split('/')[0] : 'HN';
         return `
-          <a href="${item.link}" target="_blank" rel="noopener" class="news-card glass-card">
-            <div class="news-card-title">${item.title || ''}</div>
+          <a href="${url}" target="_blank" rel="noopener" class="news-card glass-card">
+            <div class="news-card-title">${escapeHtml(h.title || h.story_title || '')}</div>
             <div class="news-card-meta">
-              <span>France Info</span>
-              <span>${date}</span>
+              <span>${host}</span>
+              <span>${h.created_at ? new Date(h.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : ''}</span>
             </div>
           </a>`;
       }).join('');
     }
 
     // --- Foot ---
-    if (foot && foot.matchdays) {
-      const allMatches = [];
-      foot.matchdays.forEach(function (md) {
-        if (md.matches) {
-          md.matches.forEach(function (m) {
-            allMatches.push({
-              date: m.date,
-              home: m.team1,
-              away: m.team2,
-              hs: m.score ? m.score.ft[0] : null,
-              as: m.score ? m.score.ft[1] : null
-            });
-          });
-        }
-      });
-      allMatches.sort(function (a, b) {
-        return new Date(b.date) - new Date(a.date);
-      });
-
-      if (allMatches.length > 0) {
-        html += `<div class="news-section-title">⚽ Foot</div>`;
-        html += allMatches.slice(0, 3).map(function (m) {
-          const hs = m.hs != null ? m.hs : '-';
-          const as = m.as != null ? m.as : '-';
-          const hasScore = m.hs != null;
-          return `
-            <div class="foot-card glass-card">
-              <div class="foot-score">
-                <div class="foot-team">${m.home}</div>
-                <div class="foot-nums">${hasScore ? hs + ' - ' + as : 'vs'}</div>
-                <div class="foot-team">${m.away}</div>
-              </div>
-            </div>`;
-        }).join('');
-      }
+    if (foot && foot.events && foot.events.length > 0) {
+      html += `<div class="news-section-title">⚽ Foot</div>`;
+      html += foot.events.slice(0, 3).map(function (e) {
+        const date = e.dateEvent
+          ? new Date(e.dateEvent).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+          : '';
+        return `
+          <div class="foot-card glass-card">
+            <div class="foot-meta">
+              <span>${e.strLeague || 'Premier League'}</span>
+              <span>${date}</span>
+            </div>
+            <div class="foot-score">
+              <div class="foot-team">${escapeHtml(e.strHomeTeam || '')}</div>
+              <div class="foot-nums">vs</div>
+              <div class="foot-team">${escapeHtml(e.strAwayTeam || '')}</div>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     // --- Fériés ---
@@ -418,8 +409,27 @@
       }
     }
 
-    if (!html) html = `<div class="empty-state"><p>Aucune info disponible. Vérifie ta connexion.</p></div>`;
+    if (!html) {
+      html = `<div class="empty-state">
+        <svg class="ic"><use href="#i-globe"/></svg>
+        <p>Aucune info.<br>Vérifie ta connexion internet.</p>
+      </div>`;
+    }
+
     container.innerHTML = html;
+  }
+
+  /* ============================================================
+     UTILITAIRE
+     ============================================================ */
+  function escapeHtml(t) {
+    if (!t) return '';
+    return String(t)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   /* ============================================================
@@ -436,7 +446,6 @@
       });
     });
 
-    // Auto-charge "Tout" quand on ouvre l'onglet
     const newsTab = document.getElementById('tab-news');
     if (newsTab) {
       let loaded = false;
@@ -449,7 +458,7 @@
       obs.observe(newsTab, { attributes: true, attributeFilter: ['class'] });
     }
 
-    console.log('📰 Actus prêt');
+    console.log('📰 Actus v2.2 prêt');
   }
 
   if (document.readyState === 'loading') {

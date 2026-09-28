@@ -1,16 +1,41 @@
 {
   "name": "LaugraStok",
   "short_name": "LaugraStok",
+  "description": "Capture tes idées, organise-les et partage-les. Avec coffre secret, jeux et vocal.",
+  "id": "laugrastok-app",
+  "lang": "fr",
+  "dir": "ltr",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#090a0f",
   "theme_color": "#090a0f",
+  "categories": ["productivity", "utilities", "lifestyle"],
   "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle idée",
+      "short_name": "Idée",
+      "url": "./index.html?action=new"
+    },
+    {
+      "name": "Zone Arcade",
+      "short_name": "Jeux",
+      "url": "./index.html?action=games"
     }
   ]
 }

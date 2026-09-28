@@ -3,9 +3,6 @@
    Glass morphism + Apple polish + vagues + gouttes de pluie
    ============================================================ */
 
-/* ============================================================
-   1. VARIABLES
-   ============================================================ */
 :root {
   --bg: #0b0c10;
   --bg-2: #0f1015;
@@ -58,9 +55,6 @@
   --shadow-tab: 0 -8px 32px rgba(100, 116, 139, 0.15);
 }
 
-/* ============================================================
-   2. RESET
-   ============================================================ */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -68,9 +62,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   font-family: var(--font);
@@ -87,9 +79,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================================================
-   3. ICÔNES SVG
-   ============================================================ */
 .ic {
   width: 20px;
   height: 20px;
@@ -103,9 +92,7 @@ body {
 .ic-lg { width: 24px; height: 24px; }
 .ic-xl { width: 32px; height: 32px; }
 
-/* ============================================================
-   4. ARRIÈRE-PLAN : BULLES + GOUTTES DE PLUIE
-   ============================================================ */
+/* ---------- FOND ---------- */
 .glass-bg {
   position: fixed;
   inset: 0;
@@ -147,7 +134,6 @@ body {
   100% { transform: translate3d(0, -50px, 0) scale(1.12); }
 }
 
-/* --- Effet gouttes de pluie (fin, discret) --- */
 .rain {
   position: absolute;
   inset: 0;
@@ -183,9 +169,7 @@ body {
   100% { transform: translate3d(0, 110vh, 0); opacity: 0; }
 }
 
-/* ============================================================
-   5. CARTES EN VERRE
-   ============================================================ */
+/* ---------- CARTES VERRE ---------- */
 .glass-card {
   background: var(--card-bg);
   backdrop-filter: blur(22px) saturate(170%);
@@ -200,7 +184,6 @@ body {
   transition: border-color 0.3s var(--ease), transform 0.25s var(--ease);
 }
 
-/* Reflet supérieur subtil (effet verre) */
 .glass-card::before {
   content: '';
   position: absolute;
@@ -220,9 +203,7 @@ body {
     transparent 100%);
 }
 
-/* ============================================================
-   6. LAYOUT PRINCIPAL
-   ============================================================ */
+/* ---------- LAYOUT ---------- */
 .app-container {
   width: 100%;
   max-width: 480px;
@@ -238,10 +219,7 @@ header {
   padding: 4px 2px;
 }
 
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
+.header-actions { display: flex; gap: 8px; }
 
 h1 {
   font-size: 1.25rem;
@@ -269,9 +247,6 @@ h1 {
   margin-top: 3px;
 }
 
-/* ============================================================
-   7. BOUTONS ICÔNES
-   ============================================================ */
 .icon-btn {
   background: var(--card-bg);
   backdrop-filter: blur(12px);
@@ -289,29 +264,18 @@ h1 {
   box-shadow: var(--shadow-soft);
 }
 
-.icon-btn:hover {
-  transform: translateY(-2px) scale(1.04);
-  border-color: var(--border-strong);
-}
-.icon-btn:active {
-  transform: scale(0.94);
-}
+.icon-btn:hover { transform: translateY(-2px) scale(1.04); border-color: var(--border-strong); }
+.icon-btn:active { transform: scale(0.94); }
 
-/* ============================================================
-   8. TABS (contenu)
-   ============================================================ */
-.tab-content {
-  position: relative;
-}
+/* ---------- TABS CONTENU ---------- */
+.tab-content { position: relative; }
 
 .tab-page {
   display: none;
   animation: fadeSlideIn 0.35s var(--ease) both;
 }
 
-.tab-page.active {
-  display: block;
-}
+.tab-page.active { display: block; }
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -329,13 +293,9 @@ h1 {
   padding: 2px 4px;
 }
 
-.tab-title .ic {
-  color: var(--accent);
-}
+.tab-title .ic { color: var(--accent); }
 
-/* ============================================================
-   9. TAB BAR (bas de l'écran, style WhatsApp/iOS)
-   ============================================================ */
+/* ---------- TAB BAR ---------- */
 .tab-bar {
   position: fixed;
   bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -377,25 +337,11 @@ h1 {
   z-index: 2;
 }
 
-.tab-btn .ic {
-  width: 22px;
-  height: 22px;
-  transition: transform 0.25s var(--ease-bounce);
-}
+.tab-btn .ic { width: 22px; height: 22px; transition: transform 0.25s var(--ease-bounce); }
+.tab-btn.active { color: var(--accent); }
+.tab-btn.active .ic { transform: scale(1.12); }
+.tab-btn:active .ic { transform: scale(0.9); }
 
-.tab-btn.active {
-  color: var(--accent);
-}
-
-.tab-btn.active .ic {
-  transform: scale(1.12);
-}
-
-.tab-btn:active .ic {
-  transform: scale(0.9);
-}
-
-/* Indicateur animé (pilule en verre derrière l'onglet actif) */
 .tab-indicator {
   position: absolute;
   top: 8px;
@@ -410,9 +356,7 @@ h1 {
   pointer-events: none;
 }
 
-/* ============================================================
-   10. DASHBOARD
-   ============================================================ */
+/* ---------- DASHBOARD ---------- */
 .dashboard-widget {
   display: flex;
   justify-content: space-between;
@@ -420,31 +364,10 @@ h1 {
   padding: 14px 16px;
 }
 
-.dash-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.dash-num {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-
-.dash-label {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.dash-divider {
-  width: 1px;
-  height: 30px;
-  background: var(--border);
-}
+.dash-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dash-num { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
+.dash-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 500; }
+.dash-divider { width: 1px; height: 30px; background: var(--border); }
 
 .dash-action-btn {
   background: var(--accent-soft);
@@ -462,36 +385,13 @@ h1 {
   transition: all 0.2s var(--ease);
 }
 
-.dash-action-btn:hover {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-.dash-action-btn:active {
-  transform: scale(0.96);
-}
+.dash-action-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.dash-action-btn:active { transform: scale(0.96); }
 
-/* ============================================================
-   11. FORMULAIRES
-   ============================================================ */
-.form-group {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.input-group {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-}
+/* ---------- FORMULAIRES ---------- */
+.form-group { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+.input-group { display: flex; gap: 8px; margin-bottom: 10px; }
 
 input[type="text"],
 input[type="number"],
@@ -511,19 +411,13 @@ textarea {
   transition: border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
   background: var(--input-bg-focus);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-muted);
-  opacity: 0.7;
-}
+input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
 
 select {
   width: auto;
@@ -537,15 +431,8 @@ select {
   background-position: right 12px center;
 }
 
-select option {
-  background: #1a1b23;
-  color: #fff;
-}
-
-[data-theme="light"] select option {
-  background: #fff;
-  color: #0f172a;
-}
+select option { background: #1a1b23; color: #fff; }
+[data-theme="light"] select option { background: #fff; color: #0f172a; }
 
 textarea {
   resize: none;
@@ -554,17 +441,11 @@ textarea {
   line-height: 1.4;
 }
 
-.muted {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
+.muted { color: var(--text-muted); font-size: 0.85rem; }
 .small { font-size: 0.75rem; }
 .mt-12 { margin-top: 12px; }
 
-/* ============================================================
-   12. BARRE MÉDIA (micro + caméra)
-   ============================================================ */
+/* ---------- MÉDIA ---------- */
 .media-bar {
   display: flex;
   align-items: center;
@@ -576,10 +457,7 @@ textarea {
   gap: 10px;
 }
 
-.media-actions-row {
-  display: flex;
-  gap: 8px;
-}
+.media-actions-row { display: flex; gap: 8px; }
 
 .media-square-btn {
   background: var(--card-bg);
@@ -595,10 +473,7 @@ textarea {
   transition: all 0.2s var(--ease);
 }
 
-.media-square-btn:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-1px);
-}
+.media-square-btn:hover { border-color: var(--border-strong); transform: translateY(-1px); }
 
 .media-square-btn.recording {
   background: var(--danger);
@@ -619,9 +494,7 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
-.record-timer.hidden {
-  display: none;
-}
+.record-timer.hidden { display: none; }
 
 .media-status-tag {
   font-size: 0.72rem;
@@ -632,9 +505,7 @@ textarea {
   max-width: 55%;
 }
 
-/* ============================================================
-   13. BOUTON PRINCIPAL
-   ============================================================ */
+/* ---------- BOUTONS ---------- */
 .primary-btn {
   width: 100%;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
@@ -654,15 +525,8 @@ textarea {
   transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease);
 }
 
-.primary-btn:hover {
-  filter: brightness(1.06);
-  box-shadow: 0 6px 20px rgba(16, 163, 127, 0.35);
-}
-
-.primary-btn:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(16, 163, 127, 0.2);
-}
+.primary-btn:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(16, 163, 127, 0.35); }
+.primary-btn:active { transform: scale(0.97); }
 
 .ghost-btn {
   background: transparent;
@@ -677,26 +541,11 @@ textarea {
   transition: all 0.2s var(--ease);
 }
 
-.ghost-btn:hover {
-  background: var(--input-bg);
-  border-color: var(--border-strong);
-}
+.ghost-btn:hover { background: var(--input-bg); border-color: var(--border-strong); }
 
-/* ============================================================
-   14. FILTRES + RECHERCHE
-   ============================================================ */
-.filter-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+/* ---------- FILTRES ---------- */
+.filter-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.search-box { position: relative; display: flex; align-items: center; }
 
 .search-icon {
   position: absolute;
@@ -741,10 +590,7 @@ textarea {
   transition: all 0.2s var(--ease);
 }
 
-.tag-btn:hover {
-  border-color: var(--border-strong);
-  color: var(--text);
-}
+.tag-btn:hover { border-color: var(--border-strong); color: var(--text); }
 
 .tag-btn.active {
   background: var(--accent);
@@ -753,24 +599,15 @@ textarea {
   box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
 }
 
-/* ============================================================
-   15. CARTES D'IDÉES
-   ============================================================ */
-.ideas-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+/* ---------- CARTES IDÉES ---------- */
+.ideas-grid { display: flex; flex-direction: column; gap: 12px; }
 
 .idea-card {
   position: relative;
   transition: transform 0.25s var(--ease), border-color 0.25s var(--ease);
 }
 
-.idea-card:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-}
+.idea-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
 
 .idea-header {
   display: flex;
@@ -799,13 +636,8 @@ textarea {
   align-items: center;
 }
 
-.fav-star:hover {
-  transform: scale(1.2);
-}
-
-.fav-star.active {
-  color: var(--star-color);
-}
+.fav-star:hover { transform: scale(1.2); }
+.fav-star.active { color: var(--star-color); }
 
 .badge {
   font-size: 0.68rem;
@@ -829,8 +661,7 @@ textarea {
   word-break: break-word;
 }
 
-.media-preview img,
-.media-preview video {
+.media-preview img, .media-preview video {
   width: 100%;
   max-height: 220px;
   object-fit: cover;
@@ -847,9 +678,7 @@ audio {
   filter: invert(0.92) hue-rotate(180deg);
 }
 
-[data-theme="light"] audio {
-  filter: none;
-}
+[data-theme="light"] audio { filter: none; }
 
 .idea-footer {
   display: flex;
@@ -863,14 +692,9 @@ audio {
   border-top: 1px solid var(--border);
 }
 
-.action-btns {
-  display: flex;
-  gap: 4px;
-}
+.action-btns { display: flex; gap: 4px; }
 
-.share-btn,
-.edit-btn,
-.delete-btn {
+.share-btn, .edit-btn, .delete-btn {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -890,20 +714,11 @@ audio {
 .edit-btn:hover { background: var(--accent-soft); }
 .delete-btn:hover { background: var(--danger-soft); }
 
-.share-btn:active,
-.edit-btn:active,
-.delete-btn:active {
-  transform: scale(0.9);
-}
+.share-btn:active, .edit-btn:active, .delete-btn:active { transform: scale(0.9); }
 
-.share-btn .ic,
-.edit-btn .ic,
-.delete-btn .ic {
-  width: 16px;
-  height: 16px;
-}
+.share-btn .ic, .edit-btn .ic, .delete-btn .ic { width: 16px; height: 16px; }
 
-/* État vide */
+/* ---------- EMPTY STATE ---------- */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -917,13 +732,9 @@ audio {
   margin-bottom: 12px;
 }
 
-.empty-state p {
-  font-size: 0.85rem;
-}
+.empty-state p { font-size: 0.85rem; }
 
-/* ============================================================
-   16. MODALES
-   ============================================================ */
+/* ---------- MODALES ---------- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -938,15 +749,9 @@ audio {
   animation: fadeIn 0.25s var(--ease);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.modal-overlay.hidden,
-.hidden {
-  display: none !important;
-}
+.modal-overlay.hidden, .hidden { display: none !important; }
 
 .modal-card {
   width: 100%;
@@ -996,14 +801,9 @@ audio {
   border-color: var(--danger);
 }
 
-.close-btn .ic {
-  width: 16px;
-  height: 16px;
-}
+.close-btn .ic { width: 16px; height: 16px; }
 
-/* ============================================================
-   17. COFFRE / PIN
-   ============================================================ */
+/* ---------- COFFRE / PIN ---------- */
 .pin-inputs input {
   text-align: center;
   letter-spacing: 10px;
@@ -1021,14 +821,8 @@ audio {
   padding: 0 4px;
 }
 
-/* ============================================================
-   18. JEUX
-   ============================================================ */
-.games-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
+/* ---------- JEUX ---------- */
+.games-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
 
 .game-tab-btn {
   background: var(--card-bg);
@@ -1061,10 +855,7 @@ audio {
   font-variant-numeric: tabular-nums;
 }
 
-.game-score-bar strong {
-  color: var(--text);
-  font-weight: 700;
-}
+.game-score-bar strong { color: var(--text); font-weight: 700; }
 
 .game-display-area {
   display: flex;
@@ -1078,6 +869,7 @@ audio {
   overflow: hidden;
 }
 
+/* ⚡ CORRIGÉ : touch-action manipulation (au lieu de none) */
 canvas {
   background: #0a0b10;
   border-radius: var(--radius-md);
@@ -1086,12 +878,12 @@ canvas {
   width: 100%;
   height: auto;
   max-width: 340px;
-  touch-action: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-[data-theme="light"] canvas {
-  background: #0a0b10;
-}
+[data-theme="light"] canvas { background: #0a0b10; }
 
 .d-pad {
   display: flex;
@@ -1101,10 +893,7 @@ canvas {
   margin-top: 12px;
 }
 
-.d-pad-row {
-  display: flex;
-  gap: 8px;
-}
+.d-pad-row { display: flex; gap: 8px; }
 
 .dpad-btn {
   width: 52px;
@@ -1141,12 +930,8 @@ canvas {
   font-size: 1.2rem;
 }
 
-/* ============================================================
-   19. PARAMÈTRES
-   ============================================================ */
-.settings-block {
-  padding: 14px 16px;
-}
+/* ---------- PARAMÈTRES ---------- */
+.settings-block { padding: 14px 16px; }
 
 .settings-row {
   display: flex;
@@ -1164,15 +949,9 @@ canvas {
   margin-bottom: 2px;
 }
 
-.settings-label .ic {
-  color: var(--accent);
-  width: 18px;
-  height: 18px;
-}
+.settings-label .ic { color: var(--accent); width: 18px; height: 18px; }
 
-/* ============================================================
-   20. PARTAGE
-   ============================================================ */
+/* ---------- PARTAGE ---------- */
 .share-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -1197,9 +976,7 @@ canvas {
   text-align: left;
 }
 
-.share-option .ic {
-  color: var(--accent);
-}
+.share-option .ic { color: var(--accent); }
 
 .share-option:hover {
   background: var(--input-bg-focus);
@@ -1207,9 +984,7 @@ canvas {
   transform: translateX(3px);
 }
 
-.share-option:active {
-  transform: scale(0.98);
-}
+.share-option:active { transform: scale(0.98); }
 
 .share-preview {
   background: var(--input-bg);
@@ -1225,9 +1000,7 @@ canvas {
   margin-top: 10px;
 }
 
-/* ============================================================
-   21. SPLASH SCREEN
-   ============================================================ */
+/* ---------- SPLASH ---------- */
 .splash-screen {
   position: fixed;
   inset: 0;
@@ -1281,10 +1054,7 @@ canvas {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg,
-    transparent,
-    var(--accent),
-    transparent);
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
@@ -1299,23 +1069,12 @@ canvas {
   pointer-events: none !important;
 }
 
-/* ============================================================
-   22. SCROLLBAR + RESPONSIVE
-   ============================================================ */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* ---------- SCROLLBAR ---------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 3px;
-}
-
+/* ---------- RESPONSIVE ---------- */
 @media (max-width: 380px) {
   body { padding: 12px 12px calc(94px + env(safe-area-inset-bottom, 0px)) 12px; }
   h1 { font-size: 1.1rem; }
@@ -1323,7 +1082,4 @@ canvas {
   .tab-btn .ic { width: 20px; height: 20px; }
 }
 
-/* Empêche le zoom double-tap sur boutons */
-button, .icon-btn, .tag-btn, .tab-btn {
-  touch-action: manipulation;
-}
+button, .icon-btn, .tag-btn, .tab-btn { touch-action: manipulation; }

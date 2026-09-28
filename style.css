@@ -1,8 +1,7 @@
 /* ============================================================
-   LAUGRASTOK v2.2 — Styles
-   ✅ Scroll fonctionne partout
-   ✅ Barre de navigation ne cache plus rien
-   ✅ Bulles transparentes
+   LAUGRASTOK v2.3 — Styles
+   ✅ Scroll tactile partout
+   ✅ Bulles transparentes (comme des gouttes d'eau)
    ============================================================ */
 
 :root {
@@ -33,7 +32,6 @@
   --shadow-tab: 0 -8px 32px rgba(0, 0, 0, 0.4);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  /* ✅ Hauteur de la tab bar + marge de sécurité */
   --tabbar-space: 130px;
 }
 
@@ -71,22 +69,29 @@
 
 html {
   overflow-x: hidden;
-  overscroll-behavior: none;
 }
 
-/* ✅ BODY : scroll naturel + espace pour la tab bar */
+/* ✅ BODY — scroll tactile partout */
 body {
   font-family: var(--font);
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  overscroll-behavior: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
-  /* ✅ Padding bottom GÉNÉREUX : 130px (tab bar) + safe-area */
   padding: 16px 16px calc(var(--tabbar-space) + env(safe-area-inset-bottom, 0px)) 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ✅ Le geste de scroll marche sur toute la surface */
+.app-container,
+.tab-content,
+.tab-page {
+  touch-action: pan-y;
 }
 
 .ic {
@@ -113,16 +118,17 @@ body {
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
 }
 
+/* ✅ Bulles ultra-transparentes comme des gouttes d'eau */
 .bubble {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.16; /* ✅ Très transparent */
+  filter: blur(120px);
+  opacity: 0.06;
   animation: floatBubble 18s infinite ease-in-out alternate;
   will-change: transform;
 }
 
-[data-theme="light"] .bubble { opacity: 0.22; }
+[data-theme="light"] .bubble { opacity: 0.10; }
 
 .bubble-1 {
   width: 360px; height: 360px;
@@ -214,7 +220,7 @@ body {
 .app-container {
   width: 100%;
   max-width: 480px;
-  margin: 0 auto; /* ✅ Centre sans flex */
+  margin: 0 auto;
   position: relative;
   z-index: 1;
 }

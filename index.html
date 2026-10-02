@@ -9,14 +9,295 @@
   <meta name="application-name" content="LaugraStok">
   <meta name="theme-color" content="#0d0d11">
   <meta name="description" content="Capture tes idées, organise-les et partage-les.">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+:root {
+  --bg: #0b0810; --bg-2: #100a17;
+  --card-bg: rgba(30, 22, 45, 0.55); --card-bg-strong: rgba(30, 22, 45, 0.85);
+  --input-bg: rgba(255, 255, 255, 0.07); --input-bg-focus: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.12); --border-strong: rgba(255, 255, 255, 0.22);
+  --text: #ffffff; --text-muted: #a8a0b8;
+  --accent: #7c3aed; --accent-hover: #8b4ff0;
+  --accent-soft: rgba(124, 58, 237, 0.22); --accent-border: rgba(124, 58, 237, 0.5);
+  --star-color: #f59e0b; --danger: #ef4444; --danger-soft: rgba(239, 68, 68, 0.15);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius-sm: 12px; --radius-md: 16px; --radius-lg: 22px; --radius-xl: 28px;
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-tab: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1); --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --tabbar-space: 130px; --font-scale: 1; --anim-duration: 0.35s;
+}
+[data-theme="light"] {
+  --bg: #f0ecfa; --bg-2: #e8e2f7;
+  --card-bg: rgba(255, 255, 255, 0.7); --card-bg-strong: rgba(255, 255, 255, 0.92);
+  --input-bg: rgba(124, 58, 237, 0.06); --input-bg-focus: rgba(124, 58, 237, 0.1);
+  --border: rgba(124, 58, 237, 0.15); --border-strong: rgba(124, 58, 237, 0.28);
+  --text: #1a0e2e; --text-muted: #6b5b85;
+  --accent: #7c3aed; --accent-hover: #6a2bd6;
+  --accent-soft: rgba(124, 58, 237, 0.14); --accent-border: rgba(124, 58, 237, 0.35);
+  --star-color: #d97706; --danger: #e53e3e; --danger-soft: rgba(229, 62, 62, 0.12);
+  --shadow-glass: 0 10px 40px rgba(124, 58, 237, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-tab: 0 -10px 40px rgba(124, 58, 237, 0.12);
+}
+[data-animations="off"] * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { overflow-x: hidden; font-size: calc(16px * var(--font-scale)); }
+body {
+  font-family: var(--font); background-color: var(--bg); color: var(--text);
+  min-height: 100vh; overflow-x: hidden; overflow-y: auto;
+  -webkit-overflow-scrolling: touch; touch-action: pan-y;
+  transition: background-color var(--anim-duration) var(--ease), color var(--anim-duration) var(--ease);
+  padding: 16px 16px calc(var(--tabbar-space) + env(safe-area-inset-bottom, 0px)) 16px;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+.app-container, .tab-content, .tab-page { touch-action: pan-y; }
+.ic { width: 20px; height: 20px; display: inline-block; flex-shrink: 0; vertical-align: middle; stroke-linecap: round; stroke-linejoin: round; }
+.ic-sm { width: 16px; height: 16px; }
+.ic-xl { width: 32px; height: 32px; }
+.glass-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%); }
+.bubble { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.08; animation: floatBubble 20s infinite ease-in-out alternate; will-change: transform; }
+[data-theme="light"] .bubble { opacity: 0.12; }
+.bubble-1 { width: 380px; height: 380px; background: radial-gradient(circle, #7c3aed, #4c1d95); top: -120px; left: -120px; }
+.bubble-2 { width: 420px; height: 420px; background: radial-gradient(circle, #a855f7, #7c3aed); bottom: 5%; right: -160px; animation-delay: -8s; }
+.bubble-3 { width: 300px; height: 300px; background: radial-gradient(circle, #c026d3, #7c3aed); top: 40%; left: 15%; animation-delay: -14s; }
+@keyframes floatBubble { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(0, -80px, 0) scale(1.18); } }
+.rain { position: absolute; inset: 0; overflow: hidden; opacity: 0.5; }
+[data-theme="light"] .rain { display: none; }
+.drop { position: absolute; top: -10%; width: 1.5px; height: 70px; background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(200,180,255,0.2) 50%, rgba(220,200,255,0.5) 100%); border-radius: 2px; animation: fall linear infinite; will-change: transform; }
+@keyframes fall { 0% { transform: translate3d(0, -10vh, 0); opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { transform: translate3d(0, 110vh, 0); opacity: 0; } }
+.sky-elements { position: absolute; inset: 0; overflow: hidden; display: none; }
+[data-theme="light"] .sky-elements { display: block; }
+.cloud { position: absolute; color: rgba(124, 58, 237, 0.12); animation: cloudMove linear infinite; }
+.cloud svg { width: 100%; height: auto; display: block; }
+.cloud-1 { top: 8%; width: 130px; animation-duration: 45s; }
+.cloud-2 { top: 22%; width: 90px; animation-duration: 60s; animation-delay: -15s; }
+.cloud-3 { top: 38%; width: 150px; animation-duration: 75s; animation-delay: -30s; }
+@keyframes cloudMove { 0% { left: -20%; } 100% { left: 120%; } }
+.bird { position: absolute; color: rgba(60, 40, 100, 0.5); animation: birdMove linear infinite; }
+.bird svg { width: 28px; height: auto; display: block; }
+.bird-1 { top: 15%; animation-duration: 40s; animation-delay: -5s; }
+.bird-2 { top: 28%; animation-duration: 50s; animation-delay: -20s; }
+@keyframes birdMove { 0% { left: -10%; transform: translateY(0); } 50% { transform: translateY(-8px); } 100% { left: 110%; transform: translateY(0); } }
+.plane { position: absolute; top: 12%; color: rgba(60, 40, 100, 0.35); animation: planeMove linear infinite; animation-duration: 90s; }
+.plane svg { width: 42px; height: auto; display: block; }
+@keyframes planeMove { 0% { left: -10%; } 100% { left: 110%; } }
+.glass-card { background: var(--card-bg); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-glass); margin-bottom: 14px; position: relative; overflow: hidden; transition: border-color 0.3s var(--ease), transform 0.25s var(--ease), box-shadow 0.3s var(--ease); }
+.glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%); pointer-events: none; }
+.glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.06) 0%, transparent 50%); pointer-events: none; border-radius: inherit; }
+.ripple-container { position: relative; overflow: hidden; }
+.ripple { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(124,58,237,0.3) 40%, transparent 70%); transform: scale(0); animation: rippleAnim 0.7s var(--ease); pointer-events: none; z-index: 0; }
+@keyframes rippleAnim { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(3.5); opacity: 0; } }
+.app-container { width: 100%; max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding: 4px 2px; }
+.header-actions { display: flex; gap: 8px; }
+h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
+.version-tag { font-size: 0.62rem; font-weight: 600; background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--accent-border); backdrop-filter: blur(10px); }
+.user-greeting { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+.icon-btn { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: transform 0.2s var(--ease-bounce); box-shadow: var(--shadow-glass); position: relative; overflow: hidden; }
+.icon-btn:active { transform: scale(0.9); }
+.tab-page { display: none; animation: fadeSlideIn var(--anim-duration) var(--ease) both; }
+.tab-page.active { display: block; }
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.tab-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 2px 4px; }
+.tab-title .ic { color: var(--accent); }
+.tab-bar { position: fixed; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 460px; background: var(--card-bg-strong); backdrop-filter: blur(32px) saturate(200%); border: 1px solid var(--border-strong); border-radius: var(--radius-xl); padding: 8px; display: flex; justify-content: space-between; align-items: center; gap: 4px; box-shadow: var(--shadow-tab), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(255, 255, 255, 0.05); z-index: 100; }
+.tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 8px 4px; border-radius: var(--radius-md); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--font); font-size: 0.65rem; font-weight: 600; transition: color 0.25s var(--ease), transform 0.15s var(--ease-bounce); position: relative; z-index: 2; }
+.tab-btn .ic { width: 22px; height: 22px; transition: transform 0.25s var(--ease-bounce); }
+.tab-btn.active { color: var(--accent); }
+.tab-btn.active .ic { transform: scale(1.15); }
+.tab-btn:active { transform: scale(0.92); }
+.tab-indicator { position: absolute; top: 8px; bottom: 8px; left: 8px; width: calc((100% - 16px) / 5); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: var(--radius-md); transition: transform 0.4s var(--ease-bounce); z-index: 1; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 12px rgba(124, 58, 237, 0.3); }
+.dashboard-widget { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
+.dash-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dash-num { font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a855f7, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.dash-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 500; }
+.dash-divider { width: 1px; height: 30px; background: var(--border); }
+.dash-action-btn { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; font-family: var(--font); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.15s var(--ease-bounce); }
+.dash-action-btn:active { transform: scale(0.94); }
+.form-group { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+.input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+input[type="text"], input[type="number"], input[type="password"], input[type="date"], input[type="time"], select, textarea { width: 100%; background: var(--input-bg); backdrop-filter: blur(10px); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; border-radius: var(--radius-md); font-family: var(--font); font-size: 0.9rem; outline: none; transition: border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--input-bg-focus); box-shadow: 0 0 0 3px var(--accent-soft); }
+input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+select { width: auto; min-width: 100px; cursor: pointer; appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a0b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; }
+select option { background: #1a0e2e; color: #fff; }
+[data-theme="light"] select option { background: #fff; color: #1a0e2e; }
+textarea { resize: none; margin-bottom: 10px; min-height: 70px; line-height: 1.4; }
+.muted { color: var(--text-muted); font-size: 0.85rem; }
+.small { font-size: 0.75rem; }
+.mt-12 { margin-top: 12px; }
+.media-bar { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); backdrop-filter: blur(14px); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 10px; gap: 10px; }
+.media-actions-row { display: flex; gap: 8px; }
+.media-square-btn { background: var(--card-bg); backdrop-filter: blur(14px); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.15s var(--ease-bounce); position: relative; overflow: hidden; }
+.media-square-btn:active { transform: scale(0.92); }
+.media-square-btn.recording { background: var(--danger); color: #fff; border-color: var(--danger); animation: pulseRec 1.4s ease-in-out infinite; }
+@keyframes pulseRec { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } }
+.record-timer { font-size: 0.7rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.record-timer.hidden { display: none; }
+.media-status-tag { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
+.primary-btn { width: 100%; background: linear-gradient(135deg, #8b4ff0 0%, #7c3aed 50%, #6a2bd6 100%); color: #fff; border: none; padding: 14px 16px; border-radius: var(--radius-md); font-family: var(--font); font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2); transition: transform 0.15s var(--ease-bounce), box-shadow 0.2s var(--ease); position: relative; overflow: hidden; }
+.primary-btn:active { transform: scale(0.96); }
+.ghost-btn { background: var(--card-bg); backdrop-filter: blur(14px); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: transform 0.15s var(--ease-bounce); }
+.ghost-btn:active { transform: scale(0.94); }
+.danger-btn { background: var(--danger-soft); border: 1px solid var(--danger); color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 0.82rem; font-weight: 600; cursor: pointer; width: 100%; transition: transform 0.15s var(--ease-bounce); }
+.danger-btn:active { transform: scale(0.96); }
+.filter-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.search-box { position: relative; display: flex; align-items: center; }
+.search-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; width: 18px; height: 18px; z-index: 2; }
+.search-box input { padding-left: 42px; background: var(--card-bg); backdrop-filter: blur(20px); }
+.tags { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.tags::-webkit-scrollbar { display: none; }
+.tag-btn { background: var(--card-bg); backdrop-filter: blur(14px); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 18px; border-radius: 20px; font-family: var(--font); font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: transform 0.15s var(--ease-bounce); }
+.tag-btn:active { transform: scale(0.94); }
+.tag-btn.active { background: linear-gradient(135deg, #8b4ff0, #7c3aed); color: #fff; border-color: var(--accent); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4); }
+.ideas-grid { display: flex; flex-direction: column; gap: 12px; }
+.idea-wrapper { position: relative; overflow: hidden; border-radius: var(--radius-lg); }
+.idea-swipe-bg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 24px; font-weight: 700; font-size: 0.9rem; color: #fff; opacity: 0; pointer-events: none; }
+.idea-swipe-bg.swipe-left { right: 0; background: linear-gradient(90deg, transparent 0%, rgba(239,68,68,0.85) 50%); justify-content: flex-end; }
+.idea-swipe-bg.swipe-right { left: 0; background: linear-gradient(90deg, rgba(245,158,11,0.85) 50%, transparent 100%); justify-content: flex-start; }
+.idea-swipe-bg.active { opacity: 1; }
+.idea-card { position: relative; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease); touch-action: pan-y; cursor: grab; }
+.idea-card.swiping { transition: none; }
+.idea-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.idea-title { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; line-height: 1.3; word-break: break-word; }
+.fav-star { cursor: pointer; color: var(--text-muted); flex-shrink: 0; display: inline-flex; align-items: center; }
+.fav-star.active { color: var(--star-color); }
+.badge { font-size: 0.68rem; padding: 4px 10px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--accent-border); color: var(--accent); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.idea-content { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.media-preview img, .media-preview video { width: 100%; max-height: 220px; object-fit: cover; border-radius: var(--radius-md); margin-top: 8px; border: 1px solid var(--border); }
+audio { width: 100%; height: 38px; margin-top: 8px; border-radius: var(--radius-sm); filter: invert(0.92) hue-rotate(180deg); }
+[data-theme="light"] audio { filter: none; }
+.idea-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--text-muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.action-btns { display: flex; gap: 4px; }
+.share-btn, .edit-btn, .delete-btn { background: transparent; border: none; cursor: pointer; padding: 6px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s var(--ease-bounce); }
+.share-btn { color: #6ba3ff; }
+.edit-btn { color: var(--accent); }
+.delete-btn { color: var(--danger); }
+.share-btn:active, .edit-btn:active, .delete-btn:active { transform: scale(0.88); }
+.share-btn .ic, .edit-btn .ic, .delete-btn .ic { width: 16px; height: 16px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state .ic { width: 44px; height: 44px; opacity: 0.4; margin-bottom: 12px; }
+.empty-state p { font-size: 0.85rem; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(11, 8, 16, 0.7); backdrop-filter: blur(20px) saturate(150%); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 16px; }
+.modal-overlay.hidden, .hidden { display: none !important; }
+.modal-card { width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.4s var(--ease-bounce); }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; }
+.modal-header h2 { font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+.close-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-muted); width: 34px; height: 34px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s var(--ease-bounce); }
+.close-btn:active { transform: scale(0.88); }
+.close-btn .ic { width: 16px; height: 16px; }
+.pin-inputs input { text-align: center; letter-spacing: 10px; font-size: 1.3rem; font-weight: 700; margin-top: 12px; padding-left: 20px; }
+.secret-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+.settings-category { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin: 18px 4px 8px; padding-left: 4px; }
+.settings-category:first-child { margin-top: 0; }
+.settings-block { padding: 0; margin-bottom: 8px; }
+.settings-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; }
+.settings-row + .settings-row { border-top: 1px solid var(--border); }
+.settings-row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.settings-icon { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+.settings-label { font-size: 0.88rem; font-weight: 600; line-height: 1.3; }
+.toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--input-bg); border: 1px solid var(--border); border-radius: 26px; transition: background 0.25s, border-color 0.25s; }
+.toggle-slider::before { content: ''; position: absolute; height: 20px; width: 20px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: transform 0.25s var(--ease-bounce); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.toggle input:checked + .toggle-slider { background: var(--accent); border-color: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+.share-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 14px 0; }
+.share-option { background: var(--input-bg); backdrop-filter: blur(14px); border: 1px solid var(--border); color: var(--text); padding: 14px 16px; border-radius: var(--radius-md); font-family: var(--font); font-size: 0.88rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; text-align: left; transition: transform 0.15s var(--ease-bounce); }
+.share-option:active { transform: scale(0.97); }
+.share-option .ic { color: var(--accent); }
+.share-preview { background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--text-muted); word-break: break-all; max-height: 120px; overflow-y: auto; margin-top: 10px; }
+.splash-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: opacity 0.5s var(--ease), visibility 0.5s var(--ease); }
+.splash-logo-box { width: 90px; height: 90px; background: linear-gradient(135deg, rgba(139,79,240,0.3), rgba(124,58,237,0.15)); backdrop-filter: blur(20px); border: 1px solid var(--accent-border); border-radius: 28px; display: flex; justify-content: center; align-items: center; color: var(--accent); box-shadow: 0 16px 50px rgba(124, 58, 237, 0.4), inset 0 1px 0 rgba(255,255,255,0.2); }
+.splash-title { margin-top: 18px; font-size: 1.05rem; font-weight: 700; letter-spacing: 5px; color: var(--text); }
+.splash-shimmer { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: shimmer 1.4s ease-in-out infinite; }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.splash-screen.hidden { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+.news-menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.news-menu-card { background: var(--card-bg); backdrop-filter: blur(22px) saturate(180%); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 12px; text-align: center; cursor: pointer; transition: transform 0.15s var(--ease-bounce), border-color 0.2s var(--ease), box-shadow 0.25s var(--ease); box-shadow: var(--shadow-glass); position: relative; overflow: hidden; }
+.news-menu-card:active { transform: scale(0.95); }
+.news-menu-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+.news-menu-label { font-size: 0.85rem; font-weight: 600; }
+.news-submenu { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
+.news-submenu::-webkit-scrollbar { display: none; }
+.news-submenu-btn { background: var(--card-bg); backdrop-filter: blur(14px); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-family: var(--font); font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: transform 0.15s var(--ease-bounce); }
+.news-submenu-btn:active { transform: scale(0.94); }
+.news-submenu-btn.active { background: linear-gradient(135deg, #8b4ff0, #7c3aed); color: #fff; border-color: var(--accent); box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
+.back-btn { background: transparent; border: none; color: var(--accent); font-family: var(--font); font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; padding: 4px 0; }
+.news-content { display: flex; flex-direction: column; gap: 10px; }
+.news-card { display: block; text-decoration: none; color: var(--text); padding: 14px 16px; margin-bottom: 0; transition: transform 0.15s var(--ease-bounce); }
+.news-card:active { transform: scale(0.98); }
+.news-card-title { font-size: 0.9rem; font-weight: 600; line-height: 1.35; margin-bottom: 6px; }
+.news-card-meta { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); }
+.weather-city { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+.weather-now { display: flex; align-items: center; gap: 16px; }
+.weather-icon-big { font-size: 3rem; }
+.weather-temp { font-size: 2rem; font-weight: 700; }
+.weather-desc { font-size: 0.85rem; color: var(--text-muted); }
+.weather-details { margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }
+.weather-forecast { display: flex; justify-content: space-between; gap: 8px; padding: 14px 10px; }
+.weather-day { flex: 1; text-align: center; }
+.weather-day-name { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+.weather-day-icon { font-size: 1.4rem; margin-bottom: 4px; }
+.weather-day-temp { font-size: 0.85rem; font-weight: 700; }
+.weather-day-temp span { color: var(--text-muted); font-weight: 500; font-size: 0.75rem; }
+.holiday-card { padding: 12px 16px; }
+.holiday-card.past { opacity: 0.5; }
+.holiday-date { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 2px; }
+.holiday-name { font-size: 0.92rem; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge-now { font-size: 0.65rem; background: var(--accent); color: #fff; padding: 3px 9px; border-radius: 8px; font-weight: 700; }
+.badge-future { font-size: 0.65rem; background: var(--accent-soft); color: var(--accent); padding: 3px 9px; border-radius: 8px; font-weight: 700; border: 1px solid var(--accent-border); }
+.foot-card { padding: 12px 16px; }
+.foot-meta { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; }
+.foot-score { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.foot-team { flex: 1; font-size: 0.85rem; font-weight: 600; text-align: center; line-height: 1.2; }
+.foot-nums { font-size: 1.1rem; font-weight: 700; color: var(--accent); white-space: nowrap; padding: 0 4px; }
+.media-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.media-card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s var(--ease); }
+.media-poster { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: var(--input-bg); display: block; }
+.media-poster-placeholder { width: 100%; aspect-ratio: 2/3; background: var(--input-bg); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--text-muted); }
+.media-info { padding: 10px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.media-title { font-size: 0.8rem; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.media-meta { font-size: 0.68rem; color: var(--text-muted); margin-top: auto; }
+.media-trailer-btn { display: flex; align-items: center; justify-content: center; gap: 4px; background: var(--accent-soft); border: none; color: var(--accent); padding: 10px; font-family: var(--font); font-size: 0.72rem; font-weight: 700; cursor: pointer; border-top: 1px solid var(--border); transition: background 0.2s var(--ease), transform 0.15s var(--ease-bounce); }
+.media-trailer-btn:active { background: var(--accent); color: #fff; transform: scale(0.98); }
+.wattpad-profile-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: linear-gradient(135deg, rgba(255, 102, 0, 0.15), rgba(124, 58, 237, 0.15)); border: 1px solid rgba(255, 102, 0, 0.3); cursor: pointer; text-decoration: none; color: var(--text); transition: transform 0.2s var(--ease-bounce); }
+.wattpad-profile-card:active { transform: scale(0.98); }
+.wattpad-profile-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #ff6600, #ff9500); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 4px 16px rgba(255, 102, 0, 0.4); }
+.wattpad-profile-info { flex: 1; min-width: 0; }
+.wattpad-profile-name { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+.wattpad-profile-link { font-size: 0.75rem; color: var(--text-muted); }
+.wattpad-profile-arrow { font-size: 1.2rem; color: var(--text-muted); }
+.wattpad-section-title { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin: 16px 4px 10px; display: flex; align-items: center; gap: 6px; }
+.wattpad-story-card { display: flex; gap: 12px; padding: 12px; text-decoration: none; color: var(--text); transition: transform 0.2s var(--ease-bounce), border-color 0.2s var(--ease); cursor: pointer; }
+.wattpad-story-card:active { transform: scale(0.98); }
+.wattpad-story-cover { width: 80px; height: 120px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--input-bg); border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.wattpad-story-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wattpad-story-title { font-size: 0.95rem; font-weight: 700; line-height: 1.3; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wattpad-story-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
+.wattpad-story-stats { display: flex; gap: 12px; font-size: 0.7rem; color: var(--text-muted); margin-top: auto; }
+.wattpad-story-stats span { display: flex; align-items: center; gap: 3px; }
+.wattpad-mine-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; background: linear-gradient(135deg, #ff6600, #ff9500); color: #fff; padding: 2px 8px; border-radius: 6px; margin-left: 6px; vertical-align: middle; }
+.wattpad-discover-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #ff6600, #ff9500); color: #fff; border: none; padding: 14px 16px; border-radius: var(--radius-md); font-family: var(--font); font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; text-decoration: none; box-shadow: 0 6px 20px rgba(255, 102, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.2); transition: transform 0.15s var(--ease-bounce); margin-top: 10px; }
+.wattpad-discover-btn:active { transform: scale(0.96); }
+@media (max-width: 380px) {
+  :root { --tabbar-space: 120px; }
+  body { padding: 12px 12px calc(var(--tabbar-space) + env(safe-area-inset-bottom, 0px)) 12px; }
+  h1 { font-size: 1.1rem; }
+  .tab-btn span { font-size: 0.6rem; }
+  .tab-btn .ic { width: 20px; height: 20px; }
+  .wattpad-story-cover { width: 70px; height: 105px; }
+}
+button { touch-action: manipulation; }
+  </style>
 </head>
 <body>
-  <!-- SPRITE SVG -->
+
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></symbol>
     <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/></symbol>
@@ -38,26 +319,36 @@
     <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 22 11c0-5-4.5-9-10-9z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-text-size" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20M2 14h20M6 4v16M10 4v16M14 4v16M18 4v16"/></symbol>
+    <symbol id="i-tv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
   </svg>
 
-  <!-- FOND -->
   <div class="glass-bg" aria-hidden="true">
     <div class="bubble bubble-1"></div>
     <div class="bubble bubble-2"></div>
     <div class="bubble bubble-3"></div>
     <div class="rain" id="rainLayer"></div>
+    <div class="sky-elements" id="skyLayer"></div>
   </div>
 
-  <!-- SPLASH -->
   <div id="splashScreen" class="splash-screen">
-    <div class="splash-logo-box">
-      <svg class="ic ic-xl"><use href="#i-bulb"/></svg>
-    </div>
+    <div class="splash-logo-box"><svg class="ic ic-xl"><use href="#i-bulb"/></svg></div>
     <h1 class="splash-title">LAUGRASTOK</h1>
     <div class="splash-shimmer"></div>
   </div>
 
-  <!-- MODAL PROFIL -->
   <div id="profileModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
       <h2>Bienvenue !</h2>
@@ -74,74 +365,51 @@
     </div>
   </div>
 
-  <!-- APP PRINCIPALE -->
   <div class="app-container">
-
     <header>
       <div>
-        <h1>LAUGRASTOK <span class="version-tag">v2.2</span></h1>
+        <h1>LAUGRASTOK <span class="version-tag">v2.8</span></h1>
         <p id="userGreeting" class="user-greeting"></p>
       </div>
       <div class="header-actions">
-        <button id="themeToggle" class="icon-btn glass-btn" title="Thème">
-          <svg class="ic"><use href="#i-moon"/></svg>
-        </button>
+        <button id="themeToggle" class="icon-btn ripple-container" title="Thème"><svg class="ic"><use href="#i-moon"/></svg></button>
       </div>
     </header>
 
     <main class="tab-content">
-
-      <!-- ACCUEIL -->
       <section id="tab-home" class="tab-page active">
         <div class="glass-card dashboard-widget">
-          <div class="dash-item">
-            <span class="dash-num" id="totalIdeasCount">0</span>
-            <span class="dash-label">Idées</span>
-          </div>
+          <div class="dash-item"><span class="dash-num" id="totalIdeasCount">0</span><span class="dash-label">Idées</span></div>
+          <div class="dash-divider"></div>
+          <div class="dash-item"><span class="dash-num" id="favIdeasCount">0</span><span class="dash-label">Favoris</span></div>
           <div class="dash-divider"></div>
           <div class="dash-item">
-            <span class="dash-num" id="favIdeasCount">0</span>
-            <span class="dash-label">Favoris</span>
-          </div>
-          <div class="dash-divider"></div>
-          <div class="dash-item">
-            <button id="randomPromptBtn" class="dash-action-btn">
-              <svg class="ic ic-sm"><use href="#i-bulb"/></svg>
-              <span>Inspiration</span>
-            </button>
+            <button id="randomPromptBtn" class="dash-action-btn ripple-container"><svg class="ic ic-sm"><use href="#i-bulb"/></svg><span>Inspiration</span></button>
           </div>
         </div>
-
         <section class="glass-card add-idea-section">
           <div class="input-group">
             <input type="text" id="ideaTitle" placeholder="Titre de ton idée..." autocomplete="off">
             <select id="ideaCategory">
-              <option value="app">Dev</option>
-              <option value="story">Histoire</option>
-              <option value="video">Vidéo</option>
-              <option value="other">Autre</option>
+              <option value="app">Dev</option><option value="story">Histoire</option><option value="video">Vidéo</option><option value="other">Autre</option>
             </select>
           </div>
           <textarea id="ideaText" placeholder="Écris ton idée ici..." rows="3"></textarea>
           <div class="media-bar">
             <div class="media-actions-row">
-              <button id="recordVoiceBtn" class="media-square-btn" title="Enregistrer un vocal">
+              <button id="recordVoiceBtn" class="media-square-btn ripple-container" title="Enregistrer un vocal">
                 <svg class="ic"><use href="#i-mic"/></svg>
                 <span id="recordTimer" class="record-timer hidden">00:00</span>
               </button>
-              <label for="cameraInput" class="media-square-btn" title="Ajouter un média">
+              <label for="cameraInput" class="media-square-btn ripple-container" title="Ajouter un média">
                 <svg class="ic"><use href="#i-camera"/></svg>
                 <input type="file" id="cameraInput" accept="image/*,video/*" hidden>
               </label>
             </div>
             <div id="mediaStatus" class="media-status-tag">Aucun média</div>
           </div>
-          <button id="addBtn" class="primary-btn mt-12">
-            <svg class="ic ic-sm"><use href="#i-plus"/></svg>
-            Sauvegarder l'idée
-          </button>
+          <button id="addBtn" class="primary-btn mt-12 ripple-container"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Sauvegarder l'idée</button>
         </section>
-
         <section class="filter-section">
           <div class="search-box">
             <svg class="ic search-icon"><use href="#i-search"/></svg>
@@ -155,226 +423,1151 @@
             <button class="tag-btn" data-filter="video">Vidéos</button>
           </div>
         </section>
-
         <div id="ideasList" class="ideas-grid"></div>
       </section>
 
-      <!-- FAVORIS -->
       <section id="tab-fav" class="tab-page">
-        <h2 class="tab-title">
-          <svg class="ic"><use href="#i-star-fill"/></svg>
-          Mes favoris
-        </h2>
+        <h2 class="tab-title"><svg class="ic"><use href="#i-star-fill"/></svg>Mes favoris</h2>
         <div id="favList" class="ideas-grid"></div>
       </section>
 
-      <!-- COFFRE -->
       <section id="tab-vault" class="tab-page">
-        <h2 class="tab-title">
-          <svg class="ic"><use href="#i-lock"/></svg>
-          Coffre secret
-        </h2>
+        <h2 class="tab-title"><svg class="ic"><use href="#i-lock"/></svg>Coffre secret</h2>
         <div id="pinArea" class="glass-card">
           <p id="pinInstruction" class="muted">Entre ton code PIN à 6 chiffres :</p>
           <div class="pin-inputs">
             <input type="password" maxlength="6" id="pinInput" placeholder="••••••" inputmode="numeric">
           </div>
-          <button id="unlockSecretBtn" class="primary-btn mt-12">Déverrouiller</button>
+          <button id="unlockSecretBtn" class="primary-btn mt-12 ripple-container">Déverrouiller</button>
         </div>
         <div id="secretContent" class="hidden">
           <p class="secret-desc">Ces idées ne sont visibles qu'avec ton code PIN.</p>
           <div class="glass-card add-idea-section compact">
             <input type="text" id="secretTitle" placeholder="Titre secret...">
             <textarea id="secretText" placeholder="Écris ton idée secrète..." rows="2"></textarea>
-            <button id="addSecretBtn" class="primary-btn mt-12">
-              <svg class="ic ic-sm"><use href="#i-lock"/></svg>
-              Sauvegarder dans le coffre
-            </button>
+            <button id="addSecretBtn" class="primary-btn mt-12 ripple-container"><svg class="ic ic-sm"><use href="#i-lock"/></svg>Sauvegarder dans le coffre</button>
           </div>
           <div id="secretIdeasList" class="ideas-grid"></div>
         </div>
       </section>
 
-      <!-- ACTUS -->
       <section id="tab-news" class="tab-page">
-        <h2 class="tab-title">
-          <svg class="ic"><use href="#i-globe"/></svg>
-          Actus & Infos
-        </h2>
-        <div class="news-filters">
-          <button class="news-filter-btn active" data-news="all">Tout</button>
-          <button class="news-filter-btn" data-news="general">Infos</button>
-          <button class="news-filter-btn" data-news="weather">Météo</button>
-          <button class="news-filter-btn" data-news="foot">Foot</button>
-          <button class="news-filter-btn" data-news="holidays">Fériés</button>
+        <h2 class="tab-title"><svg class="ic"><use href="#i-globe"/></svg>Actus & Infos</h2>
+        <div id="newsMainMenu" class="news-menu-grid">
+          <button class="news-menu-card ripple-container" data-news-section="wattpad"><span class="news-menu-icon">📚</span><span class="news-menu-label">Wattpad</span></button>
+          <button class="news-menu-card ripple-container" data-news-section="international"><span class="news-menu-icon">🌍</span><span class="news-menu-label">Infos Internationales</span></button>
+          <button class="news-menu-card ripple-container" data-news-section="foot"><span class="news-menu-icon">⚽</span><span class="news-menu-label">Foot</span></button>
+          <button class="news-menu-card ripple-container" data-news-section="cinema"><span class="news-menu-icon">🎬</span><span class="news-menu-label">Cinéma</span></button>
+          <button class="news-menu-card ripple-container" data-news-section="anime"><span class="news-menu-icon">🎌</span><span class="news-menu-label">Animes</span></button>
+          <button class="news-menu-card ripple-container" data-news-section="weather"><span class="news-menu-icon">☀️</span><span class="news-menu-label">Météo</span></button>
         </div>
-        <div id="newsContent" class="news-content">
-          <div class="empty-state">
-            <svg class="ic"><use href="#i-globe"/></svg>
-            <p>Choisis une catégorie</p>
-          </div>
+        <div id="newsDetailView" class="hidden">
+          <button id="newsBackBtn" class="back-btn"><svg class="ic ic-sm"><use href="#i-arrow-left"/></svg> Retour</button>
+          <div id="newsSubmenu" class="news-submenu hidden"></div>
+          <div id="newsContent" class="news-content"></div>
         </div>
       </section>
 
-      <!-- RÉGLAGES -->
       <section id="tab-settings" class="tab-page">
-        <h2 class="tab-title">
-          <svg class="ic"><use href="#i-settings"/></svg>
-          Paramètres
-        </h2>
-
+        <h2 class="tab-title"><svg class="ic"><use href="#i-settings"/></svg>Paramètres</h2>
+        <div class="settings-category">Mon compte</div>
         <div class="glass-card settings-block">
-          <div class="settings-row">
-            <div>
-              <div class="settings-label">Profil</div>
-              <div class="muted" id="profileSummary">—</div>
-            </div>
-            <button id="editProfileBtn" class="ghost-btn">Modifier</button>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-user"/></svg><div><div class="settings-label">Profil</div><div class="muted small" id="profileSummary">—</div></div></div><button id="editProfileBtn" class="ghost-btn ripple-container">Modifier</button></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-heart"/></svg><div><div class="settings-label">Espace Crush</div><div class="muted small">Notes, dates (privé)</div></div></div><button id="openCrushBtn" class="ghost-btn ripple-container">Ouvrir</button></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-share"/></svg><div><div class="settings-label">Recevoir une idée</div><div class="muted small">Colle un code partagé</div></div></div><button id="openReceiveBtn" class="ghost-btn ripple-container">Recevoir</button></div>
+        </div>
+        <div class="settings-category">Localisation</div>
+        <div class="glass-card settings-block">
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-map-pin"/></svg><div><div class="settings-label">Ma position</div><div class="muted small" id="locationStatus">Non activée</div></div></div><button id="useLocationBtn" class="ghost-btn ripple-container">Activer</button></div>
+        </div>
+        <div class="settings-category">Apparence</div>
+        <div class="glass-card settings-block">
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-palette"/></svg><div><div class="settings-label">Thème</div><div class="muted small">Sombre ou clair</div></div></div><button id="themeToggle2" class="ghost-btn ripple-container">Basculer</button></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-text-size"/></svg><div><div class="settings-label">Taille du texte</div><div class="muted small" id="fontSizeValue">Normale</div></div></div>
+            <select id="fontSizeSelect"><option value="0.9">Petite</option><option value="1" selected>Normale</option><option value="1.1">Grande</option><option value="1.2">Très grande</option></select>
+          </div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-calendar"/></svg><div><div class="settings-label">Format de date</div><div class="muted small">Affichage des dates</div></div></div>
+            <select id="dateFormatSelect"><option value="fr-FR" selected>JJ/MM/AAAA</option><option value="en-US">MM/DD/YYYY</option><option value="ja-JP">AAAA-MM-JJ</option></select>
+          </div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-zap"/></svg><div><div class="settings-label">Animations</div><div class="muted small">Effets visuels</div></div></div>
+            <label class="toggle"><input type="checkbox" id="animationsToggle" checked><span class="toggle-slider"></span></label>
           </div>
         </div>
-
+        <div class="settings-category">Mes préférences</div>
         <div class="glass-card settings-block">
-          <div class="settings-row">
-            <div>
-              <div class="settings-label">
-                <svg class="ic ic-sm"><use href="#i-heart"/></svg>
-                Espace Crush
-              </div>
-              <div class="muted">Notes, dates, souvenirs (privé)</div>
-            </div>
-            <button id="openCrushBtn" class="ghost-btn">Ouvrir</button>
-          </div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-tv"/></svg><div><div class="settings-label">Club de foot préféré</div><div class="muted small" id="footPrefValue">Aucun</div></div></div><button id="editFootPrefBtn" class="ghost-btn ripple-container">Choisir</button></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-film"/></svg><div><div class="settings-label">Genre de film préféré</div><div class="muted small" id="cinemaPrefValue">Aucun</div></div></div><button id="editCinemaPrefBtn" class="ghost-btn ripple-container">Choisir</button></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-globe"/></svg><div><div class="settings-label">Genre d'anime préféré</div><div class="muted small" id="animePrefValue">Aucun</div></div></div><button id="editAnimePrefBtn" class="ghost-btn ripple-container">Choisir</button></div>
         </div>
-
+        <div class="settings-category">Données</div>
         <div class="glass-card settings-block">
-          <div class="settings-row">
-            <div>
-              <div class="settings-label">
-                <svg class="ic ic-sm"><use href="#i-share"/></svg>
-                Recevoir une idée
-              </div>
-              <div class="muted">Colle un code partagé</div>
-            </div>
-            <button id="openReceiveBtn" class="ghost-btn">Recevoir</button>
-          </div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-download"/></svg><div><div class="settings-label">Exporter mes données</div><div class="muted small">Sauvegarder en fichier</div></div></div><button id="exportBtn" class="ghost-btn ripple-container">Exporter</button></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-upload"/></svg><div><div class="settings-label">Importer des données</div><div class="muted small">Restaurer une sauvegarde</div></div></div><label class="ghost-btn ripple-container" for="importInput">Importer</label><input type="file" id="importInput" accept=".json,application/json" hidden></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-database"/></svg><div><div class="settings-label">Vider le cache</div><div class="muted small">Libérer de l'espace</div></div></div><button id="clearCacheBtn" class="ghost-btn ripple-container">Vider</button></div>
         </div>
-
+        <div class="settings-category">Zone dangereuse</div>
         <div class="glass-card settings-block">
-          <div class="settings-row">
-            <div>
-              <div class="settings-label">Changer le thème</div>
-              <div class="muted">Clair ou sombre</div>
-            </div>
-            <button id="themeToggle2" class="ghost-btn">Basculer</button>
-          </div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon" style="color:var(--danger)"><use href="#i-trash"/></svg><div><div class="settings-label" style="color:var(--danger)">Réinitialiser l'app</div><div class="muted small">Efface TOUTES les données</div></div></div></div>
+          <div class="settings-row" style="padding-top:0;"><button id="resetAppBtn" class="danger-btn ripple-container">Tout effacer</button></div>
         </div>
-
+        <div class="settings-category">À propos</div>
         <div class="glass-card settings-block">
-          <div class="settings-row">
-            <div>
-              <div class="settings-label">Version</div>
-              <div class="muted">LaugraStok v2.2 · 2025</div>
-            </div>
-          </div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-info"/></svg><div><div class="settings-label">Version</div><div class="muted small">LaugraStok v2.8</div></div></div></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-user"/></svg><div><div class="settings-label">Développeur</div><div class="muted small">Elite</div></div></div></div>
+          <div class="settings-row"><div class="settings-row-left"><svg class="ic settings-icon"><use href="#i-shield"/></svg><div><div class="settings-label">Politique de confidentialité</div><div class="muted small">100% local</div></div></div><button id="privacyBtn" class="ghost-btn ripple-container">Voir</button></div>
         </div>
       </section>
-
     </main>
 
-    <!-- TAB BAR -->
     <nav class="tab-bar" id="tabBar">
-      <button class="tab-btn active" data-tab="home">
-        <svg class="ic"><use href="#i-home"/></svg>
-        <span>Accueil</span>
-      </button>
-      <button class="tab-btn" data-tab="fav">
-        <svg class="ic"><use href="#i-star"/></svg>
-        <span>Favoris</span>
-      </button>
-      <button class="tab-btn" data-tab="vault">
-        <svg class="ic"><use href="#i-lock"/></svg>
-        <span>Coffre</span>
-      </button>
-      <button class="tab-btn" data-tab="news">
-        <svg class="ic"><use href="#i-globe"/></svg>
-        <span>Actus</span>
-      </button>
-      <button class="tab-btn" data-tab="settings">
-        <svg class="ic"><use href="#i-settings"/></svg>
-        <span>Réglages</span>
-      </button>
+      <button class="tab-btn active" data-tab="home"><svg class="ic"><use href="#i-home"/></svg><span>Accueil</span></button>
+      <button class="tab-btn" data-tab="fav"><svg class="ic"><use href="#i-star"/></svg><span>Favoris</span></button>
+      <button class="tab-btn" data-tab="vault"><svg class="ic"><use href="#i-lock"/></svg><span>Coffre</span></button>
+      <button class="tab-btn" data-tab="news"><svg class="ic"><use href="#i-globe"/></svg><span>Actus</span></button>
+      <button class="tab-btn" data-tab="settings"><svg class="ic"><use href="#i-settings"/></svg><span>Réglages</span></button>
       <div class="tab-indicator" id="tabIndicator"></div>
     </nav>
   </div>
 
-  <!-- MODAL CRUSH -->
   <div id="crushModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
-      <div class="modal-header">
-        <h2><svg class="ic"><use href="#i-heart"/></svg> Espace Crush</h2>
-        <button class="close-btn" data-close="crushModal"><svg class="ic"><use href="#i-close"/></svg></button>
-      </div>
-      <div class="form-group">
-        <label>Son prénom / pseudo</label>
-        <input type="text" id="crushName" placeholder="Ex: ..." autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>Date de rencontre</label>
-        <input type="date" id="crushMeet">
-      </div>
-      <div class="form-group">
-        <label>Anniversaire</label>
-        <input type="date" id="crushBirthday">
-      </div>
-      <div class="form-group">
-        <label>Notes / souvenirs</label>
-        <textarea id="crushNotes" rows="4" placeholder="Ce que tu veux retenir..."></textarea>
-      </div>
+      <div class="modal-header"><h2><svg class="ic"><use href="#i-heart"/></svg> Espace Crush</h2><button class="close-btn" data-close="crushModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
+      <div class="form-group"><label>Son prénom / pseudo</label><input type="text" id="crushName" placeholder="Ex: ..." autocomplete="off"></div>
+      <div class="form-group"><label>Date de rencontre</label><input type="date" id="crushMeet"></div>
+      <div class="form-group"><label>Anniversaire</label><input type="date" id="crushBirthday"></div>
+      <div class="form-group"><label>Notes / souvenirs</label><textarea id="crushNotes" rows="4" placeholder="Ce que tu veux retenir..."></textarea></div>
       <button id="saveCrushBtn" class="primary-btn mt-12">Enregistrer</button>
     </div>
   </div>
 
-  <!-- MODAL PARTAGE -->
   <div id="shareModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
-      <div class="modal-header">
-        <h2><svg class="ic"><use href="#i-share"/></svg> Partager</h2>
-        <button class="close-btn" data-close="shareModal"><svg class="ic"><use href="#i-close"/></svg></button>
-      </div>
+      <div class="modal-header"><h2><svg class="ic"><use href="#i-share"/></svg> Partager</h2><button class="close-btn" data-close="shareModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
       <p class="muted small">Choisis comment envoyer ton idée :</p>
       <div class="share-grid">
-        <button class="share-option" data-share="native">
-          <svg class="ic"><use href="#i-share"/></svg>
-          <span>Partager via...</span>
-        </button>
-        <button class="share-option" data-share="code">
-          <svg class="ic"><use href="#i-copy"/></svg>
-          <span>Copier le code</span>
-        </button>
-        <button class="share-option" data-share="download">
-          <svg class="ic"><use href="#i-download"/></svg>
-          <span>Télécharger</span>
-        </button>
+        <button class="share-option ripple-container" data-share="native"><svg class="ic"><use href="#i-share"/></svg><span>Partager via...</span></button>
+        <button class="share-option ripple-container" data-share="code"><svg class="ic"><use href="#i-copy"/></svg><span>Copier le code</span></button>
+        <button class="share-option ripple-container" data-share="download"><svg class="ic"><use href="#i-download"/></svg><span>Télécharger</span></button>
       </div>
       <div id="sharePreview" class="share-preview hidden"></div>
     </div>
   </div>
 
-  <!-- MODAL RECEVOIR -->
   <div id="receiveModal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
-      <div class="modal-header">
-        <h2>Recevoir une idée</h2>
-        <button class="close-btn" data-close="receiveModal"><svg class="ic"><use href="#i-close"/></svg></button>
-      </div>
+      <div class="modal-header"><h2>Recevoir une idée</h2><button class="close-btn" data-close="receiveModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
       <p class="muted small">Colle le code que tu as reçu :</p>
       <textarea id="receiveCode" rows="5" placeholder="Colle ici le code partagé..."></textarea>
       <button id="importIdeaBtn" class="primary-btn mt-12">Importer</button>
     </div>
   </div>
 
-  <script src="script.js"></script>
-  <script src="actus.js"></script>
-  <script src="sw-register.js"></script>
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <h2 id="confirmTitle">Confirmer ?</h2>
+      <p class="muted mt-12" id="confirmMessage">Es-tu sûr ?</p>
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button id="confirmNo" class="ghost-btn" style="flex:1;">Annuler</button>
+        <button id="confirmYes" class="primary-btn" style="flex:1;background:var(--danger);">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="privacyModal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header"><h2>Politique de confidentialité</h2><button class="close-btn" data-close="privacyModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
+      <div class="muted small" style="line-height:1.6;">
+        <p><strong>LaugraStok respecte totalement ta vie privée.</strong></p>
+        <p style="margin-top:10px;">Toutes tes idées, vocaux, photos et notes restent <strong>sur ton téléphone</strong>. Aucune donnée personnelle n'est envoyée à un serveur.</p>
+        <p style="margin-top:10px;">L'app se connecte à internet <strong>uniquement</strong> pour les actus (infos, météo, foot, films, animes, Wattpad).</p>
+        <p style="margin-top:10px;">La localisation (si activée) sert <strong>uniquement</strong> à afficher la météo de ta ville.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="footPrefModal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header"><h2>Club de foot préféré</h2><button class="close-btn" data-close="footPrefModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
+      <p class="muted small">Choisis ton club pour voir ses matchs en priorité.</p>
+      <div class="form-group"><label>Club</label>
+        <select id="footPrefSelect">
+          <option value="">— Aucun —</option>
+          <option value="Arsenal">Arsenal</option><option value="Chelsea">Chelsea</option><option value="Liverpool">Liverpool</option>
+          <option value="Manchester City">Manchester City</option><option value="Manchester United">Manchester United</option>
+          <option value="Tottenham">Tottenham</option><option value="Real Madrid">Real Madrid</option>
+          <option value="Barcelona">FC Barcelone</option><option value="Atlético">Atlético Madrid</option>
+          <option value="Juventus">Juventus</option><option value="Milan">AC Milan</option><option value="Inter">Inter Milan</option>
+          <option value="Bayern">Bayern Munich</option><option value="Dortmund">Borussia Dortmund</option>
+          <option value="Paris">Paris SG</option><option value="Marseille">Marseille</option>
+          <option value="Lyon">Lyon</option><option value="Monaco">Monaco</option>
+        </select>
+      </div>
+      <button id="saveFootPrefBtn" class="primary-btn mt-12">Enregistrer</button>
+    </div>
+  </div>
+
+  <div id="cinemaPrefModal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header"><h2>Genre de film préféré</h2><button class="close-btn" data-close="cinemaPrefModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
+      <div class="form-group"><label>Genre</label>
+        <select id="cinemaPrefSelect">
+          <option value="">— Aucun —</option>
+          <option value="28">Action</option><option value="35">Comédie</option><option value="18">Drame</option>
+          <option value="878">Science-Fiction</option><option value="27">Horreur</option><option value="53">Thriller</option>
+          <option value="10749">Romance</option><option value="16">Animation</option><option value="12">Aventure</option><option value="14">Fantastique</option>
+        </select>
+      </div>
+      <button id="saveCinemaPrefBtn" class="primary-btn mt-12">Enregistrer</button>
+    </div>
+  </div>
+
+  <div id="animePrefModal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header"><h2>Genre d'anime préféré</h2><button class="close-btn" data-close="animePrefModal"><svg class="ic"><use href="#i-close"/></svg></button></div>
+      <div class="form-group"><label>Genre</label>
+        <select id="animePrefSelect">
+          <option value="">— Aucun —</option>
+          <option value="1">Action</option><option value="2">Aventure</option><option value="4">Comédie</option>
+          <option value="8">Drame</option><option value="10">Fantasy</option><option value="14">Horreur</option>
+          <option value="7">Mystère</option><option value="22">Romance</option><option value="24">Sci-Fi</option>
+          <option value="36">Slice of Life</option><option value="30">Sports</option><option value="37">Supernatural</option>
+        </select>
+      </div>
+      <button id="saveAnimePrefBtn" class="primary-btn mt-12">Enregistrer</button>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+
+  const TMDB_KEY = 'e73c4da16e9eb98455ed9ae2c21f8b72';
+  const PROXY = 'https://api.allorigins.win/get?url=';
+
+  const CACHE = {};
+  const CACHE_DURATION = 5 * 60 * 1000;
+  function cacheGet(key) {
+    const item = CACHE[key];
+    if (!item) return null;
+    if (Date.now() - item.time > CACHE_DURATION) { delete CACHE[key]; return null; }
+    return item.data;
+  }
+  function cacheSet(key, data) {
+    CACHE[key] = { data, time: Date.now() };
+    const keys = Object.keys(CACHE);
+    if (keys.length > 20) delete CACHE[keys[0]];
+  }
+
+  const MY_WATTPAD_PROFILE = 'https://www.wattpad.com/user/Tokuverse';
+  const MY_WATTPAD_NAME = 'Tokuverse';
+  const MY_STORIES = [
+    { title: 'The Spider-Man', url: 'https://www.wattpad.com/story/415290054-the-spider-man', description: 'Peter Parker voulait simplement augmenter sa moyenne et décrocher un stage à Horizon Labs...', views: '63', votes: '10', chapters: '2', cover: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I2RjMjYyNiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFhMWEyZSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9InVybCgjZykiLz48dGV4dCB4PSI0MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUElERVItTUFOPC90ZXh0Pjwvc3ZnPg==' },
+    { title: 'Le Fils de l\'Ombre', url: 'https://www.wattpad.com/story/400923674-le-fils-de-l%27ombre', description: 'Shintaro, un jeune homme marqué par un passé difficile, rencontre Jonas, Malik et Aya...', views: '51', votes: '1', chapters: '5', cover: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzJhMTU0NyIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzBkMDIxMSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9InVybCgjZykiLz48dGV4dCB4PSI0MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GSUxTIE9NQlJFPC90ZXh0Pjwvc3ZnPg==' },
+    { title: 'L\'Éternel Mourant', url: 'https://www.wattpad.com/story/407132780-l%27%C3%A9ternel-mourant', description: 'Que se passerait-il si vous étiez la personne la plus forte du monde...', views: '29', votes: '7', chapters: '10', cover: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzNiODJmNiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFhMWEyZSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9InVybCgjZykiLz48dGV4dCB4PSI0MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7DiVRFUk5FTCBNPC90ZXh0Pjwvc3ZnPg==' },
+    { title: 'Letters From a World on the Brink', url: 'https://www.wattpad.com/story/413611191-letters-from-a-world-on-the-brink', description: 'This novel is a work of historical fiction...', views: '3', votes: '0', chapters: '1', cover: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFhMWEyZSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I2RjMjYyNiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9InVybCgjZykiLz48dGV4dCB4PSI0MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxFVFRFUlM8L3RleHQ+PC9zdmc+' }
+  ];
+
+  const safeParse = (k, f) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : f; } catch { return f; } };
+  const escapeHtml = (t) => !t ? '' : String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+  function getDateFormat() { return localStorage.getItem('laugra_date_format') || 'fr-FR'; }
+  function formatDate(date = new Date()) {
+    const loc = getDateFormat();
+    if (loc === 'en-US') { const m = String(date.getMonth()+1).padStart(2,'0'); const d = String(date.getDate()).padStart(2,'0'); return `${m}/${d}/${date.getFullYear()}`; }
+    if (loc === 'ja-JP') { const m = String(date.getMonth()+1).padStart(2,'0'); const d = String(date.getDate()).padStart(2,'0'); return `${date.getFullYear()}-${m}-${d}`; }
+    const d = String(date.getDate()).padStart(2,'0'); const m = String(date.getMonth()+1).padStart(2,'0');
+    return `${d}/${m}/${date.getFullYear()}`;
+  }
+  const nowFR = () => formatDate();
+
+  const toast = (msg, type = 'info') => {
+    const old = document.getElementById('lsToast'); if (old) old.remove();
+    const t = document.createElement('div');
+    t.id = 'lsToast'; t.textContent = msg;
+    t.style.cssText = `position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%) translateY(-30px);background:${type === 'error' ? '#ef4444' : type === 'success' ? '#7c3aed' : 'rgba(30,22,45,0.96)'};color:#fff;padding:14px 20px;border-radius:16px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:2147483647;opacity:0;transition:opacity .3s,transform .3s;backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.18);max-width:90vw;text-align:center;pointer-events:none;line-height:1.35;`;
+    document.body.appendChild(t); void t.offsetHeight;
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(-30px)'; setTimeout(() => t.remove(), 350); }, 2400);
+  };
+
+  let confirmResolve = null;
+  function askConfirm(title, message) {
+    return new Promise((resolve) => {
+      confirmResolve = resolve;
+      $('#confirmTitle').textContent = title; $('#confirmMessage').textContent = message;
+      $('#confirmModal').classList.remove('hidden');
+    });
+  }
+  $('#confirmYes')?.addEventListener('click', () => { $('#confirmModal').classList.add('hidden'); if (confirmResolve) { confirmResolve(true); confirmResolve = null; } });
+  $('#confirmNo')?.addEventListener('click', () => { $('#confirmModal').classList.add('hidden'); if (confirmResolve) { confirmResolve(false); confirmResolve = null; } });
+
+  window.addEventListener('load', () => setTimeout(() => $('#splashScreen')?.classList.add('hidden'), 700));
+  setTimeout(() => $('#splashScreen')?.classList.add('hidden'), 2000);
+
+  (function createRain() {
+    const layer = $('#rainLayer'); if (!layer) return;
+    const n = window.innerWidth < 480 ? 15 : 22;
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('div'); d.className = 'drop';
+      d.style.left = Math.random() * 100 + '%';
+      d.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      d.style.animationDelay = (Math.random() * 4) + 's';
+      d.style.opacity = 0.3 + Math.random() * 0.5;
+      d.style.height = (50 + Math.random() * 40) + 'px';
+      layer.appendChild(d);
+    }
+  })();
+
+  (function createSky() {
+    const layer = $('#skyLayer'); if (!layer) return;
+    const cloudSvg = `<svg viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="25" cy="25" rx="20" ry="14" fill="currentColor"/><ellipse cx="50" cy="20" rx="25" ry="18" fill="currentColor"/><ellipse cx="75" cy="25" rx="20" ry="14" fill="currentColor"/></svg>`;
+    for (let i = 1; i <= 3; i++) { const c = document.createElement('div'); c.className = 'cloud cloud-' + i; c.innerHTML = cloudSvg; layer.appendChild(c); }
+    const birdSvg = `<svg viewBox="0 0 30 15" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 10 Q8 2 15 10 Q22 2 28 10"/></svg>`;
+    for (let i = 1; i <= 2; i++) { const b = document.createElement('div'); b.className = 'bird bird-' + i; b.innerHTML = birdSvg; layer.appendChild(b); }
+    const planeSvg = `<svg viewBox="0 0 40 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M2 12 L15 11 L18 6 L21 11 L34 10 L36 12 L21 13 L18 17 L15 13 L2 14 Z" opacity="0.8"/></svg>`;
+    const plane = document.createElement('div'); plane.className = 'plane'; plane.innerHTML = planeSvg; layer.appendChild(plane);
+  })();
+
+  document.addEventListener('touchstart', (e) => {
+    const target = e.target.closest('.ripple-container, .primary-btn, .ghost-btn, .icon-btn, .dash-action-btn, .media-square-btn, .news-menu-card, .tag-btn, .danger-btn, .share-option, .news-submenu-btn');
+    if (!target) return;
+    if (!target.classList.contains('ripple-container')) target.classList.add('ripple-container');
+    const rect = target.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (x - size / 2) + 'px';
+    ripple.style.top = (y - size / 2) + 'px';
+    target.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 700);
+  }, { passive: true });
+
+  function applyFontSize(scale) {
+    document.documentElement.style.setProperty('--font-scale', scale);
+    const labels = { '0.9': 'Petite', '1': 'Normale', '1.1': 'Grande', '1.2': 'Très grande' };
+    const el = $('#fontSizeValue'); if (el) el.textContent = labels[scale] || 'Normale';
+  }
+  function applyAnimations(on) {
+    if (on) document.documentElement.removeAttribute('data-animations');
+    else document.documentElement.setAttribute('data-animations', 'off');
+  }
+
+  const savedFont = localStorage.getItem('laugra_font_size') || '1';
+  if ($('#fontSizeSelect')) $('#fontSizeSelect').value = savedFont;
+  applyFontSize(savedFont);
+  const savedAnims = localStorage.getItem('laugra_animations') !== 'off';
+  if ($('#animationsToggle')) $('#animationsToggle').checked = savedAnims;
+  applyAnimations(savedAnims);
+  if ($('#dateFormatSelect')) $('#dateFormatSelect').value = getDateFormat();
+
+  $('#fontSizeSelect')?.addEventListener('change', (e) => { localStorage.setItem('laugra_font_size', e.target.value); applyFontSize(e.target.value); });
+  $('#animationsToggle')?.addEventListener('change', (e) => { localStorage.setItem('laugra_animations', e.target.checked ? 'on' : 'off'); applyAnimations(e.target.checked); });
+  $('#dateFormatSelect')?.addEventListener('change', (e) => { localStorage.setItem('laugra_date_format', e.target.value); renderIdeas(); renderFavList(); renderSecretIdeas(); });
+
+  const profileModal = $('#profileModal');
+  const userGreeting = $('#userGreeting');
+  const profileSummary = $('#profileSummary');
+  let userProfile = safeParse('laugra_user_profile', null);
+
+  function renderProfile() {
+    if (!userProfile) { profileModal.classList.remove('hidden'); if (profileSummary) profileSummary.textContent = '—'; }
+    else {
+      profileModal.classList.add('hidden');
+      if (userGreeting) userGreeting.textContent = `Bienvenue, ${userProfile.name} ! ✨`;
+      if (profileSummary) profileSummary.textContent = `${userProfile.name} · ${userProfile.age} ans`;
+    }
+  }
+  $('#saveProfileBtn')?.addEventListener('click', () => {
+    const name = $('#userNameInput').value.trim(); const age = $('#userAgeInput').value.trim();
+    if (!name || !age) return toast('Remplis ton prénom et ton âge !', 'error');
+    userProfile = { name, age };
+    localStorage.setItem('laugra_user_profile', JSON.stringify(userProfile));
+    renderProfile(); toast('Profil enregistré ✨', 'success');
+  });
+  $('#editProfileBtn')?.addEventListener('click', () => {
+    $('#userNameInput').value = userProfile?.name || ''; $('#userAgeInput').value = userProfile?.age || '';
+    profileModal.classList.remove('hidden');
+  });
+  renderProfile();
+
+  const themeToggle = $('#themeToggle');
+  let currentTheme = localStorage.getItem('laugra_theme') || 'dark';
+  function applyTheme() {
+    if (currentTheme === 'light') { document.documentElement.setAttribute('data-theme', 'light'); if (themeToggle) themeToggle.innerHTML = '<svg class="ic"><use href="#i-sun"/></svg>'; }
+    else { document.documentElement.removeAttribute('data-theme'); if (themeToggle) themeToggle.innerHTML = '<svg class="ic"><use href="#i-moon"/></svg>'; }
+  }
+  function switchTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; localStorage.setItem('laugra_theme', currentTheme); applyTheme(); }
+  themeToggle?.addEventListener('click', switchTheme);
+  $('#themeToggle2')?.addEventListener('click', switchTheme);
+  applyTheme();
+
+  const tabIndicator = $('#tabIndicator');
+  const tabButtons = $$('.tab-btn');
+  function moveIndicator(btn) {
+    if (!tabIndicator || !btn) return;
+    tabIndicator.style.transform = `translateX(${btn.offsetLeft - 8}px)`;
+    tabIndicator.style.width = btn.offsetWidth + 'px';
+  }
+  function switchTab(name) {
+    const wasActive = document.querySelector('.tab-btn.active')?.dataset.tab === name;
+    $$('.tab-page').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById('tab-' + name); if (page) page.classList.add('active');
+    tabButtons.forEach(btn => { const isActive = btn.dataset.tab === name; btn.classList.toggle('active', isActive); if (isActive) moveIndicator(btn); });
+    if (!wasActive) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (name === 'fav') renderFavList();
+    if (name === 'vault') resetVaultView();
+    if (name === 'news') resetNewsView();
+  }
+  tabButtons.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+  setTimeout(() => switchTab('home'), 50);
+  window.addEventListener('resize', () => { const a = $('.tab-btn.active'); if (a) moveIndicator(a); });
+
+  const recordVoiceBtn = $('#recordVoiceBtn');
+  const recordTimer = $('#recordTimer');
+  const cameraInput = $('#cameraInput');
+  const mediaStatus = $('#mediaStatus');
+  let mediaRecorder = null, audioChunks = [], audioStream = null, isRecording = false;
+  let timerInterval = null, secondsRecorded = 0;
+  let currentAudioBase64 = null, currentMediaBase64 = null, currentMediaType = null;
+
+  async function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return toast('Micro non supporté.', 'error');
+    if (typeof MediaRecorder === 'undefined') return toast('Enregistrement non supporté.', 'error');
+    try {
+      audioStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+      const mimeType = candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
+      mediaRecorder = mimeType ? new MediaRecorder(audioStream, { mimeType }) : new MediaRecorder(audioStream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => { currentAudioBase64 = reader.result; if (mediaStatus) mediaStatus.textContent = '🎙️ Vocal prêt'; toast('Vocal enregistré 🎙️', 'success'); };
+        reader.readAsDataURL(blob);
+        if (audioStream) { audioStream.getTracks().forEach(t => t.stop()); audioStream = null; }
+      };
+      mediaRecorder.start();
+      isRecording = true; recordVoiceBtn.classList.add('recording');
+      recordTimer.classList.remove('hidden'); secondsRecorded = 0; recordTimer.textContent = '00:00';
+      timerInterval = setInterval(() => {
+        secondsRecorded++;
+        const m = String(Math.floor(secondsRecorded / 60)).padStart(2, '0'); const s = String(secondsRecorded % 60).padStart(2, '0');
+        recordTimer.textContent = `${m}:${s}`;
+        if (secondsRecorded >= 180) stopRecording();
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      if (err.name === 'NotAllowedError') toast('Autorise le micro.', 'error');
+      else if (err.name === 'NotFoundError') toast('Aucun micro détecté.', 'error');
+      else toast('Impossible d\'accéder au micro.', 'error');
+    }
+  }
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') { try { mediaRecorder.stop(); } catch {} }
+    isRecording = false; recordVoiceBtn.classList.remove('recording');
+    recordTimer.classList.add('hidden');
+    clearInterval(timerInterval); timerInterval = null;
+  }
+  recordVoiceBtn?.addEventListener('click', () => { isRecording ? stopRecording() : startRecording(); });
+  cameraInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast('Fichier trop gros (max 5 Mo).', 'error'); e.target.value = ''; return; }
+    const reader = new FileReader();
+    reader.onloadend = () => { currentMediaBase64 = reader.result; currentMediaType = file.type.startsWith('video') ? 'video' : 'image'; if (mediaStatus) mediaStatus.textContent = currentMediaType === 'video' ? '🎥 Vidéo prête' : '📸 Photo prête'; };
+    reader.readAsDataURL(file);
+  });
+
+  const ideasList = $('#ideasList');
+  let ideas = safeParse('laugra_ideas', []);
+  let currentFilter = 'all';
+  const CATEGORY_LABELS = { app: 'Dev', story: 'Histoire', video: 'Vidéo', other: 'Autre' };
+
+  function updateDashboard() {
+    if ($('#totalIdeasCount')) $('#totalIdeasCount').textContent = ideas.length;
+    if ($('#favIdeasCount')) $('#favIdeasCount').textContent = ideas.filter(i => i.fav).length;
+  }
+  function saveIdeas() { try { localStorage.setItem('laugra_ideas', JSON.stringify(ideas)); } catch (err) { toast('Stockage plein ! Supprime des médias.', 'error'); } }
+
+  function buildIdeaCard(idea) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'idea-wrapper';
+    wrapper.innerHTML = `<div class="idea-swipe-bg swipe-left">🗑️ Supprimer</div><div class="idea-swipe-bg swipe-right">⭐ Favori</div>`;
+    const card = document.createElement('div');
+    card.className = 'idea-card glass-card';
+    card.dataset.id = idea.id;
+    let mediaHTML = '';
+    if (idea.audio) mediaHTML += `<audio controls preload="metadata" src="${idea.audio}"></audio>`;
+    if (idea.media) mediaHTML += idea.mediaType === 'video' ? `<div class="media-preview"><video controls preload="metadata" src="${idea.media}"></video></div>` : `<div class="media-preview"><img src="${idea.media}" alt="Média" loading="lazy"/></div>`;
+    card.innerHTML = `
+      <div class="idea-header">
+        <span class="idea-title">
+          <span class="fav-star ${idea.fav ? 'active' : ''}" data-fav="${idea.id}" title="Favori">
+            <svg class="ic"><use href="#i-${idea.fav ? 'star-fill' : 'star'}"/></svg>
+          </span>
+          ${escapeHtml(idea.title)}
+        </span>
+        <span class="badge">${CATEGORY_LABELS[idea.category] || idea.category}</span>
+      </div>
+      ${idea.text ? `<div class="idea-content">${escapeHtml(idea.text)}</div>` : ''}
+      ${mediaHTML}
+      <div class="idea-footer">
+        <span>${idea.date}</span>
+        <div class="action-btns">
+          <button class="share-btn" data-share="${idea.id}" title="Partager"><svg class="ic"><use href="#i-share"/></svg></button>
+          <button class="edit-btn" data-edit="${idea.id}" title="Éditer"><svg class="ic"><use href="#i-edit"/></svg></button>
+          <button class="delete-btn" data-del="${idea.id}" title="Supprimer"><svg class="ic"><use href="#i-trash"/></svg></button>
+        </div>
+      </div>`;
+    wrapper.appendChild(card);
+    initSwipe(card, wrapper, idea.id);
+    return wrapper;
+  }
+
+  function initSwipe(card, wrapper, ideaId) {
+    let startX = 0, startY = 0, currentX = 0, swiping = false, isHorizontal = null;
+    const swipeLeftBg = wrapper.querySelector('.swipe-left');
+    const swipeRightBg = wrapper.querySelector('.swipe-right');
+    const THRESHOLD = 90;
+    card.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; swiping = true; isHorizontal = null; card.classList.add('swiping'); }, { passive: true });
+    card.addEventListener('touchmove', (e) => {
+      if (!swiping) return;
+      currentX = e.touches[0].clientX - startX;
+      const deltaY = e.touches[0].clientY - startY;
+      if (isHorizontal === null) isHorizontal = Math.abs(currentX) > Math.abs(deltaY) + 5;
+      if (!isHorizontal) return;
+      e.preventDefault();
+      const clampedX = Math.max(-140, Math.min(140, currentX));
+      card.style.transform = `translateX(${clampedX}px)`;
+      if (clampedX < -20) { swipeLeftBg.classList.add('active'); swipeRightBg.classList.remove('active'); swipeLeftBg.style.opacity = Math.min(1, Math.abs(clampedX) / THRESHOLD); }
+      else if (clampedX > 20) { swipeRightBg.classList.add('active'); swipeLeftBg.classList.remove('active'); swipeRightBg.style.opacity = Math.min(1, clampedX / THRESHOLD); }
+      else { swipeLeftBg.classList.remove('active'); swipeRightBg.classList.remove('active'); }
+    }, { passive: false });
+    card.addEventListener('touchend', () => {
+      if (!swiping) return;
+      card.classList.remove('swiping');
+      swipeLeftBg.classList.remove('active'); swipeRightBg.classList.remove('active');
+      swipeLeftBg.style.opacity = ''; swipeRightBg.style.opacity = '';
+      if (currentX < -THRESHOLD) {
+        card.style.transform = 'translateX(-100%)';
+        setTimeout(async () => {
+          const ok = await askConfirm('Supprimer cette idée ?', 'Cette action est irréversible.');
+          if (ok) { ideas = ideas.filter(i => i.id !== ideaId); saveIdeas(); renderIdeas(); renderFavList(); toast('Idée supprimée', 'success'); }
+          else card.style.transform = 'translateX(0)';
+        }, 200);
+      } else if (currentX > THRESHOLD) {
+        const idea = ideas.find(i => i.id === ideaId);
+        if (idea) { idea.fav = !idea.fav; saveIdeas(); renderIdeas(); renderFavList(); toast(idea.fav ? 'Ajouté aux favoris ⭐' : 'Retiré des favoris', 'success'); }
+        card.style.transform = 'translateX(0)';
+      } else { card.style.transform = 'translateX(0)'; }
+      swiping = false; currentX = 0;
+    });
+  }
+
+  function renderIdeas() {
+    if (!ideasList) return;
+    ideasList.innerHTML = '';
+    const search = ($('#searchInput')?.value || '').toLowerCase().trim();
+    let filtered = ideas.filter(i => (i.title || '').toLowerCase().includes(search) || (i.text || '').toLowerCase().includes(search));
+    if (currentFilter === 'fav') filtered = filtered.filter(i => i.fav);
+    else if (currentFilter !== 'all') filtered = filtered.filter(i => i.category === currentFilter);
+    if (filtered.length === 0) {
+      ideasList.innerHTML = `<div class="empty-state"><svg class="ic"><use href="#i-bulb"/></svg><p>${search ? 'Aucun résultat.' : 'Aucune idée pour l\'instant.<br>Crée ta première ! ✨'}</p></div>`;
+      updateDashboard(); return;
+    }
+    filtered.forEach(i => ideasList.appendChild(buildIdeaCard(i)));
+    updateDashboard();
+  }
+  function renderFavList() {
+    const favList = $('#favList'); if (!favList) return;
+    favList.innerHTML = '';
+    const favs = ideas.filter(i => i.fav);
+    if (favs.length === 0) { favList.innerHTML = `<div class="empty-state"><svg class="ic"><use href="#i-star"/></svg><p>Aucun favori. Touche ★ sur une idée pour l'ajouter ici.</p></div>`; return; }
+    favs.forEach(i => favList.appendChild(buildIdeaCard(i)));
+  }
+  $('#addBtn')?.addEventListener('click', () => {
+    const title = $('#ideaTitle').value.trim(); const text = $('#ideaText').value.trim();
+    if (!title && !text && !currentAudioBase64 && !currentMediaBase64) return toast('Écris quelque chose ou ajoute un média !', 'error');
+    ideas.unshift({ id: Date.now(), title: title || 'Nouvelle idée', text, category: $('#ideaCategory').value, audio: currentAudioBase64, media: currentMediaBase64, mediaType: currentMediaType, fav: false, date: nowFR() });
+    saveIdeas(); renderIdeas();
+    $('#ideaTitle').value = ''; $('#ideaText').value = '';
+    if (cameraInput) cameraInput.value = '';
+    currentAudioBase64 = null; currentMediaBase64 = null; currentMediaType = null;
+    if (mediaStatus) mediaStatus.textContent = 'Aucun média';
+    toast('Idée sauvegardée ✅', 'success');
+  });
+
+  document.addEventListener('click', async (e) => {
+    const favBtn = e.target.closest('[data-fav]');
+    if (favBtn) { const id = Number(favBtn.dataset.fav); const idea = ideas.find(i => i.id === id); if (idea) { idea.fav = !idea.fav; saveIdeas(); renderIdeas(); renderFavList(); } return; }
+    const shareBtn = e.target.closest('[data-share]');
+    if (shareBtn && !shareBtn.closest('#shareModal')) { openShareModal(Number(shareBtn.dataset.share)); return; }
+    const editBtn = e.target.closest('[data-edit]');
+    if (editBtn) { editIdea(Number(editBtn.dataset.edit)); return; }
+    const delBtn = e.target.closest('[data-del]');
+    if (delBtn) {
+      const id = Number(delBtn.dataset.del);
+      const ok = await askConfirm('Supprimer cette idée ?', 'Cette action est irréversible.');
+      if (ok) { ideas = ideas.filter(i => i.id !== id); saveIdeas(); renderIdeas(); renderFavList(); toast('Idée supprimée', 'success'); }
+      return;
+    }
+  });
+
+  function editIdea(id) {
+    const idea = ideas.find(i => i.id === id); if (!idea) return;
+    const newTitle = prompt('Modifier le titre :', idea.title); if (newTitle === null) return;
+    const newText = prompt('Modifier le contenu :', idea.text || ''); if (newText === null) return;
+    idea.title = newTitle.trim() || 'Sans titre'; idea.text = newText.trim();
+    saveIdeas(); renderIdeas(); renderFavList(); toast('Idée modifiée ✏️', 'success');
+  }
+
+  $$('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => { $$('.tag-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); currentFilter = btn.dataset.filter; renderIdeas(); });
+  });
+  $('#searchInput')?.addEventListener('input', renderIdeas);
+
+  const prompts = [
+    "Une appli mobile qui prédit la météo selon l'humeur 🌤️", "Un script de vidéo Short sur un mystère du Tokuverse 🎬",
+    "Un jeu 2D pixel art où le héros utilise la foudre ⚡", "Un concept de chaîne YouTube spécialisé dans les théories Manga 📚",
+    "Une histoire fantasy d'un phénix ressuscité en détective 🔥", "Une app qui transforme tes rêves en comics 🎨",
+    "Un podcast sur les théories folles de l'univers 🎙️", "Un site qui mélange recettes et culture africaine 🍲",
+    "Une app qui te challenge à créer 1 idée par jour 💡"
+  ];
+  $('#randomPromptBtn')?.addEventListener('click', () => {
+    const p = prompts[Math.floor(Math.random() * prompts.length)];
+    $('#ideaTitle').value = 'Idée Flash ⚡'; $('#ideaText').value = p;
+    document.querySelector('.add-idea-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  const pinInput = $('#pinInput');
+  const pinInstruction = $('#pinInstruction');
+  const pinArea = $('#pinArea');
+  const secretContent = $('#secretContent');
+  const unlockSecretBtn = $('#unlockSecretBtn');
+  let savedPin = localStorage.getItem('laugra_secret_pin') || null;
+  let secretIdeas = safeParse('laugra_secret_ideas', []);
+
+  function resetVaultView() {
+    if (!pinArea || !secretContent) return;
+    pinArea.classList.remove('hidden'); secretContent.classList.add('hidden');
+    if (pinInput) pinInput.value = '';
+    if (pinInstruction) pinInstruction.textContent = savedPin ? 'Entre ton code PIN à 6 chiffres :' : 'Crée ton code PIN à 6 chiffres :';
+    if (unlockSecretBtn) unlockSecretBtn.textContent = savedPin ? 'Déverrouiller' : 'Créer le code PIN';
+  }
+  unlockSecretBtn?.addEventListener('click', () => {
+    const entered = pinInput.value.trim();
+    if (entered.length !== 6 || !/^\d+$/.test(entered)) return toast('Code à 6 chiffres requis !', 'error');
+    if (!savedPin) { savedPin = entered; localStorage.setItem('laugra_secret_pin', savedPin); toast('PIN enregistré 🔒', 'success'); }
+    else if (entered !== savedPin) return toast('Code PIN incorrect', 'error');
+    pinArea.classList.add('hidden'); secretContent.classList.remove('hidden'); renderSecretIdeas();
+  });
+  $('#addSecretBtn')?.addEventListener('click', () => {
+    const title = $('#secretTitle').value.trim(); const text = $('#secretText').value.trim();
+    if (!title && !text) return toast('Rien à sauvegarder', 'error');
+    secretIdeas.unshift({ id: Date.now(), title: title || 'Secret', text, date: nowFR() });
+    localStorage.setItem('laugra_secret_ideas', JSON.stringify(secretIdeas));
+    renderSecretIdeas(); $('#secretTitle').value = ''; $('#secretText').value = '';
+    toast('Ajouté au coffre 🔒', 'success');
+  });
+  function renderSecretIdeas() {
+    const c = $('#secretIdeasList'); if (!c) return;
+    c.innerHTML = '';
+    if (secretIdeas.length === 0) { c.innerHTML = `<div class="empty-state"><svg class="ic"><use href="#i-lock"/></svg><p>Ton coffre est vide.</p></div>`; return; }
+    secretIdeas.forEach(i => {
+      const card = document.createElement('div');
+      card.className = 'idea-card glass-card';
+      card.innerHTML = `<div class="idea-header"><span class="idea-title"><svg class="ic ic-sm"><use href="#i-lock"/></svg>${escapeHtml(i.title)}</span></div>${i.text ? `<div class="idea-content">${escapeHtml(i.text)}</div>` : ''}<div class="idea-footer"><span>${i.date}</span><button class="delete-btn" data-secret-del="${i.id}"><svg class="ic"><use href="#i-trash"/></svg></button></div>`;
+      c.appendChild(card);
+    });
+  }
+  document.addEventListener('click', async (e) => {
+    const del = e.target.closest('[data-secret-del]');
+    if (del) {
+      const id = Number(del.dataset.secretDel);
+      const ok = await askConfirm('Supprimer cette idée secrète ?', 'Elle sera définitivement effacée.');
+      if (ok) { secretIdeas = secretIdeas.filter(i => i.id !== id); localStorage.setItem('laugra_secret_ideas', JSON.stringify(secretIdeas)); renderSecretIdeas(); }
+    }
+  });
+
+  const crushModal = $('#crushModal');
+  let crushData = safeParse('laugra_crush', { name: '', meet: '', birthday: '', notes: '' });
+  $('#openCrushBtn')?.addEventListener('click', () => {
+    $('#crushName').value = crushData.name || ''; $('#crushMeet').value = crushData.meet || '';
+    $('#crushBirthday').value = crushData.birthday || ''; $('#crushNotes').value = crushData.notes || '';
+    crushModal.classList.remove('hidden');
+  });
+  $('#saveCrushBtn')?.addEventListener('click', () => {
+    crushData = { name: $('#crushName').value.trim(), meet: $('#crushMeet').value, birthday: $('#crushBirthday').value, notes: $('#crushNotes').value.trim() };
+    localStorage.setItem('laugra_crush', JSON.stringify(crushData));
+    crushModal.classList.add('hidden'); toast('Espace Crush enregistré 💕', 'success');
+  });
+
+  const shareModal = $('#shareModal');
+  const sharePreview = $('#sharePreview');
+  let shareIdeaId = null;
+  function encodeIdea(idea) {
+    const p = { t: idea.title, x: idea.text, c: idea.category, d: idea.date, a: !!idea.audio, m: !!idea.media };
+    try { return 'LS:' + btoa(unescape(encodeURIComponent(JSON.stringify(p)))); } catch { return ''; }
+  }
+  function decodeIdea(code) {
+    try {
+      if (!code.startsWith('LS:')) return null;
+      const json = decodeURIComponent(escape(atob(code.slice(3).trim())));
+      const d = JSON.parse(json);
+      return { title: d.t || 'Idée reçue', text: d.x || '', category: d.c || 'other', date: d.d || nowFR() };
+    } catch { return null; }
+  }
+  function openShareModal(id) { shareIdeaId = id; if (sharePreview) { sharePreview.classList.add('hidden'); sharePreview.textContent = ''; } shareModal.classList.remove('hidden'); }
+  document.addEventListener('click', (e) => {
+    const opt = e.target.closest('#shareModal [data-share]'); if (!opt) return;
+    const mode = opt.dataset.share;
+    const idea = ideas.find(i => i.id === shareIdeaId); if (!idea) return;
+    if (mode === 'native') {
+      const txt = `🚀 ${idea.title}\n\n${idea.text || ''}\n\n— partagé via LaugraStok`;
+      if (navigator.share) navigator.share({ title: idea.title, text: txt }).catch(() => {});
+      else { navigator.clipboard.writeText(txt); toast('Copié dans le presse-papier', 'success'); }
+    }
+    if (mode === 'code') {
+      const code = encodeIdea(idea);
+      navigator.clipboard.writeText(code).then(() => toast('Code copié ! Envoie-le à un ami 📤', 'success'));
+      if (sharePreview) { sharePreview.textContent = code; sharePreview.classList.remove('hidden'); }
+    }
+    if (mode === 'download') {
+      const txt = `${idea.title}\n\n${idea.text || ''}\n\nDate: ${idea.date}\n— LaugraStok`;
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `laugrastok-${idea.title.slice(0, 20)}.txt`; a.click();
+      URL.revokeObjectURL(url); toast('Fichier téléchargé', 'success');
+    }
+  });
+
+  const receiveModal = $('#receiveModal');
+  $('#openReceiveBtn')?.addEventListener('click', () => { $('#receiveCode').value = ''; receiveModal.classList.remove('hidden'); });
+  $('#importIdeaBtn')?.addEventListener('click', () => {
+    const raw = $('#receiveCode').value.trim(); if (!raw) return toast('Colle un code d\'abord', 'error');
+    const parsed = decodeIdea(raw); if (!parsed) return toast('Code invalide', 'error');
+    ideas.unshift({ id: Date.now(), title: parsed.title, text: parsed.text, category: parsed.category, audio: null, media: null, mediaType: null, fav: false, date: parsed.date });
+    saveIdeas(); renderIdeas(); receiveModal.classList.add('hidden');
+    toast('Idée importée 🎉', 'success'); switchTab('home');
+  });
+
+  document.addEventListener('click', (e) => {
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn) { document.getElementById(closeBtn.dataset.close)?.classList.add('hidden'); return; }
+    if (e.target.classList.contains('modal-overlay')) e.target.classList.add('hidden');
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $$('.modal-overlay:not(.hidden)').forEach(m => m.classList.add('hidden')); });
+
+  const BACKUP_KEYS = ['laugra_user_profile', 'laugra_ideas', 'laugra_secret_pin', 'laugra_secret_ideas', 'laugra_crush', 'laugra_theme', 'laugra_font_size', 'laugra_animations', 'laugra_date_format', 'laugra_user_lat', 'laugra_user_lon', 'laugra_user_city', 'laugra_foot_pref', 'laugra_cinema_pref', 'laugra_anime_pref'];
+  $('#exportBtn')?.addEventListener('click', () => {
+    const data = { version: '2.8', exported_at: new Date().toISOString(), data: {} };
+    BACKUP_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) data.data[k] = v; });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `laugrastok-sauvegarde-${new Date().toISOString().slice(0,10)}.json`; a.click();
+    URL.revokeObjectURL(url); toast('Sauvegarde téléchargée ✅', 'success');
+  });
+  $('#importInput')?.addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed || !parsed.data) throw new Error('Format invalide');
+        const ok = await askConfirm('Restaurer la sauvegarde ?', 'Tes données actuelles seront remplacées.');
+        if (!ok) { e.target.value = ''; return; }
+        Object.keys(parsed.data).forEach(k => localStorage.setItem(k, parsed.data[k]));
+        toast('Données restaurées ! Rechargement...', 'success');
+        setTimeout(() => location.reload(), 1200);
+      } catch (err) { toast('Fichier de sauvegarde invalide', 'error'); }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+  $('#clearCacheBtn')?.addEventListener('click', async () => {
+    const ok = await askConfirm('Vider le cache ?', 'Les fichiers temporaires seront supprimés. Tes données restent intactes.');
+    if (!ok) return;
+    if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+    toast('Cache vidé ✅', 'success');
+  });
+  $('#resetAppBtn')?.addEventListener('click', async () => {
+    const ok = await askConfirm('⚠️ Tout réinitialiser ?', 'Toutes tes idées, ton coffre, ton profil et tes préférences seront DÉFINITIVEMENT effacés.');
+    if (!ok) return;
+    const confirm2 = await askConfirm('Vraiment sûr ?', 'Dernière chance avant suppression totale.');
+    if (!confirm2) return;
+    localStorage.clear();
+    toast('App réinitialisée', 'success');
+    setTimeout(() => location.reload(), 1200);
+  });
+  $('#privacyBtn')?.addEventListener('click', () => $('#privacyModal').classList.remove('hidden'));
+
+  function updateLocationStatus() {
+    const city = localStorage.getItem('laugra_user_city');
+    const statusEl = $('#locationStatus');
+    if (statusEl) statusEl.textContent = city ? `📍 ${city}` : 'Non activée';
+  }
+  updateLocationStatus();
+  $('#useLocationBtn')?.addEventListener('click', () => {
+    if (!navigator.geolocation) return toast('Géolocalisation non supportée', 'error');
+    toast('Localisation en cours...', 'info');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude; const lon = pos.coords.longitude;
+        localStorage.setItem('laugra_user_lat', lat); localStorage.setItem('laugra_user_lon', lon);
+        try {
+          const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=&latitude=${lat}&longitude=${lon}&count=1&language=fr`);
+          const data = await res.json();
+          const city = data.results?.[0]?.name || 'Ma position';
+          localStorage.setItem('laugra_user_city', city);
+        } catch (e) { localStorage.setItem('laugra_user_city', 'Ma position'); }
+        updateLocationStatus(); toast('Localisation activée ✅', 'success');
+      },
+      (err) => {
+        if (err.code === 1) toast('Autorise la localisation dans les réglages', 'error');
+        else toast('Impossible d\'obtenir ta position', 'error');
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 3600000 }
+    );
+  });
+
+  function updatePrefsDisplay() {
+    const foot = localStorage.getItem('laugra_foot_pref');
+    const cinema = localStorage.getItem('laugra_cinema_pref');
+    const anime = localStorage.getItem('laugra_anime_pref');
+    if ($('#footPrefValue')) $('#footPrefValue').textContent = foot || 'Aucun';
+    const cinemaLabels = { '28': 'Action', '35': 'Comédie', '18': 'Drame', '878': 'Science-Fiction', '27': 'Horreur', '53': 'Thriller', '10749': 'Romance', '16': 'Animation', '12': 'Aventure', '14': 'Fantastique' };
+    const animeLabels = { '1': 'Action', '2': 'Aventure', '4': 'Comédie', '8': 'Drame', '10': 'Fantasy', '14': 'Horreur', '7': 'Mystère', '22': 'Romance', '24': 'Sci-Fi', '36': 'Slice of Life', '30': 'Sports', '37': 'Supernatural' };
+    if ($('#cinemaPrefValue')) $('#cinemaPrefValue').textContent = cinema ? (cinemaLabels[cinema] || cinema) : 'Aucun';
+    if ($('#animePrefValue')) $('#animePrefValue').textContent = anime ? (animeLabels[anime] || anime) : 'Aucun';
+  }
+  updatePrefsDisplay();
+
+  $('#editFootPrefBtn')?.addEventListener('click', () => { $('#footPrefSelect').value = localStorage.getItem('laugra_foot_pref') || ''; $('#footPrefModal').classList.remove('hidden'); });
+  $('#saveFootPrefBtn')?.addEventListener('click', () => { const val = $('#footPrefSelect').value; if (val) localStorage.setItem('laugra_foot_pref', val); else localStorage.removeItem('laugra_foot_pref'); updatePrefsDisplay(); $('#footPrefModal').classList.add('hidden'); toast('Préférence foot enregistrée ⚽', 'success'); });
+  $('#editCinemaPrefBtn')?.addEventListener('click', () => { $('#cinemaPrefSelect').value = localStorage.getItem('laugra_cinema_pref') || ''; $('#cinemaPrefModal').classList.remove('hidden'); });
+  $('#saveCinemaPrefBtn')?.addEventListener('click', () => { const val = $('#cinemaPrefSelect').value; if (val) localStorage.setItem('laugra_cinema_pref', val); else localStorage.removeItem('laugra_cinema_pref'); updatePrefsDisplay(); $('#cinemaPrefModal').classList.add('hidden'); toast('Préférence cinéma enregistrée 🎬', 'success'); });
+  $('#editAnimePrefBtn')?.addEventListener('click', () => { $('#animePrefSelect').value = localStorage.getItem('laugra_anime_pref') || ''; $('#animePrefModal').classList.remove('hidden'); });
+  $('#saveAnimePrefBtn')?.addEventListener('click', () => { const val = $('#animePrefSelect').value; if (val) localStorage.setItem('laugra_anime_pref', val); else localStorage.removeItem('laugra_anime_pref'); updatePrefsDisplay(); $('#animePrefModal').classList.add('hidden'); toast('Préférence anime enregistrée 🎌', 'success'); });
+
+  const WEATHER_CODES = { 0:'Ciel dégagé',1:'Principalement dégagé',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine modérée',55:'Bruine dense',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',80:'Averses légères',81:'Averses modérées',82:'Averses violentes',95:'Orage',96:'Orage avec grêle',99:'Orage violent' };
+  const WEATHER_ICONS = { 0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️' };
+
+  let currentNewsSection = null;
+  let currentNewsSub = null;
+
+  function resetNewsView() {
+    currentNewsSection = null; currentNewsSub = null;
+    $('#newsMainMenu').classList.remove('hidden'); $('#newsDetailView').classList.add('hidden');
+    $('#newsSubmenu').classList.add('hidden'); $('#newsContent').innerHTML = '';
+  }
+
+  async function safeFetch(url, timeoutMs) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 12000);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (err) { clearTimeout(timer); return null; }
+  }
+
+  function showNewsLoading() { $('#newsContent').innerHTML = `<div class="empty-state"><svg class="ic"><use href="#i-globe"/></svg><p>Chargement...</p></div>`; }
+
+  function loadWattpad() {
+    const c = $('#newsContent');
+    let html = '';
+    html += `<a href="${MY_WATTPAD_PROFILE}" target="_blank" rel="noopener" class="wattpad-profile-card glass-card">
+      <div class="wattpad-profile-avatar">${MY_WATTPAD_NAME[0].toUpperCase()}</div>
+      <div class="wattpad-profile-info">
+        <div class="wattpad-profile-name">${MY_WATTPAD_NAME}</div>
+        <div class="wattpad-profile-link">wattpad.com/user/${MY_WATTPAD_NAME}</div>
+      </div>
+      <div class="wattpad-profile-arrow">→</div>
+    </a>`;
+    html += `<div class="wattpad-section-title"><svg class="ic ic-sm"><use href="#i-star-fill"/></svg> Mes romans</div>`;
+    MY_STORIES.forEach(story => {
+      html += `<a href="${story.url}" target="_blank" rel="noopener" class="wattpad-story-card glass-card">
+        <img class="wattpad-story-cover" src="${story.cover}" alt="${escapeHtml(story.title)}">
+        <div class="wattpad-story-info">
+          <div class="wattpad-story-title">${escapeHtml(story.title)}<span class="wattpad-mine-badge">À MOI</span></div>
+          <div class="wattpad-story-desc">${escapeHtml(story.description)}</div>
+          <div class="wattpad-story-stats">
+            <span>👁️ ${story.views}</span>
+            <span>⭐ ${story.votes}</span>
+            <span>📖 ${story.chapters}</span>
+          </div>
+        </div>
+      </a>`;
+    });
+    html += `<a href="${MY_WATTPAD_PROFILE}" target="_blank" rel="noopener" class="wattpad-discover-btn">🔥 Découvrir plus de romans sur Wattpad</a>`;
+    c.innerHTML = html;
+  }
+
+  async function loadInfos() {
+    const c = $('#newsContent');
+    const cached = cacheGet('infos_intl');
+    if (cached) { c.innerHTML = cached; return; }
+    showNewsLoading();
+    let xml = null;
+    try {
+      const proxyRes = await safeFetch(PROXY + encodeURIComponent('https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr'), 15000);
+      if (proxyRes && proxyRes.contents) xml = proxyRes.contents;
+    } catch(e) {}
+    if (!xml) {
+      try {
+        const proxyRes2 = await safeFetch(PROXY + encodeURIComponent('https://www.france24.com/fr/rss'), 15000);
+        if (proxyRes2 && proxyRes2.contents) xml = proxyRes2.contents;
+      } catch(e) {}
+    }
+    if (!xml) {
+      c.innerHTML = `<div class="empty-state"><svg class="ic"><use href="#i-globe"/></svg><p>Infos indisponibles.<br>Réessaie plus tard.</p></div>`;
+      return;
+    }
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xml, 'text/xml');
+      const items = doc.querySelectorAll('item');
+      if (items.length === 0) throw new Error('Aucun item');
+      let html = ''; let i = 0;
+      items.forEach(item => {
+        if (i >= 15) return; i++;
+        const title = item.querySelector('title')?.textContent || 'Sans titre';
+        const link = item.querySelector('link')?.textContent || '#';
+        const pubDate = item.querySelector('pubDate')?.textContent || '';
+        let date = '';
+        if (pubDate) { try { date = new Date(pubDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }); } catch {} }
+        html += `<a href="${link}" target="_blank" rel="noopener" class="news-card glass-card">
+          <div class="news-card-title">${escapeHtml(title)}</div>
+          <div class="news-card-meta"><span>Google News</span><span>${date}</span></div>
+        </a>`;
+      });
+      c.innerHTML = html;
+      cacheSet('infos_intl', html);
+    } catch (e) {
+      c.innerHTML = `<div class="empty-state"><p>Erreur de lecture des infos.</p></div>`;
+    }
+  }
+
+  async function loadWeather() {
+    const c = $('#newsContent');
+    const cached = cacheGet('weather');
+    if (cached) { c.innerHTML = cached; return; }
+    showNewsLoading();
+    const lat = localStorage.getItem('laugra_user_lat') || '48.85';
+    const lon = localStorage.getItem('laugra_user_lon') || '2.35';
+    const city = localStorage.getItem('laugra_user_city') || 'Paris';
+    const data = await safeFetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=4`);
+    if (!data || !data.current_weather) { c.innerHTML = `<div class="empty-state"><p>Météo indisponible.</p></div>`; return; }
+    const cw = data.current_weather; const code = cw.weathercode;
+    let dailyHTML = '';
+    if (data.daily) {
+      const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+      dailyHTML = data.daily.time.map((t, i) => {
+        const d = new Date(t);
+        return `<div class="weather-day"><div class="weather-day-name">${days[d.getDay()]}</div><div class="weather-day-icon">${WEATHER_ICONS[data.daily.weathercode[i]] || '🌡️'}</div><div class="weather-day-temp">${Math.round(data.daily.temperature_2m_max[i])}° <span>${Math.round(data.daily.temperature_2m_min[i])}°</span></div></div>`;
+      }).join('');
+    }
+    const html = `
+      <div class="glass-card weather-main">
+        <div class="weather-city">📍 ${escapeHtml(city)}</div>
+        <div class="weather-now">
+          <div class="weather-icon-big">${WEATHER_ICONS[code] || '🌡️'}</div>
+          <div><div class="weather-temp">${Math.round(cw.temperature)}°C</div><div class="weather-desc">${WEATHER_CODES[code] || 'Inconnu'}</div></div>
+        </div>
+        <div class="weather-details"><span>Vent : ${Math.round(cw.windspeed)} km/h</span></div>
+      </div>
+      <div class="glass-card weather-forecast">${dailyHTML}</div>`;
+    c.innerHTML = html;
+    cacheSet('weather', html);
+  }
+
+  const FOOT_LEAGUES = {
+    premier: { id: 4328, name: 'Premier League' }, liga: { id: 4335, name: 'La Liga' },
+    serie: { id: 4332, name: 'Serie A' }, bundes: { id: 4331, name: 'Bundesliga' },
+    ligue1: { id: 4334, name: 'Ligue 1' }
+  };
+  const INTERNATIONAL_LEAGUES = [
+    { id: 4480, name: 'Champions League' }, { id: 4481, name: 'Europa League' },
+    { id: 4497, name: 'CAN' }, { id: 4503, name: 'Copa America' },
+    { id: 4498, name: 'Euro' }, { id: 4429, name: 'Qualif. CdM' }
+  ];
+
+  async function fetchMatchesForLeague(league) {
+    const results = [];
+    const past = await safeFetch(`https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=${league.id}`);
+    if (past && past.events) { past.events.slice(0, 10).forEach(e => { results.push({ home: e.strHomeTeam || '', away: e.strAwayTeam || '', homeScore: e.intHomeScore != null ? e.intHomeScore : null, awayScore: e.intAwayScore != null ? e.intAwayScore : null, date: e.dateEvent, time: e.strTime, league: league.name, status: 'past' }); }); }
+    const next = await safeFetch(`https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${league.id}`);
+    if (next && next.events) { next.events.slice(0, 15).forEach(e => { results.push({ home: e.strHomeTeam || '', away: e.strAwayTeam || '', homeScore: null, awayScore: null, date: e.dateEvent, time: e.strTime, league: league.name, status: 'next' }); }); }
+    return results;
+  }
+
+  async function loadFootball(filter) {
+    const c = $('#newsContent');
+    const cacheKey = 'foot_' + (filter || 'all');
+    const cached = cacheGet(cacheKey);
+    if (cached) { c.innerHTML = cached; return; }
+    showNewsLoading();
+    const pref = localStorage.getItem('laugra_foot_pref') || '';
+    let leaguesToLoad = [];
+    if (!filter || filter === 'all') leaguesToLoad = Object.values(FOOT_LEAGUES).concat(INTERNATIONAL_LEAGUES);
+    else if (filter === 'inter') leaguesToLoad = INTERNATIONAL_LEAGUES;
+    else if (FOOT_LEAGUES[filter]) leaguesToLoad = [FOOT_LEAGUES[filter]];
+    else leaguesToLoad = Object.values(FOOT_LEAGUES);
+    let allEvents = [];
+    for (const l of leaguesToLoad) { const matches = await fetchMatchesForLeague(l); allEvents.push(...matches); }
+    if (allEvents.length === 0) { const html = `<div class="empty-state"><p>Aucun match.</p></div>`; c.innerHTML = html; cacheSet(cacheKey, html); return; }
+    allEvents.sort((a, b) => {
+      const order = { live: 0, next: 1, past: 2 };
+      if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+      if (a.status === 'past') return new Date(b.date) - new Date(a.date);
+      return new Date(a.date) - new Date(b.date);
+    });
+    if (pref) {
+      allEvents.sort((a, b) => {
+        const aPref = (a.home.includes(pref) || a.away.includes(pref)) ? 1 : 0;
+        const bPref = (b.home.includes(pref) || b.away.includes(pref)) ? 1 : 0;
+        if (aPref !== bPref) return bPref - aPref;
+        return 0;
+      });
+    }
+    const html = allEvents.slice(0, 40).map(m => {
+      const date = m.date ? new Date(m.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) : '';
+      const prefTag = (pref && (m.home.includes(pref) || m.away.includes(pref))) ? ' ⭐' : '';
+      let score;
+      if (m.status === 'past' && m.homeScore !== null) score = `${m.homeScore} - ${m.awayScore}`;
+      else score = 'vs';
+      return `<div class="foot-card glass-card">
+        <div class="foot-meta"><span>${m.league}${prefTag}</span><span>${date}${m.time ? ' · ' + m.time.slice(0,5) : ''}</span></div>
+        <div class="foot-score">
+          <div class="foot-team">${escapeHtml(m.home)}</div>
+          <div class="foot-nums">${score}</div>
+          <div class="foot-team">${escapeHtml(m.away)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    c.innerHTML = html;
+    cacheSet(cacheKey, html);
+  }
+
+  async function loadCinema(genreId) {
+    const c = $('#newsContent');
+    const cacheKey = 'cinema_' + (genreId || 'all');
+    const cached = cacheGet(cacheKey);
+    if (cached) { c.innerHTML = cached; return; }
+    showNewsLoading();
+    let url;
+    if (genreId && genreId !== 'all') url = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_KEY}&language=fr-FR&sort_by=popularity.desc&with_genres=${genreId}&page=1`;
+    else url = `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}&language=fr-FR&page=1`;
+    const data = await safeFetch(url);
+    if (!data || !data.results || data.results.length === 0) { c.innerHTML = `<div class="empty-state"><p>Films indisponibles.</p></div>`; return; }
+    const movies = data.results.slice(0, 8);
+    const trailerKeys = await Promise.all(movies.map(async (m) => {
+      const v = await safeFetch(`https://api.themoviedb.org/3/movie/${m.id}/videos?api_key=${TMDB_KEY}&language=fr-FR`);
+      if (v && v.results && v.results.length > 0) { const yt = v.results.find(x => x.site === 'YouTube' && (x.type === 'Trailer' || x.type === 'Teaser')); if (yt) return yt.key; }
+      return null;
+    }));
+    const html = `<div class="media-grid">` + movies.map((m, i) => {
+      const poster = m.poster_path ? `<img class="media-poster" src="https://image.tmdb.org/t/p/w342${m.poster_path}" alt="${escapeHtml(m.title)}" loading="lazy">` : `<div class="media-poster-placeholder">🎬</div>`;
+      const year = m.release_date ? m.release_date.slice(0, 4) : '';
+      const rating = m.vote_average ? `⭐ ${m.vote_average.toFixed(1)}` : '';
+      const trailerBtn = trailerKeys[i] ? `<button class="media-trailer-btn" data-yt-key="${trailerKeys[i]}">▶️ Bande-annonce</button>` : '';
+      return `<div class="media-card">${poster}<div class="media-info"><div class="media-title">${escapeHtml(m.title)}</div><div class="media-meta">${year}${year && rating ? ' · ' : ''}${rating}</div></div>${trailerBtn}</div>`;
+    }).join('') + `</div>`;
+    c.innerHTML = html;
+    cacheSet(cacheKey, html);
+  }
+
+  async function loadAnime(genreId) {
+    const c = $('#newsContent');
+    const cacheKey = 'anime_' + (genreId || 'all');
+    const cached = cacheGet(cacheKey);
+    if (cached) { c.innerHTML = cached; return; }
+    showNewsLoading();
+    let url;
+    if (genreId && genreId !== 'all') url = `https://api.jikan.moe/v4/anime?genres=${genreId}&order_by=score&sort=desc&limit=12&sfw=true&min_score=6`;
+    else url = 'https://api.jikan.moe/v4/top/anime?limit=12&filter=bypopularity';
+    let data = await safeFetch(url, 12000);
+    if (!data || !data.data || data.data.length === 0) { await new Promise(r => setTimeout(r, 2000)); data = await safeFetch(url, 12000); }
+    if (!data || !data.data || data.data.length === 0) { c.innerHTML = `<div class="empty-state"><p>Animes indisponibles.<br>Réessaie dans un instant.</p></div>`; return; }
+    const html = `<div class="media-grid">` + data.data.map(a => {
+      const poster = a.images?.jpg?.image_url ? `<img class="media-poster" src="${a.images.jpg.image_url}" alt="${escapeHtml(a.title)}" loading="lazy">` : `<div class="media-poster-placeholder">🎌</div>`;
+      const score = a.score ? `⭐ ${a.score}` : '';
+      const eps = a.episodes ? `${a.episodes} ép.` : '';
+      let ytKey = null;
+      if (a.trailer?.url) { const m = a.trailer.url.match(/(?:watch\?v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/); if (m) ytKey = m[1]; }
+      const trailerBtn = ytKey ? `<button class="media-trailer-btn" data-yt-key="${ytKey}">▶️ Bande-annonce</button>` : '';
+      return `<div class="media-card">${poster}<div class="media-info"><div class="media-title">${escapeHtml(a.title)}</div><div class="media-meta">${score}${score && eps ? ' · ' : ''}${eps}</div></div>${trailerBtn}</div>`;
+    }).join('') + `</div>`;
+    c.innerHTML = html;
+    cacheSet(cacheKey, html);
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-yt-key]');
+    if (!btn) return;
+    e.preventDefault();
+    const key = btn.dataset.ytKey;
+    const appUrl = `vnd.youtube:${key}`;
+    const webUrl = `https://www.youtube.com/watch?v=${key}`;
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      const timer = setTimeout(() => { window.open(webUrl, '_blank'); setTimeout(() => iframe.remove(), 100); }, 1500);
+      iframe.src = appUrl;
+      window.addEventListener('blur', () => clearTimeout(timer), { once: true });
+    } catch (err) { window.open(webUrl, '_blank'); }
+  });
+
+  function showSubmenu(section) {
+    const submenu = $('#newsSubmenu');
+    let buttons = [];
+    if (section === 'foot') {
+      buttons = [{ label: 'Tous', sub: 'all' }, { label: 'Premier League', sub: 'premier' }, { label: 'La Liga', sub: 'liga' }, { label: 'Serie A', sub: 'serie' }, { label: 'Bundesliga', sub: 'bundes' }, { label: 'Ligue 1', sub: 'ligue1' }, { label: 'International', sub: 'inter' }];
+    } else if (section === 'cinema') {
+      buttons = [{ label: 'Populaires', sub: 'all' }, { label: 'Action', sub: '28' }, { label: 'Comédie', sub: '35' }, { label: 'Sci-Fi', sub: '878' }, { label: 'Drame', sub: '18' }];
+    } else if (section === 'anime') {
+      buttons = [{ label: 'Top', sub: 'all' }, { label: 'Action', sub: '1' }, { label: 'Aventure', sub: '2' }, { label: 'Comédie', sub: '4' }, { label: 'Fantasy', sub: '10' }, { label: 'Romance', sub: '22' }];
+    }
+    if (buttons.length === 0) { submenu.classList.add('hidden'); return; }
+    submenu.classList.remove('hidden');
+    submenu.innerHTML = buttons.map(b => `<button class="news-submenu-btn ${b.sub === 'all' ? 'active' : ''}" data-sub="${b.sub}">${b.label}</button>`).join('');
+    submenu.querySelectorAll('.news-submenu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        submenu.querySelectorAll('.news-submenu-btn').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active'); currentNewsSub = btn.dataset.sub;
+        loadSectionContent(section, currentNewsSub);
+      });
+    });
+  }
+
+  function loadSectionContent(section, sub) {
+    if (section === 'wattpad') return loadWattpad();
+    if (section === 'international') return loadInfos();
+    if (section === 'weather') return loadWeather();
+    if (section === 'foot') return loadFootball(sub || 'all');
+    if (section === 'cinema') return loadCinema(sub || 'all');
+    if (section === 'anime') return loadAnime(sub || 'all');
+  }
+
+  function openNewsSection(section) {
+    currentNewsSection = section; currentNewsSub = 'all';
+    $('#newsMainMenu').classList.add('hidden'); $('#newsDetailView').classList.remove('hidden');
+    showSubmenu(section); loadSectionContent(section, 'all');
+  }
+
+  $$('[data-news-section]').forEach(btn => { btn.addEventListener('click', () => openNewsSection(btn.dataset.newsSection)); });
+  $('#newsBackBtn')?.addEventListener('click', () => { resetNewsView(); });
+
+  renderIdeas(); renderFavList(); updateDashboard();
+  console.log('%c🚀 LaugraStok v2.8 chargé', 'color:#7c3aed;font-weight:bold;font-size:14px');
+});
+  </script>
 </body>
 </html>
